@@ -1,0 +1,121 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Hash;
+
+class GatewaveController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function randomEmail($length = 5){
+        $time = time();
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $charactersLength = strlen($characters);
+        $randomString = '';
+        for ($i = 0; $i < $length; $i++) {
+            $randomString .= $characters[random_int(0, $charactersLength - 1)];
+        }
+        return $randomString."_".$time."@gmail.com";
+    }
+    public function index(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'store' => 'required',
+                'sdt' => 'required',
+                'user_id' => 'required',
+                'name' => 'required'
+            ],[
+                'store.required' => "Vui lòng nhập store",
+                'sdt.required' => "Vui lòng nhập sdt",
+                'user_id.required' => "Vui lòng nhập id",
+                'name.required' => "Vui lòng nhập name"
+            ]);
+            if ($validator->fails()) {
+                return $this->returnError(new \stdClass,$validator->errors()->first());
+            }else{
+                $store = DB::table('tenants')->join(
+                    'domains','domains.tenant_id','=','tenants.id'
+                )->where('tenants.id',$request['store'])->select('tenants.*','domains.domain')->first();
+                
+                if($store){
+                    $databaseStore = json_decode($store->data)->tenancy_db_name; 
+                    $this->connectDb($databaseStore);
+                    $user = DB::connection('mysql_external')->table('users')->where('mobile', $request['sdt'])->first();
+                    if (!$user) {
+                        $insert = DB::connection('mysql_external')->table('users')->insert(
+                            array(
+                                'name'     =>   $request['name'],
+                                'password'     =>   "appid",
+                                'email'     =>   $this->randomEmail(),
+                                'mobile'     =>   $request['sdt'],
+                                'id'   =>   $request['user_id']
+                            )
+                        );
+                    }
+                    $hash = $this->getToken($request['store'],$request['sdt'],$databaseStore,$store->domain);
+                    return $this->returnSuccess([
+                        'token'=> $hash
+                    ]);
+                }else{
+                    return $this->returnError(new \stdClass,'Store không tồn tại');
+                }           
+            }
+        } catch (\Throwable $th) {
+            return $this->returnError(new \stdClass,$th->getMessage());
+        }
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        //
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, $id)
+    {
+        //
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        //
+    }
+}

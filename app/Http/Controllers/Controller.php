@@ -38,9 +38,21 @@ class Controller extends BaseController
     }
     public function connectDb($databaseStore)
     {
-        echo '<pre>';
-        print_r($databaseStore);
-        die;
+        $daUser = $databaseStore->da_user;
+        $domain = $databaseStore->domain;
+        $path = "/home/{$daUser}/domains/{$domain}/public_html";
+
+
+        if ( !$this->is_dir($path) ) {
+			include $path.'/wp-config.php';
+            $databaseUser = DB_USER;
+            echo '<pre>';
+            print_r($databaseUser);
+            die;
+
+
+		}
+
 
         Config::set("database.connections.mysql_external", [
             'driver' => 'mysql',
@@ -55,6 +67,62 @@ class Controller extends BaseController
             'strict'    => true,
         ]);
     }
+    public function is_dir($path)
+	{
+		return $this->toNumber($this->sshBash('[ ! -d "' . $path . '" ]; echo $?'));
+	}
+    public function toNumber($str)
+    {
+        return (int)$this->vnStrFilter($str, "");
+    }
+    public function vnStrFilter($text, $space = "-", $lower = true)
+    {
+        $text = html_entity_decode(trim($text), ENT_QUOTES, 'UTF-8');
+        $replace = array(
+            'a' => 'á|à|ả|ã|ạ|ă|ắ|ặ|ằ|ẳ|ẵ|â|ấ|ầ|ẩ|ẫ|ậ',
+            'd' => 'đ',
+            'e' => 'é|è|ẻ|ẽ|ẹ|ê|ế|ề|ể|ễ|ệ',
+            'i' => 'í|ì|ỉ|ĩ|ị',
+            'o' => 'ó|ò|ỏ|õ|ọ|ô|ố|ồ|ổ|ỗ|ộ|ơ|ớ|ờ|ở|ỡ|ợ',
+            'u' => 'ú|ù|ủ|ũ|ụ|ư|ứ|ừ|ử|ữ|ự',
+            'y' => 'ý|ỳ|ỷ|ỹ|ỵ',
+            'A' => 'Á|À|Ả|Ã|Ạ|Ă|Ắ|Ặ|Ằ|Ẳ|Ẵ|Â|Ấ|Ầ|Ẩ|Ẫ|Ậ',
+            'D' => 'Đ',
+            'E' => 'É|È|Ẻ|Ẽ|Ẹ|Ê|Ế|Ề|Ể|Ễ|Ệ',
+            'I' => 'Í|Ì|Ỉ|Ĩ|Ị',
+            'O' => 'Ó|Ò|Ỏ|Õ|Ọ|Ô|Ố|Ồ|Ổ|Ỗ|Ộ|Ơ|Ớ|Ờ|Ở|Ỡ|Ợ',
+            'U' => 'Ú|Ù|Ủ|Ũ|Ụ|Ư|Ứ|Ừ|Ử|Ữ|Ự',
+            'Y' => 'Ý|Ỳ|Ỷ|Ỹ|Ỵ',
+            ' ' => '[^a-z0-9]'
+        );
+        foreach ($replace as $to => $from) {
+            $text = preg_replace("/($from)/i", $to, $text);
+        }
+        $text = trim($text);
+        $text = str_replace(" ", $space, $text);
+        while (strpos($text, "--") !== false) {
+            $text = str_replace("--", "-", $text);
+        }
+        if ($lower) {
+            $text = strtolower($text);
+        }
+        return $text;
+    }
+    public function sshBash($cmd, $out = false, $toend = '', $dbQuote = false)
+    {
+        if ($dbQuote) {
+            $cmd = "sudo sh -c \"" . $cmd . "\"";
+        } else {
+            $cmd = 'sudo sh -c \'' . $cmd . '\'';
+        }
+        $cmd .= $toend;
+        if ($out) {
+            echo '<textarea>' . $cmd . '</textarea>';
+            return;
+        }
+        return trim(shell_exec($cmd));
+    }
+
     public function encodeData($data, $key = "lhdmknaooqoqp!k")
     {
         $key = env('APP_KEY');
@@ -608,37 +676,37 @@ class Controller extends BaseController
             }
 
             if ($campaign) {
-                 //là chiến dịch kiểm tra xem tồn kho theo chiến dịch
-                 $campaingSoldProduct = DB::connection('mysql_external')->table('campaign_sold_products')->where('campaign_sold_products.product_id', $productId)->first();
+                //là chiến dịch kiểm tra xem tồn kho theo chiến dịch
+                $campaingSoldProduct = DB::connection('mysql_external')->table('campaign_sold_products')->where('campaign_sold_products.product_id', $productId)->first();
 
 
-                 if ($campaingSoldProduct) {
-                     if ($campaingSoldProduct->sold_count + $item['qty'] > $campaign->units_for_sale) {
-                         $this->_messageError = "Sản phẩm " . $checkProductInventory->name . " trong flashsale đã hết";
-                         return false;
-                     }
-                     DB::connection('mysql_external')->table('campaign_sold_products')->where('id', $campaingSoldProduct->id)->update(
-                         array(
-                             'sold_count' => $item['qty'] + $campaingSoldProduct->sold_count,
-                             'total_amount' => $campaign->units_for_sale,
-                         )
-                     );
-                 } else {
-                     // thêm sản phẩm chiến dịch
-                     DB::connection('mysql_external')->table('campaign_sold_products')->insertGetId(
-                         array(
-                             'product_id' => $productId,
-                             'sold_count' => $item['qty'],
-                             'total_amount' => $campaign->units_for_sale,
-                         )
-                     );
-                 }
+                if ($campaingSoldProduct) {
+                    if ($campaingSoldProduct->sold_count + $item['qty'] > $campaign->units_for_sale) {
+                        $this->_messageError = "Sản phẩm " . $checkProductInventory->name . " trong flashsale đã hết";
+                        return false;
+                    }
+                    DB::connection('mysql_external')->table('campaign_sold_products')->where('id', $campaingSoldProduct->id)->update(
+                        array(
+                            'sold_count' => $item['qty'] + $campaingSoldProduct->sold_count,
+                            'total_amount' => $campaign->units_for_sale,
+                        )
+                    );
+                } else {
+                    // thêm sản phẩm chiến dịch
+                    DB::connection('mysql_external')->table('campaign_sold_products')->insertGetId(
+                        array(
+                            'product_id' => $productId,
+                            'sold_count' => $item['qty'],
+                            'total_amount' => $campaign->units_for_sale,
+                        )
+                    );
+                }
             }
 
             // trừ số lượng kho
             DB::connection('mysql_external')->table('product_inventories')->where('id', $checkProductInventory->id)->update(
                 array(
-                    'stock_count' => $checkProductInventory->stock_count - $item['qty']  ,
+                    'stock_count' => $checkProductInventory->stock_count - $item['qty'],
                     'sold_count' => $item['qty'] + $checkProductInventory->sold_count
                 )
             );

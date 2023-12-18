@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\API\AffiliateController;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
@@ -39,6 +38,10 @@ class Controller extends BaseController
     }
     public function connectDb($databaseStore)
     {
+        echo '<pre>';
+        print_r($databaseStore);
+        die;
+
         Config::set("database.connections.mysql_external", [
             'driver' => 'mysql',
             'host' => env('DB_HOST'),
@@ -458,8 +461,7 @@ class Controller extends BaseController
                 );
             }
             //tính hoa hồng
-            $AffiliateController = new AffiliateController();
-            $commission = $AffiliateController->calCommission($user['id'],$finalPriceDetails,$order_id);
+
             DB::connection('mysql_external')->commit();
 
 

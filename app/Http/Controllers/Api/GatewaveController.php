@@ -42,13 +42,11 @@ class GatewaveController extends Controller
             if ($validator->fails()) {
                 return $this->returnError(new \stdClass,$validator->errors()->first());
             }else{
-                $store = DB::table('tenants')->join(
-                    'domains','domains.tenant_id','=','tenants.id'
-                )->where('tenants.id',$request['store'])->select('tenants.*','domains.domain')->first();
-                
+                $store = DB::table('website')->where('db_name',$request['store'])->select('*')->first();
                 if($store){
-                    $databaseStore = json_decode($store->data)->tenancy_db_name; 
+                    $databaseStore = $store;
                     $this->connectDb($databaseStore);
+                    die;
                     $user = DB::connection('mysql_external')->table('users')->where('mobile', $request['sdt'])->first();
                     if (!$user) {
                         $insert = DB::connection('mysql_external')->table('users')->insert(
@@ -67,7 +65,7 @@ class GatewaveController extends Controller
                     ]);
                 }else{
                     return $this->returnError(new \stdClass,'Store không tồn tại');
-                }           
+                }
             }
         } catch (\Throwable $th) {
             return $this->returnError(new \stdClass,$th->getMessage());

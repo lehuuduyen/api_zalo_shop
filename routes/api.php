@@ -40,8 +40,6 @@ Route::group([  'middleware' => ['CorsApi','CheckStore']], function()
         Route::get('banner', 'App\Http\Controllers\Api\StoreController@banner');
         Route::get('products', 'App\Http\Controllers\Api\ProductController@index');
     });
-    Route::prefix('affiliate')->group(function () {
-        Route::get('register', 'App\Http\Controllers\Api\AffiliateController@registerAffiliate');
-    });
+
 });
 

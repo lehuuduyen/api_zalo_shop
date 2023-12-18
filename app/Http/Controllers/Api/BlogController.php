@@ -15,35 +15,19 @@ class BlogController extends Controller
      */
     public function index(Request $request)
     {
-        $languare = env('DEFAULT_LANGUARE')?env('DEFAULT_LANGUARE'):"vi";
-
         $store = $request['data_reponse'];
-        $blogs = DB::connection('mysql_external')->table('blogs')->where('status',1)->latest()->get();
-        foreach($blogs as $key => $blog){
-            $blogs[$key]->image = $this->getImage($blog->image,$store);
-            $jsonTitle = json_decode($blog->title);
-            $title ="";
-            if(isset($jsonTitle->$languare)){
-                $title = $jsonTitle->$languare;
+        $listBlogs = $this->getPostByCategory('tin-tuc');
+        if($listBlogs){
+            $blogs = $listBlogs['data'];
+            foreach($blogs as $key => $blog){
+                $blogs[$key]->image = $this->getImage($blog->ID,$store);
+                $blogs[$key]->title = $blog->post_title;
+                $blogs[$key]->blog_content = $blog->post_content;
+                $blogs[$key]->excerpt = $blog->post_excerpt;
+                $blogs[$key]->category_name = $listBlogs['cate']->name;
             }
-            $blogs[$key]->title = $title;
-            
-            $jsonContent = json_decode($blog->blog_content);
-            $content = "";
-            if(isset($jsonContent->$languare)){
-                $content = $jsonContent->$languare;
-            }
-            $blogs[$key]->blog_content = $content;
-
-            $jsonExcerpt = json_decode($blog->excerpt);
-            $excerpt = "";
-            if(isset($jsonExcerpt->$languare)){
-                $excerpt = $jsonExcerpt->$languare;
-            }
-            $blogs[$key]->excerpt = $excerpt;
-            $blogs[$key]->category_name = $this->getBlogCategory($blog->category_id);
-
         }
+        
         return $this->returnSuccess($blogs);
     }
 

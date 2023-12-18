@@ -44,20 +44,32 @@ class GatewaveController extends Controller
             }else{
                 $store = DB::table('website')->where('db_name',$request['store'])->select('*')->first();
                 if($store){
-                    $databaseStore = $store;
+                    $databaseStore = $request['store'];
                     $this->connectDb($databaseStore);
-                    die;
-                    $user = DB::connection('mysql_external')->table('users')->where('mobile', $request['sdt'])->first();
+                    $user = DB::connection('mysql_external')->table('wp_users')->where('user_login', $request['sdt'])->first();
+                    
+                    
                     if (!$user) {
-                        $insert = DB::connection('mysql_external')->table('users')->insert(
+                        $insert = DB::connection('mysql_external')->table('wp_users')->insert(
                             array(
-                                'name'     =>   $request['name'],
-                                'password'     =>   "appid",
-                                'email'     =>   $this->randomEmail(),
-                                'mobile'     =>   $request['sdt'],
-                                'id'   =>   $request['user_id']
+                                'user_login'     =>   $request['sdt'],
+                                'user_pass'     =>   "appid",
+                                'user_email'     =>   $this->randomEmail(),
+                                'user_nicename'     =>   $request['name'],
+                                'display_name'     =>   $request['name'],
+                                'user_registered'     =>   date('Y-m-d H:i:s'),
+                                'ID'   =>   $request['user_id']
                             )
                         );
+                        $insertMetaUser = DB::connection('mysql_external')->table('wp_usermeta')->insert(
+                            array(
+                                'meta_key'     =>   "last_name",
+                                'meta_value'     =>  $request['name'],
+                                'user_id'     =>   $request['user_id'],
+                              
+                            )
+                        );
+                     
                     }
                     $hash = $this->getToken($request['store'],$request['sdt'],$databaseStore,$store->domain);
                     return $this->returnSuccess([

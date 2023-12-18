@@ -16,6 +16,10 @@ class StoreController extends Controller
      */
     public function index()
     {
+        $infor = DB::connection('mysql_external')->table('wp_posts')->where('post_name','lien-he')->where('post_status','publish')->where('post_type','page')->first();
+        
+        
+        
         $info = new \stdClass();
         $info->email = [
             'title' => "",
@@ -33,46 +37,27 @@ class StoreController extends Controller
             'title' => "",
             'value' => "",
         ];
-        $store = DB::connection('mysql_external')->table('page_builders')->join(
-            'pages',
-            'pages.id',
-            '=',
-            'page_builders.addon_page_id'
-        )->where('pages.slug', "contact")->select('page_builders.*')->first();
-        if ($store) {
-            $setting = json_decode($store->addon_settings);
-            if (isset($setting->contact_tenant_repeater)) {
-                if (isset($setting->contact_tenant_repeater->repeater_title_vi)) {
-                    foreach ($setting->contact_tenant_repeater->repeater_title_vi as $key => $val) {
-                        if ($key == 0) {
-                            $info->email = [
-                                'title' => $val,
-                                'value' => $setting->contact_tenant_repeater->repeater_info_vi[$key],
-                            ];
-                        }
-                        if ($key == 1) {
-                            $info->phone = [
-                                'title' => $val,
-                                'value' => $setting->contact_tenant_repeater->repeater_info_vi[$key],
-                            ];
-                        }
-                        if ($key == 2) {
-                            $info->address = [
-                                'title' => $val,
-                                'value' => $setting->contact_tenant_repeater->repeater_info_vi[$key],
-                            ];
-                        }
-                        if ($key == 3) {
-                            $info->open_hour = [
-                                'title' => $val,
-                                'value' => $setting->contact_tenant_repeater->repeater_info_vi[$key],
-                            ];
-                        }
-                    }
-                }
-            }
+        if($infor){
+            $content = $infor->post_content;
+            $lineAfterPhone = $this->lienhe($content,'Điện thoại:',16);
+            
+            
+            $info->phone = [
+                'title' => 'Điện thoại:',
+                'value' => $lineAfterPhone,
+            ];
+            $email = $this->lienhe($content,'Email:',16);
+            $info->email = [
+                'title' => 'Email:',
+                'value' => $email,
+            ];
+            $address = $this->lienhe($content,'Địa chỉ :',16);
+            $info->address = [
+                'title' => 'Địa chỉ :',
+                'value' => $address,
+            ];
         }
-
+        
         return $this->returnSuccess($info);
     }
     public function country(Request $request)

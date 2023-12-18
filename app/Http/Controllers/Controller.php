@@ -38,17 +38,6 @@ class Controller extends BaseController
     }
     public function connectDb($databaseStore)
     {
-        $daUser = $databaseStore->da_user;
-        $domain = $databaseStore->domain;
-        $path = "/home/{$daUser}/domains/{$domain}/public_html";
-
-        include $path.'/wp-config.php';
-        $databaseUser = DB_USER;
-        echo '<pre>';
-        print_r($databaseUser);
-        die;
-
-
         Config::set("database.connections.mysql_external", [
             'driver' => 'mysql',
             'host' => env('DB_HOST'),
@@ -95,15 +84,20 @@ class Controller extends BaseController
             //throw $th;
         }
     }
+    
     public function getImage($id, $store)
     {
+        
+        $image ="";
+        $postMeta = DB::connection('mysql_external')->table('wp_postmeta')->where('meta_key','_thumbnail_id')->where('post_id',$id)->first();
+        if($postMeta){
+            $image = DB::connection('mysql_external')->table('wp_postmeta')->where('meta_key','_wp_attached_file')->where('post_id',$postMeta->meta_value)->first();
+            
+        }
 
-        $domain = "https://" . $store->domain . "/assets/tenant/uploads/media-uploader/" . $store->store;
-
-
-        $image = DB::connection('mysql_external')->table('media_uploaders')->select('id', 'title', 'path', 'alt', 'size', 'user_type', 'dimensions')->find($id);
         if ($image) {
-            $image->path = $domain . "/" . $image->path;
+            $domain = "https://" . $store->domain . "/wp-content/uploads/" . $image->meta_value;
+            $image->path = $domain;
         }
 
         return $image;
@@ -667,5 +661,26 @@ class Controller extends BaseController
         ];
 
         return $arr;
+    }
+    public function getPostByCategory($nameCate){
+        $cate = DB::connection('mysql_external')->table('wp_terms')->where('slug',$nameCate)->first();
+        $data =[];
+        if($cate){
+            $data = DB::connection('mysql_external')->table('wp_posts')
+            ->join('wp_term_relationships','wp_term_relationships.object_id','wp_posts.ID')
+            ->where('term_taxonomy_id',$cate->term_id)->where('post_status','publish')->orderBy('post_modified', 'DESC')->get();
+        }
+        return ['data'=>$data,'cate'=>$cate];
+    }
+    public function lienhe($content,$text,$count){
+        $position = strpos($content, $text);
+        $lineAfterPhone = "";
+        if ($position !== false) {
+            $endOfLinePosition = strpos($content, PHP_EOL, $position);
+            if ($endOfLinePosition !== false) {
+                $lineAfterPhone = substr($content, $position + $count, $endOfLinePosition - $position -$count);
+            } 
+        }
+        return $lineAfterPhone;
     }
 }

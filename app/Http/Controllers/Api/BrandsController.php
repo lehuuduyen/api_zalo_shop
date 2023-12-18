@@ -16,9 +16,13 @@ class BrandsController extends Controller
     public function index(Request $request)
     {
         $store = $request['data_reponse'];
-        $brands = DB::connection('mysql_external')->table('brands')->where('status',1)->latest()->get();
-        foreach($brands as $key => $brand){
-            $brands[$key]->image = $this->getImage($brand->image,$store);
+        $listBanner = $this->getPostByCategory('brand');
+        
+        if($listBanner){
+            $brands = $listBanner['data'];
+            foreach($brands as $key => $brand){
+                $brands[$key]->image = $this->getImage($brand->ID,$store);
+            }
         }
         return $this->returnSuccess($brands);
         

@@ -84,15 +84,15 @@ class Controller extends BaseController
             //throw $th;
         }
     }
-    
+
     public function getImage($id, $store)
     {
-        
+
         $image ="";
         $postMeta = DB::connection('mysql_external')->table('wp_postmeta')->where('meta_key','_thumbnail_id')->where('post_id',$id)->first();
         if($postMeta){
             $image = DB::connection('mysql_external')->table('wp_postmeta')->where('meta_key','_wp_attached_file')->where('post_id',$postMeta->meta_value)->first();
-            
+
         }
 
         if ($image) {
@@ -204,7 +204,16 @@ class Controller extends BaseController
     }
     public function getCategoryByProduct($id, $store)
     {
-        $response = new \stdClass();
+        // $response = new \stdClass();
+        // $cate = DB::connection('mysql_external')->table('wp_terms')->where('slug',$nameCate)->first();
+        // $data =[];
+        // if($cate){
+        //     $data = DB::connection('mysql_external')->table('wp_posts')
+        //     ->join('wp_term_relationships','wp_term_relationships.object_id','wp_posts.ID')
+        //     ->where('term_taxonomy_id',$cate->term_id)->where('post_status','publish')->orderBy('post_modified', 'DESC')->get();
+        // }
+
+
         $data = DB::connection('mysql_external')->table('product_categories')->join('categories', 'categories.id', 'product_categories.category_id')->where('product_categories.product_id', $id)->first();
         if ($data) {
             $data->name =  $this->getTextByLanguare($data->name);
@@ -679,8 +688,15 @@ class Controller extends BaseController
             $endOfLinePosition = strpos($content, PHP_EOL, $position);
             if ($endOfLinePosition !== false) {
                 $lineAfterPhone = substr($content, $position + $count, $endOfLinePosition - $position -$count);
-            } 
+            }
         }
         return $lineAfterPhone;
+    }
+    public function getPostMeta($postId,$meta){
+        $data = DB::connection('mysql_external')->table('wp_postmeta')->where('post_id',$postId)->where('meta_key',$meta)->first();
+        if($data){
+            return $data->meta_value;
+        }
+       return $data;
     }
 }

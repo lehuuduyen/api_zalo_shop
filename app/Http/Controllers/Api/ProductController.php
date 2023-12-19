@@ -17,33 +17,34 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
-        $campaigns = DB::connection('mysql_external')->table('campaigns')->join('campaign_products', 'campaigns.id', 'campaign_products.campaign_id')->where('campaigns.status','publish')->whereDate('campaigns.start_date', '<', Carbon::now())->whereDate('campaigns.end_date', '>=', Carbon::now())->select('campaign_products.product_id','campaign_products.campaign_price')->get();
-        $products = DB::connection('mysql_external')->table('products')->join('statuses', 'statuses.id', 'products.status_id')->where('products.status_id', 1)->whereNull('products.deleted_at');
+        $products = DB::connection('mysql_external')->table('wp_posts')->where('post_type', 'product')->where('post_status', 'publish')->orderBy('post_modified', 'DESC')->get();
         if (isset($request['category'])) {
-            $products = $products->join('product_categories', 'product_categories.product_id', 'products.id')->where('product_categories.category_id', $request['category']);
+            $products = $this->getPostByCategory($request['category']);
         }
-        $products = $products->select('products.*', 'statuses.name as status')->latest()->get();
         $store = $request['data_reponse'];
-        
-        
+
+
 
         foreach ($products as $key => $product) {
+            $postMetaStatus = $this->getPostMeta($product->ID,'_stock_status');
+            $postMetaStock = $this->getPostMeta($product->ID,'_stock');
+            $postMetaGiaGoc = $this->getPostMeta($product->ID,'_regular_price');
+            $postMetaGiaKhuyenMai = $this->getPostMeta($product->ID,'_sale_price');
+            $postMetaStock = $this->getPostMeta($product->ID,'_stock');
             $products[$key]->is_campaign = false;
-            foreach($campaigns as $campaign){
-                if($campaign->product_id == $product->id){
-                    $products[$key]->price = $product->sale_price;
-                    $products[$key]->sale_price = $campaign->campaign_price;
-                    $products[$key]->is_campaign = true;
-                    break;
-                }
+            $products[$key]->price =  $postMetaGiaGoc;
+            if($postMetaGiaKhuyenMai){
+                $products[$key]->sale_price = $postMetaGiaKhuyenMai;
+                $products[$key]->is_campaign = true;
             }
-            $products[$key]->image_id = $this->getImage($product->image_id, $store);
+
+            $products[$key]->image_id = $this->getImage($product->ID, $store);
             $products[$key]->brand_id = $this->getBrand($product->brand_id, $store);
-            $products[$key]->name = $this->getTextByLanguare($product->name);
-            $products[$key]->summary = $this->getTextByLanguare($product->summary);
-            $products[$key]->description = $this->getTextByLanguare($product->description);
-            $products[$key]->badge_id = $this->getBadge($product->badge_id, $store);
-            $products[$key]->category = $this->getCategoryByProduct($product->id, $store);
+            $products[$key]->name = $product->post_title;
+            $products[$key]->summary = $product->post_excerpt;
+            $products[$key]->description = $product->post_content;
+            $products[$key]->badge_id =[];
+            $products[$key]->category = $this->getCategoryByProduct($product->ID, $store);
             $products[$key]->galleries = $this->getGalleries($product->id, $store);
             $products[$key]->product_inventory = $this->getProductInventory($product->id);
             $products[$key]->delivery_option = $this->getProductDeliveryOption($product->id);

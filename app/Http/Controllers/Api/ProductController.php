@@ -45,7 +45,7 @@ class ProductController extends Controller
             $products[$key]->description = $product->post_content;
             $products[$key]->badge_id =[];
             $products[$key]->category = $this->getCategoryByProduct($product->ID, $store);
-            $products[$key]->galleries = $this->getGalleries($product->id, $store);
+            $products[$key]->galleries = $this->getGalleries($product->ID, $store);
             $products[$key]->product_inventory = $this->getProductInventory($product->id);
             $products[$key]->delivery_option = $this->getProductDeliveryOption($product->id);
             $products[$key]->unit = $this->getUnit($product->id);

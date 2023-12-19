@@ -105,12 +105,20 @@ class Controller extends BaseController
     public function getGalleries($id, $store)
     {
         $response = [];
-        $data = DB::connection('mysql_external')->table('product_galleries')->where('product_id', $id)->get();
-        if ($data) {
-            foreach ($data as $key => $value) {
-                $response[] =  $this->getImage($value->image_id, $store);
+        $listImg = $this->getPostMeta($id,'_product_image_gallery');
+        $arr = explode(",",$listImg);
+        if(count($arr)>0){
+            $data = DB::connection('mysql_external')->table('wp_posts')->whereIn('ID', $arr)->get();
+            if ($data) {
+                foreach ($data as $key => $value) {
+                    $response[] =  $this->getImage($value->ID, $store);
+                }
             }
         }
+        echo '<pre>';
+        print_r($response);
+        die;
+
         return $response;
     }
 

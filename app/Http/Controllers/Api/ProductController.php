@@ -39,7 +39,7 @@ class ProductController extends Controller
             }
 
             $products[$key]->image_id = $this->getImage($product->ID, $store);
-            $products[$key]->brand_id = $this->getBrand($product->brand_id, $store);
+            // $products[$key]->brand_id = $this->getBrand($product->brand_id, $store);
             $products[$key]->name = $product->post_title;
             $products[$key]->summary = $product->post_excerpt;
             $products[$key]->description = $product->post_content;

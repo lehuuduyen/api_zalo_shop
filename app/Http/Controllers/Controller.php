@@ -204,23 +204,35 @@ class Controller extends BaseController
     }
     public function getCategoryByProduct($id, $store)
     {
-        // $response = new \stdClass();
-        // $cate = DB::connection('mysql_external')->table('wp_terms')->where('slug',$nameCate)->first();
-        // $data =[];
-        // if($cate){
-        //     $data = DB::connection('mysql_external')->table('wp_posts')
-        //     ->join('wp_term_relationships','wp_term_relationships.object_id','wp_posts.ID')
-        //     ->where('term_taxonomy_id',$cate->term_id)->where('post_status','publish')->orderBy('post_modified', 'DESC')->get();
-        // }
-
-
-        $data = DB::connection('mysql_external')->table('product_categories')->join('categories', 'categories.id', 'product_categories.category_id')->where('product_categories.product_id', $id)->first();
-        if ($data) {
-            $data->name =  $this->getTextByLanguare($data->name);
-            $data->image =  $this->getImage($data->image_id, $store);
-            $data->sub_category = $this->getSubCategoryByProduct($id, $store);
-            $response = $data;
+        $response = new \stdClass();
+        $cate = DB::connection('mysql_external')->table('wp_term_relationships')->where('object_id',$id)->get();
+        $term = [];
+        foreach($cate as $key => $value){
+            $term[] = $value->term_taxonomy_id;
         }
+
+
+        if(count($term) >0){
+            $listTerm = DB::connection('mysql_external')->table('wp_term_taxonomy')->whereIn('term_id',$term)->where('taxonomy','product_cat')->get();
+            $term = [];
+            foreach( $listTerm as $val){
+                $term[]= $val->term_id;
+            }
+            if(count($term) >0){
+                $listTerm = DB::connection('mysql_external')->table('wp_terms')->whereIn('term_id',$term)->first();
+                if($listTerm ){
+                    $response->category_id =  $listTerm->term_id;
+                    $response->name =  $listTerm->name;
+                    $response->slug =  $listTerm->slug;
+                    $thumbnail = DB::connection('mysql_external')->table('wp_termmeta')->where('term_id',$listTerm->term_id)->where('meta_key','thumbnail_id')->first();
+                    $response->image =  ($thumbnail)?$thumbnail->meta_value:"";
+                    $response->sub_category =[];
+                }
+
+            }
+
+        }
+
         return $response;
     }
     public function getSubCategoryByProduct($id, $store)

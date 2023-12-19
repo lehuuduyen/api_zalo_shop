@@ -111,7 +111,7 @@ class Controller extends BaseController
             $data = DB::connection('mysql_external')->table('wp_posts')->whereIn('ID', $arr)->get();
             if ($data) {
                 foreach ($data as $key => $value) {
-                    $response[] =  $this->getImage($value->ID, $store);
+                    $response[] =  $value;
                 }
             }
         }

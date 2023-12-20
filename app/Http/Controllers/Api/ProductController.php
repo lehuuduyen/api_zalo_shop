@@ -26,6 +26,7 @@ class ProductController extends Controller
 
 
         foreach ($products as $key => $product) {
+            $products[$key]->id = $product->ID;
             $postMetaStatus = $this->getPostMeta($product->ID,'_stock_status');
             $postMetaStock = $this->getPostMeta($product->ID,'_stock');
             $postMetaGiaGoc = $this->getPostMeta($product->ID,'_regular_price');
@@ -33,6 +34,7 @@ class ProductController extends Controller
             $postMetaStock = $this->getPostMeta($product->ID,'_stock');
             $products[$key]->is_campaign = false;
             $products[$key]->price =  $postMetaGiaGoc;
+            $products[$key]->sale_price =  $postMetaGiaGoc;
             if($postMetaGiaKhuyenMai){
                 $products[$key]->sale_price = $postMetaGiaKhuyenMai;
                 $products[$key]->is_campaign = true;
@@ -46,12 +48,17 @@ class ProductController extends Controller
             $products[$key]->badge_id =[];
             $products[$key]->category = $this->getCategoryByProduct($product->ID, $store);
             $products[$key]->galleries = $this->getGalleries($product->ID, $store);
-            $products[$key]->product_inventory = $this->getProductInventory($product->id);
-            $products[$key]->delivery_option = $this->getProductDeliveryOption($product->id);
-            $products[$key]->unit = $this->getUnit($product->id);
-            $products[$key]->policy = $this->getPolicy($product->id);
-            $products[$key]->tag_name = $this->getTagName($product->id);
-            $products[$key]->review = $this->getreview($product->id);
+            $products[$key]->product_inventory = $this->getProductInventory($product->ID);
+            $products[$key]->delivery_option =[];
+            // $products[$key]->delivery_option = $this->getProductDeliveryOption($product->id);
+            $products[$key]->unit = [];
+            // $products[$key]->unit = $this->getUnit($product->id);
+            $products[$key]->policy = [];
+            // $products[$key]->policy = $this->getPolicy($product->id);
+            $products[$key]->tag_name = [];
+            // $products[$key]->tag_name = $this->getTagName($product->id);
+
+            $products[$key]->review = $this->getreview($product->ID);
 
             // $products[$key]->state = $this->getState($order->state);
             // $products[$key]->order_details = json_decode($order->order_details);
@@ -64,13 +71,17 @@ class ProductController extends Controller
     {
         $store = $request['data_reponse'];
 
-        $categories = DB::connection('mysql_external')->table('categories')->where('status_id', 1)->whereNull('deleted_at')->get();
+        $categories = DB::connection('mysql_external')->table('wp_term_taxonomy')->join('wp_terms','wp_terms.term_id','wp_term_taxonomy.term_id')->where('wp_term_taxonomy.taxonomy', 'product_cat')->select('wp_terms.*')->get();
+
         if ($categories) {
             foreach ($categories as $key => $val) {
-                $categories[$key]->name =  $this->getTextByLanguare($val->name);
-                $categories[$key]->image =  $this->getImage($val->image_id, $store);
+                $img = DB::connection('mysql_external')->table('wp_termmeta')->where('wp_termmeta.meta_key', 'thumbnail_id')->where('wp_termmeta.term_id', $val->term_id)->first();
+                $categories[$key]->id =  $val->term_id;
+                $categories[$key]->image =  ($img)?$this->getImage($img->meta_value, $store,true):"";
             }
         }
+
+
         return $this->returnSuccess($categories);
     }
 

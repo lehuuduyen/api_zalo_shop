@@ -85,15 +85,19 @@ class Controller extends BaseController
         }
     }
 
-    public function getImage($id, $store)
+    public function getImage($id, $store, $checkTerm = false)
     {
 
-        $image ="";
-        $postMeta = DB::connection('mysql_external')->table('wp_postmeta')->where('meta_key','_thumbnail_id')->where('post_id',$id)->first();
-        if($postMeta){
-            $image = DB::connection('mysql_external')->table('wp_postmeta')->where('meta_key','_wp_attached_file')->where('post_id',$postMeta->meta_value)->first();
-
+        $image = "";
+        if (!$checkTerm) {
+            $postMeta = DB::connection('mysql_external')->table('wp_postmeta')->where('meta_key', '_thumbnail_id')->where('post_id', $id)->first();
+            if ($postMeta) {
+                $image = DB::connection('mysql_external')->table('wp_postmeta')->where('meta_key', '_wp_attached_file')->where('post_id', $postMeta->meta_value)->first();
+            }
+        }else{
+            $image = DB::connection('mysql_external')->table('wp_postmeta')->where('meta_key', '_wp_attached_file')->where('post_id', $id)->first();
         }
+
 
         if ($image) {
             $domain = "https://" . $store->domain . "/wp-content/uploads/" . $image->meta_value;
@@ -105,20 +109,18 @@ class Controller extends BaseController
     public function getGalleries($id, $store)
     {
         $response = [];
-        $listImg = $this->getPostMeta($id,'_product_image_gallery');
-        $arr = explode(",",$listImg);
-        if(count($arr)>0){
+        $listImg = $this->getPostMeta($id, '_product_image_gallery');
+        $arr = explode(",", $listImg);
+        if (count($arr) > 0) {
             $data = DB::connection('mysql_external')->table('wp_posts')->whereIn('ID', $arr)->get();
             if ($data) {
                 foreach ($data as $key => $value) {
-                    $response[] =  $value;
+                    $response[$key]['path'] =  "https://" . $store->domain . "/wp-content/uploads/" . $this->getPostMeta($value->ID, '_wp_attached_file');
+                    $response[$key]['title'] =  $value->post_title;
+                    $response[$key]['alt'] =  $value->post_title;
                 }
             }
         }
-        echo '<pre>';
-        print_r($response);
-        die;
-
         return $response;
     }
 
@@ -208,37 +210,36 @@ class Controller extends BaseController
                 }
             }
         }
+
         return $data;
     }
     public function getCategoryByProduct($id, $store)
     {
         $response = new \stdClass();
-        $cate = DB::connection('mysql_external')->table('wp_term_relationships')->where('object_id',$id)->get();
+        $cate = DB::connection('mysql_external')->table('wp_term_relationships')->where('object_id', $id)->get();
         $term = [];
-        foreach($cate as $key => $value){
+        foreach ($cate as $key => $value) {
             $term[] = $value->term_taxonomy_id;
         }
 
 
-        if(count($term) >0){
-            $listTerm = DB::connection('mysql_external')->table('wp_term_taxonomy')->whereIn('term_id',$term)->where('taxonomy','product_cat')->get();
+        if (count($term) > 0) {
+            $listTerm = DB::connection('mysql_external')->table('wp_term_taxonomy')->whereIn('term_id', $term)->where('taxonomy', 'product_cat')->get();
             $term = [];
-            foreach( $listTerm as $val){
-                $term[]= $val->term_id;
+            foreach ($listTerm as $val) {
+                $term[] = $val->term_id;
             }
-            if(count($term) >0){
-                $listTerm = DB::connection('mysql_external')->table('wp_terms')->whereIn('term_id',$term)->first();
-                if($listTerm ){
+            if (count($term) > 0) {
+                $listTerm = DB::connection('mysql_external')->table('wp_terms')->whereIn('term_id', $term)->first();
+                if ($listTerm) {
                     $response->category_id =  $listTerm->term_id;
                     $response->name =  $listTerm->name;
                     $response->slug =  $listTerm->slug;
-                    $thumbnail = DB::connection('mysql_external')->table('wp_termmeta')->where('term_id',$listTerm->term_id)->where('meta_key','thumbnail_id')->first();
-                    $response->image =  ($thumbnail)?$thumbnail->meta_value:"";
-                    $response->sub_category =[];
+                    $thumbnail = DB::connection('mysql_external')->table('wp_termmeta')->where('term_id', $listTerm->term_id)->where('meta_key', 'thumbnail_id')->first();
+                    $response->image =  ($thumbnail) ? $thumbnail->meta_value : "";
+                    $response->sub_category = [];
                 }
-
             }
-
         }
 
         return $response;
@@ -295,50 +296,97 @@ class Controller extends BaseController
         $uniqueArray = array_values($uniqueArray);
         return $uniqueArray;
     }
+    public function getAuthor($authroId){
+        $data = DB::connection('mysql_external')->table('wp_users')->where('ID', $authroId)->first();
+        $name =($data)?$data->display_name:"";
+        return $name;
+    }
+    // id: number;
+    // product_id: number;
+    // sku: string;
+    // stock_count: number;
+    // sold_count: number | null;
+    // attribute: {
+    //   color: { id: number; name: string; color_code: string }[];
+    //   size: { id: number; name: string; size_code: string }[];
+    //   [key: string]:
+    //     | string[]
+    //     | { id: number; name: string; color_code: string }[]
+    //     | { id: number; name: string; size_code: string }[];
+    // };
+    // product_inventory_details: any;
     public function getProductInventory($id)
     {
         $response = new \stdClass();
-        $data = DB::connection('mysql_external')->table('product_inventories')->where('product_id', $id)->first();
-        if ($data) {
-            $product_inventory_details = DB::connection('mysql_external')->table('product_inventory_details')->where('product_id', $id)->where('product_inventory_id', $data->id)->get();
-            $data->product_inventory_details = [];
-            $list = [];
-            foreach ($product_inventory_details as $value) {
-                $value->color = $this->getColor($value->color);
-                if (!empty((array)$value->color)) {
-                    $list['color'][] = [
-                        "id" => $value->color->id,
-                        "name" => $value->color->name,
-                        "color_code" => $value->color->color_code,
-                    ];
-                }
-                // Create a new color entry
-                if (!empty((array)$value->size)) {
-                    $value->size = $this->getSize($value->size);
-                    $list['size'][] = [
-                        "id" => $value->size->id,
-                        "name" => $value->size->name,
-                        "size_code" => $value->size->size_code,
-                    ];
-                }
+        $sold_count = $this->getPostMeta($id, 'total_sales');
+        $stock_count = $this->getPostMeta($id, '_stock');
+        $proAttr = $this->getPostMeta($id, '_product_attributes');
+
+        $proAttr = unserialize($proAttr);
 
 
-                $value->attribute = $this->getAttributeProduct($value->id);
-                $list = $this->calAttribute($list, $value->attribute);
-                // foreach($value->attribute as $key => $item){
-                //     $list[$key][] = $item;
-                // }
-                $data->product_inventory_details[] = $value;
+        $response->id = $id;
+        $response->product_id = $id;
+        $response->sku = '';
+        $response->stock_count =  $stock_count;
+        $response->sold_count = $sold_count;
+        $list['color']=[];
+        $list['size']=[];
+        $response->attribute = $list;
+        $response->product_inventory_details = [];
+
+        if($proAttr ){
+            foreach ($proAttr as $attr => $val) {
+                $val['attribute'] = $val;
+                $response->product_inventory_details[]=$val;
             }
-            if (isset($list['color'])) {
-                $list['color'] = $this->uniqueList($list['color']);
-            }
-            if (isset($list['size'])) {
-                $list['size'] = $this->uniqueList($list['size']);
-            }
-            $data->attribute = $list;
-            $response = $data;
         }
+
+
+
+
+
+        // $data = DB::connection('mysql_external')->table('product_inventories')->where('product_id', $id)->first();
+        // if ($data) {
+        //     $product_inventory_details = DB::connection('mysql_external')->table('product_inventory_details')->where('product_id', $id)->where('product_inventory_id', $data->id)->get();
+        //     $data->product_inventory_details = [];
+        //     $list = [];
+        //     foreach ($product_inventory_details as $value) {
+
+        //         if (!empty((array)$value->color)) {
+        //             $list['color'][] = [
+        //                 "id" => $value->color->id,
+        //                 "name" => $value->color->name,
+        //                 "color_code" => $value->color->color_code,
+        //             ];
+        //         }
+        //         // Create a new color entry
+        //         if (!empty((array)$value->size)) {
+        //             $value->size = $this->getSize($value->size);
+        //             $list['size'][] = [
+        //                 "id" => $value->size->id,
+        //                 "name" => $value->size->name,
+        //                 "size_code" => $value->size->size_code,
+        //             ];
+        //         }
+
+
+        //         $value->attribute = $this->getAttributeProduct($value->id);
+        //         $list = $this->calAttribute($list, $value->attribute);
+        //         // foreach($value->attribute as $key => $item){
+        //         //     $list[$key][] = $item;
+        //         // }
+        //         $data->product_inventory_details[] = $value;
+        //     }
+        //     if (isset($list['color'])) {
+        //         $list['color'] = $this->uniqueList($list['color']);
+        //     }
+        //     if (isset($list['size'])) {
+        //         $list['size'] = $this->uniqueList($list['size']);
+        //     }
+        //     $data->attribute = $list;
+        //     $response = $data;
+        // }
         return $response;
     }
     public function getColor($id)
@@ -405,9 +453,26 @@ class Controller extends BaseController
     }
     public function getreview($id)
     {
-        $response = DB::connection('mysql_external')->table('product_reviews')->join('users', 'users.id', 'product_reviews.user_id')->where('product_reviews.product_id', $id)->select('product_reviews.*', 'users.name')->get();
+    //     id: number;
+    // product_id: number;
+    // user_id: number;
+    // rating: number;
+    // review_text: string | null;
+    // created_at: string | null;
+    // updated_at: string | null;
+    // name: string;
+        $data =[];
+        $response = DB::connection('mysql_external')->table('wp_comments')->join('wp_commentmeta','wp_commentmeta.comment_id','wp_comments.comment_ID')->where('wp_comments.comment_post_ID', $id)->where('wp_comments.comment_type', 'review')->where('wp_commentmeta.meta_key', 'rating')->select('wp_comments.*','wp_commentmeta.meta_value')->get();
 
-        return $response;
+        foreach( $response as $key => $value){
+            $data[$key]['id'] =$value->comment_ID;
+            $data[$key]['product_id'] =$id;
+            $data[$key]['user_id'] =$value->user_id;
+            $data[$key]['rating'] =$value->meta_value;
+            $data[$key]['review_text'] =$value->comment_content;
+            $data[$key]['name'] =$value->comment_author;
+        }
+        return $data;
     }
     public function calculateCoupon($data, $products)
     {
@@ -691,32 +756,35 @@ class Controller extends BaseController
 
         return $arr;
     }
-    public function getPostByCategory($nameCate){
-        $cate = DB::connection('mysql_external')->table('wp_terms')->where('slug',$nameCate)->first();
-        $data =[];
-        if($cate){
+    public function getPostByCategory($nameCate)
+    {
+        $cate = DB::connection('mysql_external')->table('wp_terms')->where('slug', $nameCate)->first();
+        $data = [];
+        if ($cate) {
             $data = DB::connection('mysql_external')->table('wp_posts')
-            ->join('wp_term_relationships','wp_term_relationships.object_id','wp_posts.ID')
-            ->where('term_taxonomy_id',$cate->term_id)->where('post_status','publish')->orderBy('post_modified', 'DESC')->get();
+                ->join('wp_term_relationships', 'wp_term_relationships.object_id', 'wp_posts.ID')
+                ->where('term_taxonomy_id', $cate->term_id)->where('post_status', 'publish')->orderBy('post_modified', 'DESC')->get();
         }
-        return ['data'=>$data,'cate'=>$cate];
+        return ['data' => $data, 'cate' => $cate];
     }
-    public function lienhe($content,$text,$count){
+    public function lienhe($content, $text, $count)
+    {
         $position = strpos($content, $text);
         $lineAfterPhone = "";
         if ($position !== false) {
             $endOfLinePosition = strpos($content, PHP_EOL, $position);
             if ($endOfLinePosition !== false) {
-                $lineAfterPhone = substr($content, $position + $count, $endOfLinePosition - $position -$count);
+                $lineAfterPhone = substr($content, $position + $count, $endOfLinePosition - $position - $count);
             }
         }
         return $lineAfterPhone;
     }
-    public function getPostMeta($postId,$meta){
-        $data = DB::connection('mysql_external')->table('wp_postmeta')->where('post_id',$postId)->where('meta_key',$meta)->first();
-        if($data){
+    public function getPostMeta($postId, $meta)
+    {
+        $data = DB::connection('mysql_external')->table('wp_postmeta')->where('post_id', $postId)->where('meta_key', $meta)->first();
+        if ($data) {
             return $data->meta_value;
         }
-       return $data;
+        return $data;
     }
 }

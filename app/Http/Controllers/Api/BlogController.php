@@ -20,14 +20,17 @@ class BlogController extends Controller
         if($listBlogs){
             $blogs = $listBlogs['data'];
             foreach($blogs as $key => $blog){
+                $blogs[$key]->id = $blog->ID;
                 $blogs[$key]->image = $this->getImage($blog->ID,$store);
                 $blogs[$key]->title = $blog->post_title;
+                $blogs[$key]->slug = $blog->post_name;
+                $blogs[$key]->author =  $this->getAuthor($blog->post_author);
                 $blogs[$key]->blog_content = $blog->post_content;
                 $blogs[$key]->excerpt = $blog->post_excerpt;
                 $blogs[$key]->category_name = $listBlogs['cate']->name;
             }
         }
-        
+
         return $this->returnSuccess($blogs);
     }
 

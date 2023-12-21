@@ -73,12 +73,12 @@ class Controller extends BaseController
         $decryptedData = openssl_decrypt($encryptedData, 'aes-256-cbc', $key, OPENSSL_RAW_DATA, $iv);
         return $decryptedData;
     }
-    public function getToken($store, $sdt, $databaseStore, $domain)
+    public function getToken($store, $sdt, $databaseStore, $domain,$name,$user_id)
     {
         $minute = (env('EXPIRED_MINUTE')) ? env('EXPIRED_MINUTE') : "";
         try {
             $date = empty($minute) ? "" : strtotime(date('d-m-Y H:i:s', strtotime("+$minute min")));
-            $token = $this->encodeData(json_encode(['store' => $store, 'sdt' => $sdt, 'databaseStore' => $databaseStore, 'domain' => $domain, 'expired_in' => strtotime($date)]));
+            $token = $this->encodeData(json_encode(['store' => $store, 'sdt' => $sdt, 'databaseStore' => $databaseStore, 'domain' => $domain,'name'=>$name,'user_id'=>$user_id, 'expired_in' => strtotime($date)]));
             return $token;
         } catch (\Exception $e) {
             //throw $th;
@@ -330,18 +330,18 @@ class Controller extends BaseController
         $response->sku = '';
         $response->stock_count =  $stock_count;
         $response->sold_count = $sold_count;
-        $list['color']=[];
-        $list['size']=[];
-        $response->attribute = $list;
+        $list = [];
         $response->product_inventory_details = [];
 
         if($proAttr ){
             foreach ($proAttr as $attr => $val) {
                 $val['attribute'] = $val;
+                $list[$val['name']]=explode('|',$val['value']);
                 $response->product_inventory_details[]=$val;
             }
         }
 
+        $response->attribute = $list;
 
 
 
@@ -468,7 +468,7 @@ class Controller extends BaseController
             $data[$key]['id'] =$value->comment_ID;
             $data[$key]['product_id'] =$id;
             $data[$key]['user_id'] =$value->user_id;
-            $data[$key]['rating'] =$value->meta_value;
+            $data[$key]['rating'] =(int)$value->meta_value;
             $data[$key]['review_text'] =$value->comment_content;
             $data[$key]['name'] =$value->comment_author;
         }
@@ -755,6 +755,12 @@ class Controller extends BaseController
         ];
 
         return $arr;
+    }
+    public function getPostByCategoryId($id){
+        $data = DB::connection('mysql_external')->table('wp_posts')
+        ->join('wp_term_relationships', 'wp_term_relationships.object_id', 'wp_posts.ID')
+        ->where('term_taxonomy_id', $id)->where('post_status', 'publish')->select('wp_posts.*')->orderBy('post_modified', 'DESC')->get();
+        return $data;
     }
     public function getPostByCategory($nameCate)
     {

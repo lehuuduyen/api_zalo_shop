@@ -47,8 +47,8 @@ class GatewaveController extends Controller
                     $databaseStore = $request['store'];
                     $this->connectDb($databaseStore);
                     $user = DB::connection('mysql_external')->table('wp_users')->where('user_login', $request['sdt'])->first();
-                    
-                    
+
+
                     if (!$user) {
                         $insert = DB::connection('mysql_external')->table('wp_users')->insert(
                             array(
@@ -66,12 +66,12 @@ class GatewaveController extends Controller
                                 'meta_key'     =>   "last_name",
                                 'meta_value'     =>  $request['name'],
                                 'user_id'     =>   $request['user_id'],
-                              
+
                             )
                         );
-                     
+
                     }
-                    $hash = $this->getToken($request['store'],$request['sdt'],$databaseStore,$store->domain);
+                    $hash = $this->getToken($request['store'],$request['sdt'],$databaseStore,$store->domain,$request['name'],$request['user_id']);
                     return $this->returnSuccess([
                         'token'=> $hash
                     ]);

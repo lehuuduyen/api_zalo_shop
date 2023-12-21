@@ -19,14 +19,16 @@ class ProductController extends Controller
     {
         $products = DB::connection('mysql_external')->table('wp_posts')->where('post_type', 'product')->where('post_status', 'publish')->orderBy('post_modified', 'DESC')->get();
         if (isset($request['category'])) {
-            $products = $this->getPostByCategory($request['category']);
+            $products = $this->getPostByCategoryId($request['category']);
         }
+
         $store = $request['data_reponse'];
 
 
 
         foreach ($products as $key => $product) {
             $products[$key]->id = $product->ID;
+            $products[$key]->product_id = $product->ID;
             $postMetaStatus = $this->getPostMeta($product->ID,'_stock_status');
             $postMetaStock = $this->getPostMeta($product->ID,'_stock');
             $postMetaGiaGoc = $this->getPostMeta($product->ID,'_regular_price');
@@ -59,6 +61,7 @@ class ProductController extends Controller
             // $products[$key]->tag_name = $this->getTagName($product->id);
 
             $products[$key]->review = $this->getreview($product->ID);
+            $products[$key]->sold_count =  $products[$key]->product_inventory->sold_count;
 
             // $products[$key]->state = $this->getState($order->state);
             // $products[$key]->order_details = json_decode($order->order_details);
@@ -101,17 +104,29 @@ class ProductController extends Controller
         } else if (!isset($data['product_id'])) {
             return $this->returnError([], "Bắt buộc phải nhập product");
         } else {
-            $user = DB::connection('mysql_external')->table('users')->where('mobile', $data['sdt'])->first();
+            $user = DB::connection('mysql_external')->table('wp_users')->where('user_login', $data['sdt'])->first();
             if (!$user) {
                 return $this->returnError([], "Số điện thoại chưa được đăng ký");
             }
-
-            $insert = DB::connection('mysql_external')->table('product_reviews')->insert(
+            $insertId = DB::connection('mysql_external')->table('wp_comments')->insertGetId(
                 array(
-                    'product_id'     =>   $data['product_id'],
-                    'rating'     =>   $data['rating'],
-                    'review_text'     =>   isset($data['review_text']) ? $data['review_text'] : '',
-                    'user_id'   =>   $user->id
+                    'comment_post_ID'     =>   $data['product_id'],
+                    'comment_author'     =>   $store->name,
+                    'comment_content'     =>   $data['review_text'],
+                    'comment_type'     =>   'review',
+                    'user_id'   =>   $store->user_id,
+                    'comment_date' => date('Y/m/d H:i:s'),
+                    'comment_date_gmt' => date('Y/m/d H:i:s')
+
+                )
+            );
+
+
+            $insert = DB::connection('mysql_external')->table('wp_commentmeta')->insert(
+                array(
+                    'comment_id'     =>   $insertId,
+                    'meta_value'     =>   $data['rating'],
+                    'meta_key'     =>   'rating',
                 )
             );
             return $this->returnSuccess($insert, 'Thêm review thành công');

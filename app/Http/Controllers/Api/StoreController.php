@@ -17,9 +17,9 @@ class StoreController extends Controller
     public function index()
     {
         $infor = DB::connection('mysql_external')->table('wp_posts')->where('post_name','lien-he')->where('post_status','publish')->where('post_type','page')->first();
-        
-        
-        
+
+
+
         $info = new \stdClass();
         $info->email = [
             'title' => "",
@@ -40,8 +40,8 @@ class StoreController extends Controller
         if($infor){
             $content = $infor->post_content;
             $lineAfterPhone = $this->lienhe($content,'Điện thoại:',16);
-            
-            
+
+
             $info->phone = [
                 'title' => 'Điện thoại:',
                 'value' => $lineAfterPhone,
@@ -57,7 +57,7 @@ class StoreController extends Controller
                 'value' => $address,
             ];
         }
-        
+
         return $this->returnSuccess($info);
     }
     public function country(Request $request)
@@ -70,7 +70,7 @@ class StoreController extends Controller
        try {
         //code...
         $state = DB::connection('mysql_external')->table('states')->where('status','publish')->where('country_id',$request['country_id'])->get();
-       
+
         return $this->returnSuccess($state);
        } catch (\Throwable $th) {
         //throw $th;
@@ -104,19 +104,19 @@ class StoreController extends Controller
                     'email' => $data['email'],
                     'address' => $data['address'],
                     'company' => $data['company'],
-    
+
                 )
             );
             return $this->returnSuccess($user,'Cập nhật thành công');
 
         }
-        
-       
+
+
     }
     public function info(Request $request)
     {
         $store = $request['data_reponse'];
-        $user = DB::connection('mysql_external')->table('users')->where('mobile', $store->sdt)->select('name','email','mobile','company','address')
+        $user = DB::connection('mysql_external')->table('wp_users')->where('user_login', $store->sdt)->select('display_name as name','user_email as email','user_login as mobile')
         ->first();
         return $this->returnSuccess($user);
 

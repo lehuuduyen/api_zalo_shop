@@ -36,14 +36,17 @@ class FlashSaleController extends Controller
             }
 
             $data[$i]['product']['id'] = $product->ID;
+            $data[$i]['product']['product_id'] = $product->ID;
             $postMetaStatus = $this->getPostMeta($product->ID, '_stock_status');
             $postMetaStock = $this->getPostMeta($product->ID, '_stock');
             $postMetaGiaGoc = $this->getPostMeta($product->ID, '_regular_price');
             $postMetaGiaKhuyenMai = $this->getPostMeta($product->ID, '_sale_price');
             $postMetaStock = $this->getPostMeta($product->ID, '_stock');
-            $data[$i]['product']['is_campaign'] = false;
+            $data[$i]['product']['is_campaign'] = true;
             $data[$i]['product']['price'] =  $postMetaGiaGoc;
             $data[$i]['campaign_price'] = $postMetaGiaKhuyenMai;
+            $data[$i]['id'] = $product->ID;
+            $data[$i]['product_id'] = $product->ID;
 
             $data[$i]['product']['image_id'] = $this->getImage($product->ID, $store);
             $data[$i]['product']['name'] = $product->post_title;
@@ -58,6 +61,8 @@ class FlashSaleController extends Controller
             $data[$i]['product']['policy'] = [];
             $data[$i]['product']['tag_name'] = [];
             $data[$i]['product']['review'] = $this->getreview($product->ID);
+            $data[$i]['product']['sold_count'] =  $data[$i]['product']['product_inventory']->sold_count;
+
             // $campaigns[0]->products = ;
 
 

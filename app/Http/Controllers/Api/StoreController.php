@@ -100,6 +100,7 @@ class StoreController extends Controller
             return $this->returnError(new \stdClass, $validator->errors()->first());
         } else {
 
+
             $userId = $store->user_id;
             $user = DB::connection('mysql_external')->table('wp_usermeta')->updateOrInsert(
                 array(
@@ -119,7 +120,8 @@ class StoreController extends Controller
                     'user_email' => $data['email'],
                 )
             );
-            return $this->returnSuccess($user,'Cập nhật thành công');
+
+            return $this->returnSuccess($userId,'Cập nhật thành công');
 
         }
 

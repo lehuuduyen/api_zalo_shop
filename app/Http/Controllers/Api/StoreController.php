@@ -93,7 +93,7 @@ class StoreController extends Controller
             'email' => 'required',
 
         ], [
-            'address.required' => "Vui lòng nhập địa chỉ công ty",
+            'address.required' => "Vui lòng nhập địa chỉ ",
             'email.required' => "Vui lòng nhập email",
         ]);
         if ($validator->fails()) {
@@ -101,10 +101,17 @@ class StoreController extends Controller
         } else {
 
             $userId = $store->user_id;
-            $user = DB::connection('mysql_external')->table('wp_usermeta')->where('user_id', $userId)->where('meta_key','shipping_address_1')->updateOrInsert(
+            $user = DB::connection('mysql_external')->table('wp_usermeta')->updateOrInsert(
+                array(
+                    'user_id' => $userId,'meta_key' => 'shipping_address_1'),
                 array(
                     'meta_value' => $data['address'],
                 )
+            );
+            $user = DB::connection('mysql_external')->table('wp_usermeta')->updateOrInsert(
+                array(
+                    'user_id' => $userId,'meta_key' => 'company'),
+                array('meta_value' => $data['company'])
             );
 
             $user = DB::connection('mysql_external')->table('wp_users')->where('user_login', $store->sdt)->update(
@@ -124,7 +131,9 @@ class StoreController extends Controller
         $user = DB::connection('mysql_external')->table('wp_users')->where('user_login', $store->sdt)->select('ID','display_name as name','user_email as email','user_login as mobile')
         ->first();
         $address = $this->getUserMeta($user->ID,'shipping_address_1');
+        $company = $this->getUserMeta($user->ID,'company');
         $user->address = $address;
+        $user->company = $company;
         return $this->returnSuccess($user);
 
     }

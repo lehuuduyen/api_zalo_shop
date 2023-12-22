@@ -26,6 +26,8 @@ class CouponsController extends Controller
             if($date_expires < time()){
                 continue;
             }
+            $coupons[$key]->title=$val->post_excerpt;
+            $coupons[$key]->code=$val->post_title;
             $coupons[$key]->discount_type=$discount_type;
             $coupons[$key]->discount=$discount;
             $coupons[$key]->expire_date=date('d/m/Y H:i:s', $date_expires);

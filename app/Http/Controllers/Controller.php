@@ -472,21 +472,27 @@ class Controller extends BaseController
     {
         $discount_total = 0;
         $paramCoupon = $data['coupon'];
-        $coupon = DB::connection('mysql_external')->table('product_coupons')->where('code', $paramCoupon)->first();
+        $coupon = DB::connection('mysql_external')->table('wp_posts')->where('post_title', $paramCoupon)->where('post_status', 'publish')->where('post_type', 'shop_coupon')->first();
+
+
         if (is_null($coupon)) {
             return $discount_total;
         }
-        $coupon_amount = $coupon->discount;
-        $discount_on = $coupon->discount_on;
-        if ($discount_on == 'all') {
-            $discount_total = $coupon_amount; // not needed
+        $date_expires = $this->getPostMeta($coupon->ID,'date_expires');
+        if($date_expires < time()){
+            return $discount_total;
         }
-        $coupon_type = $coupon->discount_type;
+        $coupon_amount = $this->getPostMeta($coupon->ID,'coupon_amount');
+        $coupon_type = $this->getPostMeta($coupon->ID,'discount_type');
+        if($coupon_type == "percent"){
+            $coupon_type = 'percentage';
+        }
+
 
         // calculate based on coupon type
         if ($coupon_type === 'percentage') {
             $discount_total = $data['subtotal'] / 100 * $coupon_amount;
-        } elseif ($coupon_type === 'amount') { # =====
+        } else { # =====
             $discount_total = $coupon_amount;
         }
         if ($discount_total > $data['subtotal']) {

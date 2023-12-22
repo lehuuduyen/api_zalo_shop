@@ -148,7 +148,7 @@ class ProductController extends Controller
         foreach ($order as $value) {
             $listProductId[] = $value['id'];
         }
-        $products = DB::connection('mysql_external')->table('products')->whereIn('id', $listProductId)->get();
+        $products = DB::connection('mysql_external')->table('wp_posts')->whereIn('id', $listProductId)->get();
         $coupon_amount_total = $this->calculateCoupon($data, $products);
         if ($coupon_amount_total > 0) {
             return $this->returnSuccess($coupon_amount_total);

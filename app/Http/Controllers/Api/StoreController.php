@@ -93,18 +93,23 @@ class StoreController extends Controller
             'email' => 'required',
 
         ], [
-            'company.required' => "Vui lòng nhập địa chỉ công ty",
+            'address.required' => "Vui lòng nhập địa chỉ công ty",
             'email.required' => "Vui lòng nhập email",
         ]);
         if ($validator->fails()) {
             return $this->returnError(new \stdClass, $validator->errors()->first());
         } else {
-            $user = DB::connection('mysql_external')->table('users')->where('mobile', $store->sdt)->update(
-                array(
-                    'email' => $data['email'],
-                    'address' => $data['address'],
-                    'company' => $data['company'],
 
+            $userId = $store->user_id;
+            $user = DB::connection('mysql_external')->table('wp_usermeta')->where('user_id', $userId)->where('meta_key','shipping_address_1')->updateOrInsert(
+                array(
+                    'meta_value' => $data['address'],
+                )
+            );
+
+            $user = DB::connection('mysql_external')->table('wp_users')->where('user_login', $store->sdt)->update(
+                array(
+                    'user_email' => $data['email'],
                 )
             );
             return $this->returnSuccess($user,'Cập nhật thành công');
@@ -116,8 +121,10 @@ class StoreController extends Controller
     public function info(Request $request)
     {
         $store = $request['data_reponse'];
-        $user = DB::connection('mysql_external')->table('wp_users')->where('user_login', $store->sdt)->select('display_name as name','user_email as email','user_login as mobile')
+        $user = DB::connection('mysql_external')->table('wp_users')->where('user_login', $store->sdt)->select('ID','display_name as name','user_email as email','user_login as mobile')
         ->first();
+        $address = $this->getUserMeta($user->ID,'shipping_address_1');
+        $user->address = $address;
         return $this->returnSuccess($user);
 
     }

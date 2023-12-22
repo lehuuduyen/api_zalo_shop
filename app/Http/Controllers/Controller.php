@@ -321,10 +321,12 @@ class Controller extends BaseController
         $sold_count = $this->getPostMeta($id, 'total_sales');
         $stock_count = $this->getPostMeta($id, '_stock');
         $proAttr = $this->getPostMeta($id, '_product_attributes');
+        $trongLuong = $this->getPostMeta($id, '_weight');
+        $length = $this->getPostMeta($id, '_length');
+        $width = $this->getPostMeta($id, '_width');
+        $height = $this->getPostMeta($id, '_height');
 
         $proAttr = unserialize($proAttr);
-
-
         $response->id = $id;
         $response->product_id = $id;
         $response->sku = '';
@@ -332,7 +334,41 @@ class Controller extends BaseController
         $response->sold_count = $sold_count;
         $list = [];
         $response->product_inventory_details = [];
+        if($trongLuong){
+            $list['Trọng lượng'] =[$trongLuong.' kg'] ;
 
+        }
+        if($length || $width || $height){
+            $kichThuoc = "";
+            if($length && $width && !$height){
+                $kichThuoc = $length ." x ".$width;
+            }
+            else if($length && $height && !$width){
+                $kichThuoc = $length ." x ".$height;
+            }
+            else if($width && $height && !$length){
+                $kichThuoc = $width ." x ".$height;
+            }
+            else if($length && $width && $height){
+                $kichThuoc = $length ." x ".$width ." x ".$height;
+            }
+            else if($length && !$width && !$height){
+                $kichThuoc = $length ;
+            }
+            else if($width && !$length && !$height){
+                $kichThuoc = $width ;
+            }
+            else if($height && !$width && !$length){
+                $kichThuoc = $height ;
+            }
+
+            if($kichThuoc){
+                $kichThuoc = $kichThuoc ." cm";
+            }
+            $list['Kích thước'] =[$kichThuoc] ;
+
+
+        }
         if($proAttr ){
             foreach ($proAttr as $attr => $val) {
                 $val['attribute'] = $val;
@@ -341,52 +377,10 @@ class Controller extends BaseController
             }
         }
 
+
         $response->attribute = $list;
 
 
-
-
-        // $data = DB::connection('mysql_external')->table('product_inventories')->where('product_id', $id)->first();
-        // if ($data) {
-        //     $product_inventory_details = DB::connection('mysql_external')->table('product_inventory_details')->where('product_id', $id)->where('product_inventory_id', $data->id)->get();
-        //     $data->product_inventory_details = [];
-        //     $list = [];
-        //     foreach ($product_inventory_details as $value) {
-
-        //         if (!empty((array)$value->color)) {
-        //             $list['color'][] = [
-        //                 "id" => $value->color->id,
-        //                 "name" => $value->color->name,
-        //                 "color_code" => $value->color->color_code,
-        //             ];
-        //         }
-        //         // Create a new color entry
-        //         if (!empty((array)$value->size)) {
-        //             $value->size = $this->getSize($value->size);
-        //             $list['size'][] = [
-        //                 "id" => $value->size->id,
-        //                 "name" => $value->size->name,
-        //                 "size_code" => $value->size->size_code,
-        //             ];
-        //         }
-
-
-        //         $value->attribute = $this->getAttributeProduct($value->id);
-        //         $list = $this->calAttribute($list, $value->attribute);
-        //         // foreach($value->attribute as $key => $item){
-        //         //     $list[$key][] = $item;
-        //         // }
-        //         $data->product_inventory_details[] = $value;
-        //     }
-        //     if (isset($list['color'])) {
-        //         $list['color'] = $this->uniqueList($list['color']);
-        //     }
-        //     if (isset($list['size'])) {
-        //         $list['size'] = $this->uniqueList($list['size']);
-        //     }
-        //     $data->attribute = $list;
-        //     $response = $data;
-        // }
         return $response;
     }
     public function getColor($id)
@@ -793,4 +787,13 @@ class Controller extends BaseController
         }
         return $data;
     }
+    public function getUserMeta($userId, $meta)
+    {
+        $data = DB::connection('mysql_external')->table('wp_usermeta')->where('user_id', $userId)->where('meta_key', $meta)->first();
+        if ($data) {
+            return $data->meta_value;
+        }
+        return $data;
+    }
+
 }

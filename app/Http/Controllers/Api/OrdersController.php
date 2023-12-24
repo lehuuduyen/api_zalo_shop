@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use stdClass;
 
 class OrdersController extends Controller
 {
@@ -14,29 +15,69 @@ class OrdersController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+    public function info($id){
+        $user = DB::connection('mysql_external')->table('wp_users')->where('ID', $id)->select('ID','display_name as name','user_email as email','user_login as mobile')
+        ->first();
+        return $user;
+    }
     public function index(Request $request)
     {
         //
         // $languare = env('DEFAULT_LANGUARE')?env('DEFAULT_LANGUARE'):"vi";
 
         $store = $request['data_reponse'];
-        $orders = DB::connection('mysql_external')->table('product_orders')->where('phone', $store->sdt)->latest()->get();
+        
+        
+        $orders = DB::connection('mysql_external')->table('wp_wc_order_stats')->where('customer_id', $store->user_id)->orderBy('date_created', 'DESC')->get();
+        
         foreach ($orders as $key => $order) {
-            $orders[$key]->country = $this->getCountry($order->country);
-            $orders[$key]->state = $this->getState($order->state);
-            $orders[$key]->order_details = $this->detailOrder(json_decode($order->order_details), $store);
-            $orders[$key]->payment_meta = json_decode($order->payment_meta);
+            $status = $order->status ;
+            if($status == 'wc-pending'){
+                $orders[$key]->payment_status = 'pending';
+            }else if($status == 'wc-processing'){
+            $orders[$key]->status = 'pending';
+            }
+            $user = $this->info($order->customer_id);
+            $orders[$key]->name = $user->name;
+            $orders[$key]->phone = $user->mobile;
+           
+            
+            $orders[$key]->address = $this->getPostMeta($order->order_id,'_shipping_address_index');
+            
+            $orders[$key]->total_amount = $order->total_sales;
+            $ghichu = DB::connection('mysql_external')->table('wp_comments')->where('comment_post_ID',$order->order_id)->where('comment_type','order_note')->where('comment_author','!=','WooCommerce')->first();
+            if($ghichu){
+                $ghichu = $ghichu->comment_content;
+            }
+            $orders[$key]->message = $ghichu;
+            
+            
+            
+            // $orders[$key]->state = $this->getState($order->state);
+            $orders[$key]->order_details = $this->detailOrder($order->order_id, $store);
+            $temp = new stdClass;
+            $temp->shipping_cost = 0;
+            $orders[$key]->payment_meta = $temp;
         }
+        
         return $this->returnSuccess($orders);
     }
-    public function detailOrder($order, $store)
+    public function detailOrder($orderId, $store)
     {
-        foreach ($order as $key => $value) {
-            if (isset($value->options->image)) {
-                $order->$key->options->image = $this->getImage($value->options->image, $store);
-            }
+        $ordersDetail = DB::connection('mysql_external')->table('wp_wc_order_product_lookup')->join('wp_posts','wp_posts.ID','wp_wc_order_product_lookup.product_id')->where('wp_wc_order_product_lookup.order_id', $orderId)->select('wp_wc_order_product_lookup.*','wp_posts.post_title')->get();
+        $products = [];
+        foreach ($ordersDetail as $key => $value) {
+            $product[$key]['name']=$value->post_title;
+            $temp = new stdClass;
+            $temp->image = $this->getImage($value->product_id, $store);
+           
+            $product[$key]['options']= $temp;
+            $product[$key]['qty']= $value->product_qty;
+            $product[$key]['price']= $this->getOrderMeta($value->order_item_id,'_line_subtotal');
+            $product[$key]['subtotal']= $value->product_net_revenue;
+            
         }
-        return $order;
+        return $product;
     }
     /**
      * Store a newly created resource in storage.

@@ -473,7 +473,8 @@ class Controller extends BaseController
         $discount_total = 0;
         $paramCoupon = $data['coupon'];
         $coupon = DB::connection('mysql_external')->table('wp_posts')->where('post_title', $paramCoupon)->where('post_status', 'publish')->where('post_type', 'shop_coupon')->first();
-
+       
+        
 
         if (is_null($coupon)) {
             return $discount_total;
@@ -482,6 +483,7 @@ class Controller extends BaseController
         if($date_expires < time()){
             return $discount_total;
         }
+        
         $coupon_amount = $this->getPostMeta($coupon->ID,'coupon_amount');
         $coupon_type = $this->getPostMeta($coupon->ID,'discount_type');
         if($coupon_type == "percent"){
@@ -801,5 +803,14 @@ class Controller extends BaseController
         }
         return $data;
     }
+    public function getOrderMeta($orderId, $meta)
+    {
+        $data = DB::connection('mysql_external')->table('wp_woocommerce_order_itemmeta')->where('order_item_id', $orderId)->where('meta_key', $meta)->first();
+        if ($data) {
+            return $data->meta_value;
+        }
+        return $data;
+    }
+    
 
 }

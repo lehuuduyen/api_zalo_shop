@@ -78,6 +78,7 @@ class GatewaveController extends Controller
                     if(!$customer){
                         $insertCus = DB::connection('mysql_external')->table('wp_wc_customer_lookup')->insert(
                             array(
+                                'customer_id'     =>   $request['user_id'],
                                 'username'     =>   $request['sdt'],
                                 'first_name'     =>  '',
                                 'last_name'     =>  $request['name'],

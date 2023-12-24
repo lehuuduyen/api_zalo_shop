@@ -39,7 +39,7 @@ class CouponsController extends Controller
         }
 
 
-        return $this->returnSuccess($coupons);
+        return $this->returnSuccess($listCoupons);
     }
 
     /**

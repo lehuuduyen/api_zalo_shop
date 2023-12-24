@@ -26,8 +26,6 @@ class OrdersController extends Controller
         // $languare = env('DEFAULT_LANGUARE')?env('DEFAULT_LANGUARE'):"vi";
 
         $store = $request['data_reponse'];
-        
-        
         $orders = DB::connection('mysql_external')->table('wp_wc_order_stats')->where('customer_id', $store->user_id)->orderBy('date_created', 'DESC')->get();
         
         foreach ($orders as $key => $order) {
@@ -108,7 +106,7 @@ class OrdersController extends Controller
                 $data = $request->all();
                 $store = $request['data_reponse'];
                 $data['sdt'] = $store->sdt;
-                $user = DB::connection('mysql_external')->table('users')->where('mobile', $data['sdt'])->first();
+                $user = DB::connection('mysql_external')->table('wp_users')->where('user_login', $data['sdt'])->first();
                 if (!$user) {
                     return $this->returnError([], "Số điện thoại chưa được đăng ký");
                 }
@@ -116,7 +114,7 @@ class OrdersController extends Controller
                 $data['state'] =1;
                 $data['city'] = (isset($data['city'])) ? $data['city'] : "Việt Nam";
                 $user = [
-                    'id' => $user->id,
+                    'id' => $user->ID,
                     'name' => $data['name'],
                     'mobile' => $data['phone'],
                     'country' => $data['country'],

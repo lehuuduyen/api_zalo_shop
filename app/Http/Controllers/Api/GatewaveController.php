@@ -47,14 +47,15 @@ class GatewaveController extends Controller
                     $databaseStore = $request['store'];
                     $this->connectDb($databaseStore);
                     $user = DB::connection('mysql_external')->table('wp_users')->where('user_login', $request['sdt'])->first();
-
+                    // wp_wc_customer_lookup
 
                     if (!$user) {
+                        $email = $this->randomEmail();
                         $insert = DB::connection('mysql_external')->table('wp_users')->insert(
                             array(
                                 'user_login'     =>   $request['sdt'],
                                 'user_pass'     =>   "appid",
-                                'user_email'     =>   $this->randomEmail(),
+                                'user_email'     =>   $email,
                                 'user_nicename'     =>   $request['name'],
                                 'display_name'     =>   $request['name'],
                                 'user_registered'     =>   date('Y-m-d H:i:s'),
@@ -70,6 +71,22 @@ class GatewaveController extends Controller
                             )
                         );
 
+                    }else{
+                        $email = $user->user_email;
+                    }
+                    $customer = DB::connection('mysql_external')->table('wp_wc_customer_lookup')->where('user_id', $request['user_id'])->first();
+                    if(!$customer){
+                        $insertCus = DB::connection('mysql_external')->table('wp_wc_customer_lookup')->insert(
+                            array(
+                                'username'     =>   $request['sdt'],
+                                'first_name'     =>  '',
+                                'last_name'     =>  $request['name'],
+                                'user_id'     =>   $request['user_id'],
+                                'email'     =>   $email,
+                                
+
+                            )
+                        );
                     }
                     $hash = $this->getToken($request['store'],$request['sdt'],$databaseStore,$store->domain,$request['name'],$request['user_id']);
                     return $this->returnSuccess([

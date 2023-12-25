@@ -717,7 +717,7 @@ class Controller extends BaseController
                     }else{
                         $giagiam = round($price * $coupon_amount  / 100);
                         $price = $price - $giagiam;
-                        $tongGiaGiam=$tongGiaGiam + $giagiam;
+                        $tongGiaGiam=$tongGiaGiam + $giagiam * $totalPriceDetails['quantity'][$key];
                     }
                 }
                 //wp_woocommerce_order_items

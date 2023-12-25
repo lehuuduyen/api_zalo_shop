@@ -715,7 +715,7 @@ class Controller extends BaseController
                         $price = $price - $giagiam;
                         $tongGiaGiam=$tongGiaGiam + $giagiam;
                     }else{
-                        $giagiam = round($price * $coupon_amount * $totalPriceDetails['quantity'][$key] / 100);
+                        $giagiam = round($price * $coupon_amount  / 100);
                         $price = $price - $giagiam;
                         $tongGiaGiam=$tongGiaGiam + $giagiam;
                     }

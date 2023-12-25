@@ -69,11 +69,11 @@ class OrdersController extends Controller
             $product[$key]['name']=$value->post_title;
             $temp = new stdClass;
             $temp->image = $this->getImage($value->product_id, $store);
-           
+            $total = $this->getOrderMeta($value->order_item_id,'_line_subtotal');
             $product[$key]['options']= $temp;
             $product[$key]['qty']= $value->product_qty;
-            $product[$key]['price']= $value->product_net_revenue;
-            $product[$key]['subtotal']= $value->product_net_revenue *$value->product_qty;
+            $product[$key]['price']= $total / $value->product_qty;
+            $product[$key]['subtotal']= $total;
             
         }
         return $product;

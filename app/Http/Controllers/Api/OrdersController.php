@@ -37,6 +37,7 @@ class OrdersController extends Controller
             }
             $user = $this->info($order->customer_id);
             $orders[$key]->name = $user->name;
+            $orders[$key]->id = $order->order_id;
             $orders[$key]->phone = $user->mobile;
            
             

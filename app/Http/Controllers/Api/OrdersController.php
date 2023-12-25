@@ -49,8 +49,14 @@ class OrdersController extends Controller
                 $ghichu = $ghichu->comment_content;
             }
             $orders[$key]->message = $ghichu;
+            $orders[$key]->discount = 0;
+            $orders[$key]->total_price = $order->total_sales;
             
-            
+            $coupon = DB::connection('mysql_external')->table('wp_wc_order_coupon_lookup')->where('order_id',$order->order_id)->where('comment_type','order_note')->first();
+            if($coupon){
+                $orders[$key]->discount = $coupon->discount_amount;
+                $orders[$key]->total_price = $order->total_sales + $coupon->discount_amount;
+            }
             
             // $orders[$key]->state = $this->getState($order->state);
             $orders[$key]->order_details = $this->detailOrder($order->order_id, $store);

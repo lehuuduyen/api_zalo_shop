@@ -525,7 +525,7 @@ class Controller extends BaseController
                     'post_modified' => $timeNow,
                     'post_modified_gmt' => $timeNow,
                     'post_title' => 'Order &ndash; '.$this->timeFormat(),
-                    'post_status' => 'auto-draft',
+                    'post_status' => 'wc-pending',
                     'post_type' => 'shop_order',
                     'post_content' => '',
                     'post_excerpt' => '',

@@ -758,7 +758,7 @@ class Controller extends BaseController
                         array(
                             'order_item_id'=>$orderItemId,
                             'meta_key'=>'_line_subtotal',
-                            'meta_value'=>$totalBanDau * $totalPriceDetails['quantity'][$key],
+                            'meta_value'=>$totalBanDau ,
                         ),
                         array(
                             'order_item_id'=>$orderItemId,

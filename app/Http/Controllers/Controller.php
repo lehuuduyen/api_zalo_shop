@@ -504,22 +504,24 @@ class Controller extends BaseController
         return $discount_total;
     }
     public function createOrder($data, $user)
-    {
+    {   
+        
+        
         DB::connection('mysql_external')->beginTransaction();
 
         try {
             $totalPriceDetails =  $this->getTotalPriceDetails($data['order']);
-
-
             if (!$totalPriceDetails) {
                 throw new \Exception('');
             }
 
             $finalDetails = $this->getFinalPriceDetails($user, $data, $totalPriceDetails);
-
+            echo '<pre>';
+            print_r($data);
+            echo '</pre>';
+            die;
+            
             $finalPriceDetails = $finalDetails['total'];
-            $payment_meta = $finalDetails['payment_meta'];
-            $payment_gateway = $data['payment_gateway'] ?? null;
             $extra_note = $data['message'];
             $cart_data = json_encode($data['order']);
             $order_id = DB::connection('mysql_external')->table('product_orders')->insertGetId(
@@ -536,13 +538,11 @@ class Controller extends BaseController
                     'address' => $user['address'],
                     'message' => $extra_note,
                     'total_amount' => $finalPriceDetails,
-                    'payment_gateway' => $payment_gateway,
                     'status' => 'pending',
                     'payment_status' => 'pending',
                     'checkout_type' => 'cod',
                     'payment_track' => Str::random(10) . Str::random(10),
                     'order_details' => $cart_data,
-                    'payment_meta' => $payment_meta,
                     'selected_shipping_option' => $data['shipping_method'],
                     'created_at' => Carbon::now(),
                     'updated_at' => Carbon::now()
@@ -579,30 +579,33 @@ class Controller extends BaseController
     public function getFinalPriceDetails($user, $validated_data, $totalPriceDetails)
     {
         $shipping_method = $validated_data['shipping_method'] ?? "";
-        $coupon = ["coupon" => $validated_data['used_coupon']];
+        
+        
         $state = $validated_data["state"];
         $country = $validated_data["country"];
-
+        
         $price = $totalPriceDetails;
+        $coupon = ["coupon" => $validated_data['used_coupon'],"subtotal" => $price['total']];
 
-        $products = DB::connection('mysql_external')->table('products')->whereIn('id', $price['products_id'])->get();
+       
 
 
         $data = $this->get_product_shipping_tax(['country' => $country, 'state' => $state, 'shipping_method' => (int)$shipping_method]);
         $coupon['subtotal'] = $price['total'];
-        $discounted_price = $this->calculateCoupon($coupon, $products);
-
+        $discounted_price = $this->calculateCoupon($coupon, []);
+        
+        
 
         $price['total'] -= $discounted_price;
-
+        
         $product_tax = $data['product_tax'];
         $shipping_cost = $data['shipping_cost'];
 
         $taxed_price = ($price['total'] * $product_tax) / 100;
         $subtotal = $price['total'] + $discounted_price;
         $total['total'] = $price['total'] + $taxed_price + $shipping_cost;
-
-        $total['payment_meta'] = $this->payment_meta(compact('product_tax', 'shipping_cost', 'subtotal', 'total'));
+        
+        // $total['payment_meta'] = $this->payment_meta(compact('product_tax', 'shipping_cost', 'subtotal', 'total'));
         $total['coupon_discounted'] = $discounted_price;
         return $total;
     }
@@ -689,64 +692,47 @@ class Controller extends BaseController
     }
     public function getTotalPriceDetails($cart)
     {
+        
+        
         $total = 0.0;
         $cartArr = self::getCartProducts($cart);
-
-        foreach ($cartArr as $item) {
+        
+        foreach ($cartArr as $key => $item) {
+            $sold_count = $this->getPostMeta($item['id'], 'total_sales');
+            $stock_count = $this->getPostMeta($item['id'], '_stock');
+            $priceGoc = $this->getPostMeta($item['id'], '_regular_price');
+            $price = $this->getPostMeta($item['id'], '_sale_price');
+            $price = ($price)?$price:$priceGoc;
+            $stockStatus = $this->getPostMeta($item['id'], '_stock_status');
+           
+            
             //checkcampaign
             $productId = $item['id'];
-            $campaign = $this->getCampaignByProduct($productId);
-
+           
             //check số lượng trong kho
-            $checkProductInventory = $this->checkProductInventory($productId);
-
-            if ($checkProductInventory->stock_count < $item['qty']) {
-                $this->_messageError = $checkProductInventory->name . " hết hàng trong kho";
+            if(!empty($stock_count) && gettype($stock_count) == 'integer' && $stock_count < $item['qty']){
+                $this->_messageError = $item['name'] . " hết hàng trong kho";
                 return false;
             }
-
-            if ($campaign) {
-                //là chiến dịch kiểm tra xem tồn kho theo chiến dịch
-                $campaingSoldProduct = DB::connection('mysql_external')->table('campaign_sold_products')->where('campaign_sold_products.product_id', $productId)->first();
-
-
-                if ($campaingSoldProduct) {
-                    if ($campaingSoldProduct->sold_count + $item['qty'] > $campaign->units_for_sale) {
-                        $this->_messageError = "Sản phẩm " . $checkProductInventory->name . " trong flashsale đã hết";
-                        return false;
-                    }
-                    DB::connection('mysql_external')->table('campaign_sold_products')->where('id', $campaingSoldProduct->id)->update(
-                        array(
-                            'sold_count' => $item['qty'] + $campaingSoldProduct->sold_count,
-                            'total_amount' => $campaign->units_for_sale,
-                        )
-                    );
-                } else {
-                    // thêm sản phẩm chiến dịch
-                    DB::connection('mysql_external')->table('campaign_sold_products')->insertGetId(
-                        array(
-                            'product_id' => $productId,
-                            'sold_count' => $item['qty'],
-                            'total_amount' => $campaign->units_for_sale,
-                        )
-                    );
-                }
-            }
+            
 
             // trừ số lượng kho
-            DB::connection('mysql_external')->table('product_inventories')->where('id', $checkProductInventory->id)->update(
+            DB::connection('mysql_external')->table('wp_postmeta')->where('post_id', $productId)->where('meta_key','total_sales')->update(
                 array(
-                    'stock_count' => $checkProductInventory->stock_count - $item['qty'],
-                    'sold_count' => $item['qty'] + $checkProductInventory->sold_count
+                    'meta_value' => $sold_count + $item['qty']
+                )
+            );
+            DB::connection('mysql_external')->table('wp_postmeta')->where('post_id', $productId)->where('meta_key','_stock')->update(
+                array(
+                    'meta_value' => $stock_count - $item['qty']
                 )
             );
 
-
-
-            $total += $item['price'] * $item['qty'];
+            $total += $price * $item['qty'];
             $products_id[] = $item['id'];
             $variant_id[] = $item['variant_id'];
             $quantity[] = $item['qty'];
+           
         }
 
         $arr = [
@@ -755,7 +741,7 @@ class Controller extends BaseController
             'variants_id' => $variant_id,
             'quantity' => $quantity
         ];
-
+       
         return $arr;
     }
     public function getPostByCategoryId($id){

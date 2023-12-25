@@ -41,7 +41,6 @@ class FlashSaleController extends Controller
             $postMetaStock = $this->getPostMeta($product->ID, '_stock');
             $postMetaGiaGoc = $this->getPostMeta($product->ID, '_regular_price');
             $postMetaGiaKhuyenMai = $this->getPostMeta($product->ID, '_sale_price');
-            $postMetaStock = $this->getPostMeta($product->ID, '_stock');
             $data[$i]['product']['is_campaign'] = true;
             $data[$i]['product']['price'] =  $postMetaGiaGoc;
             $data[$i]['campaign_price'] = $postMetaGiaKhuyenMai;

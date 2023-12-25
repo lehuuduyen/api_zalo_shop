@@ -503,67 +503,328 @@ class Controller extends BaseController
 
         return $discount_total;
     }
+    public function timeFormat(){
+        $now = time();
+
+        // Format the date and time
+        $formattedDate = strftime('%B %d, %Y @ %I:%M %p', $now);
+        return $formattedDate;
+    }
     public function createOrder($data, $user)
     {   
         
-        
+        $timeNow = date('Y/m/d H:i:s');
         DB::connection('mysql_external')->beginTransaction();
 
         try {
-            $totalPriceDetails =  $this->getTotalPriceDetails($data['order']);
+            // them wp_posts
+            $postId = DB::connection('mysql_external')->table('wp_posts')->insertGetId(
+                array(
+                    'post_date' => $timeNow,
+                    'post_date_gmt' => $timeNow,
+                    'post_modified' => $timeNow,
+                    'post_modified_gmt' => $timeNow,
+                    'post_title' => 'Order &ndash; '.$this->timeFormat(),
+                    'post_status' => 'auto-draft',
+                    'post_type' => 'shop_order',
+                    'post_content' => '',
+                    'post_excerpt' => '',
+                    'to_ping' => '',
+                    'pinged' => '',
+                    'post_content_filtered' => '',
+                    
+                    'comment_count' => '0',
+                )
+            );
+            $totalPriceDetails =  $this->getTotalPriceDetails($data['order'],$postId);
             if (!$totalPriceDetails) {
                 throw new \Exception('');
             }
 
             $finalDetails = $this->getFinalPriceDetails($user, $data, $totalPriceDetails);
-            echo '<pre>';
-            print_r($data);
-            echo '</pre>';
-            die;
             
-            $finalPriceDetails = $finalDetails['total'];
-            $extra_note = $data['message'];
-            $cart_data = json_encode($data['order']);
-            $order_id = DB::connection('mysql_external')->table('product_orders')->insertGetId(
+            
+            
+            
+         
+            
+            
+            // them wp_postmeta
+            $postMeta = DB::connection('mysql_external')->table('wp_postmeta')->insert(
                 array(
-                    'user_id' => $user['id'] ?? \auth()->guard('web')->id() ?? null,
-                    'coupon' => $data["used_coupon"],
-                    'coupon_discounted' => $finalDetails['coupon_discounted'],
-                    'name' => $user['name'],
-                    'email' => $user['email'],
-                    'phone' => $user['mobile'],
-                    'country' => $user['country'],
-                    'state' => $user['state'],
-                    'city' => $user['city'],
-                    'address' => $user['address'],
-                    'message' => $extra_note,
-                    'total_amount' => $finalPriceDetails,
-                    'status' => 'pending',
-                    'payment_status' => 'pending',
-                    'checkout_type' => 'cod',
-                    'payment_track' => Str::random(10) . Str::random(10),
-                    'order_details' => $cart_data,
-                    'selected_shipping_option' => $data['shipping_method'],
-                    'created_at' => Carbon::now(),
-                    'updated_at' => Carbon::now()
+                    array(
+                        'post_id'=>$postId,
+                        'meta_key'=>'_order_key',
+                        'meta_value'=>'wc_order_'.Str::random(10),
+                    ),
+                    array(
+                        'post_id'=>$postId,
+                        'meta_key'=>'_customer_user',
+                        'meta_value'=>$user['id'],
+                    ),
+                    array(
+                        'post_id'=>$postId,
+                        'meta_key'=>'_payment_method',
+                        'meta_value'=>'cod',
+                    ),
+                    array(
+                        'post_id'=>$postId,
+                        'meta_key'=>'_payment_method_title',
+                        'meta_value'=>'Thanh toán khi giao hàng',
+                    ),
+                    array(
+                        'post_id'=>$postId,
+                        'meta_key'=>'_billing_last_name',
+                        'meta_value'=>$user['name'],
+                    ),
+                    array(
+                        'post_id'=>$postId,
+                        'meta_key'=>'_billing_address_1',
+                        'meta_value'=>$user['address'],
+                    ),
+                    array(
+                        'post_id'=>$postId,
+                        'meta_key'=>'_billing_email',
+                        'meta_value'=>$user['email'],
+                    ),
+                    array(
+                        'post_id'=>$postId,
+                        'meta_key'=>'_billing_phone',
+                        'meta_value'=>$user['mobile'],
+                    ),
+                    array(
+                        'post_id'=>$postId,
+                        'meta_key'=>'_order_currency',
+                        'meta_value'=>'VND',
+                    ),
+                    array(
+                        'post_id'=>$postId,
+                        'meta_key'=>'_cart_discount',
+                        'meta_value'=>$finalDetails['coupon_discounted'],
+                    ),
+                    array(
+                        'post_id'=>$postId,
+                        'meta_key'=>'_cart_discount_tax',
+                        'meta_value'=>0,
+                    ),
+                    array(
+                        'post_id'=>$postId,
+                        'meta_key'=>'_order_shipping',
+                        'meta_value'=>0,
+                    ),
+                    array(
+                        'post_id'=>$postId,
+                        'meta_key'=>'_order_shipping_tax',
+                        'meta_value'=>0,
+                    ),
+                    array(
+                        'post_id'=>$postId,
+                        'meta_key'=>'_order_tax',
+                        'meta_value'=>0,
+                    ),
+                    array(
+                        'post_id'=>$postId,
+                        'meta_key'=>'_order_total',
+                        'meta_value'=>$finalDetails['total'],
+                    ),
+                    array(
+                        'post_id'=>$postId,
+                        'meta_key'=>'_billing_address_index',
+                        'meta_value'=>$user['name'].' '.$user['address'].' '.$user['email'].' '.$user['mobile'],
+                    ),
+                    array(
+                        'post_id'=>$postId,
+                        'meta_key'=>'_shipping_address_index',
+                        'meta_value'=>$user['address'],
+                    ),
+                    array(
+                        'post_id'=>$postId,
+                        'meta_key'=>'_shipping_address_1',
+                        'meta_value'=>$user['address'],
+                    ),
+                    array(
+                        'post_id'=>$postId,
+                        'meta_key'=>'_shipping_country',
+                        'meta_value'=>'VN',
+                    ),
                 )
             );
-            foreach ($totalPriceDetails['products_id'] as $key => $ids) {
-                DB::connection('mysql_external')->table('order_products')->insertGetId(
+            
+            
+            
+           
+            
+
+            //them wp_wc_order_coupon_lookup && wp_woocommerce_order_items
+            if($finalDetails['coupon_discounted'] && $finalDetails['coupon_discounted'] >0){
+                $coupon = DB::connection('mysql_external')->table('wp_posts')->where('post_title', $data['used_coupon'])->where('post_status', 'publish')->where('post_type', 'shop_coupon')->first();
+                $coupon_amount = $this->getPostMeta($coupon->ID,'coupon_amount');
+                $coupon_type = $this->getPostMeta($coupon->ID,'discount_type');
+                
+                DB::connection('mysql_external')->table('wp_wc_order_coupon_lookup')->insertGetId(
                     array(
-                        'order_id' => $order_id,
-                        'product_id' => $totalPriceDetails['products_id'][$key],
-                        'variant_id' => !empty($totalPriceDetails['variants_id'][$key]) ? $totalPriceDetails['variants_id'][$key] : null,
-                        'quantity' => $totalPriceDetails['quantity'][$key] ?? null,
+                        'order_id' => $postId,
+                        'coupon_id' => $coupon->ID,
+                        'date_created' => $timeNow,
+                        'discount_amount' => $finalDetails['coupon_discounted'],
+                    )
+                );
+                $orderItemIdCoupon = DB::connection('mysql_external')->table('wp_woocommerce_order_items')->insertGetId(
+                    array(
+                        'order_id' => $postId,
+                        'order_item_type' => 'coupon',
+                        'order_item_name' => $data['used_coupon'],
+                    )
+                );
+                
+                
+                DB::connection('mysql_external')->table('wp_woocommerce_order_itemmeta')->insert(
+                    array(
+                        array(
+                            'order_item_id'=>$orderItemIdCoupon,
+                            'meta_key'=>'coupon_data',
+                            'meta_value'=>'',
+                        ),
+                        array(
+                            'order_item_id'=>$orderItemIdCoupon,
+                            'meta_key'=>'discount_amount_tax',
+                            'meta_value'=>0,
+                        ),
+                        array(
+                            'order_item_id'=>$orderItemIdCoupon,
+                            'meta_key'=>'discount_amount',
+                            'meta_value'=>$finalDetails['coupon_discounted'],
+                        )
+                    ),
+                );
+                
+            }
+            //wp_wc_order_product_lookup
+            $totalQuantity = array_sum($totalPriceDetails['quantity']);
+            
+            foreach($totalPriceDetails['products_id'] as $key  => $productId){
+                $products = DB::connection('mysql_external')->table('wp_posts')->where('ID', $productId)->select('post_title')->first();
+                
+                
+                $price = $this->getSellPrice($productId);
+                $totalBanDau = $price * $totalPriceDetails['quantity'][$key];
+                $tongGiaGiam = 0;
+                if(isset($coupon) && $coupon){
+                    if($coupon_type == 'fixed_cart'){
+                        $giagiam = round($coupon_amount / $totalQuantity * $totalPriceDetails['quantity'][$key]);
+                        $price = $price - $giagiam;
+                        $tongGiaGiam=$tongGiaGiam + $giagiam;
+                    }else{
+                        $giagiam = round($price * $coupon_amount / 100);
+                        $price = $price - $giagiam;
+                        $tongGiaGiam=$tongGiaGiam + $giagiam;
+                    }
+                }
+                //wp_woocommerce_order_items
+                $orderItemId = DB::connection('mysql_external')->table('wp_woocommerce_order_items')->insertGetId(
+                    array(
+                        'order_id' => $postId,
+                        'order_item_type' => 'line_item',
+                        'order_item_name' => $products->post_title,
+                    )
+                );
+                DB::connection('mysql_external')->table('wp_woocommerce_order_itemmeta')->insert(
+                    array(
+                        array(
+                            'order_item_id'=>$orderItemId,
+                            'meta_key'=>'_reduced_stock',
+                            'meta_value'=>$totalPriceDetails['quantity'][$key],
+                        ),
+                        array(
+                            'order_item_id'=>$orderItemId,
+                            'meta_key'=>'_line_tax_data',
+                            'meta_value'=>'',
+                        ),
+                        array(
+                            'order_item_id'=>$orderItemId,
+                            'meta_key'=>'_line_tax',
+                            'meta_value'=>0,
+                        ),
+                        array(
+                            'order_item_id'=>$orderItemId,
+                            'meta_key'=>'_line_total',
+                            'meta_value'=>$price * $totalPriceDetails['quantity'][$key],
+                        ),
+                        array(
+                            'order_item_id'=>$orderItemId,
+                            'meta_key'=>'_line_subtotal_tax',
+                            'meta_value'=>0,
+                        ),
+                        array(
+                            'order_item_id'=>$orderItemId,
+                            'meta_key'=>'_line_subtotal',
+                            'meta_value'=>$totalBanDau * $totalPriceDetails['quantity'][$key],
+                        ),
+                        array(
+                            'order_item_id'=>$orderItemId,
+                            'meta_key'=>'_tax_class',
+                            'meta_value'=>'',
+                        ),
+                        array(
+                            'order_item_id'=>$orderItemId,
+                            'meta_key'=>'_qty',
+                            'meta_value'=>$totalPriceDetails['quantity'][$key],
+                        ),
+                        array(
+                            'order_item_id'=>$orderItemId,
+                            'meta_key'=>'_variation_id',
+                            'meta_value'=>0,
+                        ),
+                        array(
+                            'order_item_id'=>$orderItemId,
+                            'meta_key'=>'_product_id',
+                            'meta_value'=>$productId,
+                        )
+                        
+                    )
+                );
+                // wp_wc_order_product_lookup
+                DB::connection('mysql_external')->table('wp_wc_order_product_lookup')->insert(
+                    array(
+                        'order_item_id' => $orderItemId,
+                        'order_id' => $postId,
+                        'product_id' => $productId,
+                        'variation_id' => 0,
+                        'customer_id' => $user['id'],
+                        'date_created' => $timeNow,
+                        'customer_id' => $user['id'],
+                        'product_qty' => $totalPriceDetails['quantity'][$key],
+                        'product_gross_revenue' => $price * $totalPriceDetails['quantity'][$key] ,
+                        'product_net_revenue' => $price * $totalPriceDetails['quantity'][$key] ,
+                        'coupon_amount' => $tongGiaGiam,
+                        
                     )
                 );
             }
-            //tính hoa hồng
+            
+            
+            //them order wp_wc_order_stats
+            DB::connection('mysql_external')->table('wp_wc_order_stats')->insertGetId(
+                array(
+                    'order_id' => $postId,
+                    'date_created' => $timeNow,
+                    'date_created_gmt' => $timeNow,
+                    'num_items_sold' => array_sum($totalPriceDetails['quantity']),
+                    'net_total' => $finalDetails['total'],
+                    'total_sales' => $finalDetails['total'],
+                    'returning_customer' => 1,
+                    'customer_id' => $user['id'],
+                    'status' => 'wc-pending',
+                )
+            );
 
+            //tính hoa hồng
+            
             DB::connection('mysql_external')->commit();
 
-
-            return $order_id;
+            
+            
+            return $postId;
         } catch (\Throwable $th) {
             //throw $th;
             echo '<pre>';
@@ -578,6 +839,8 @@ class Controller extends BaseController
 
     public function getFinalPriceDetails($user, $validated_data, $totalPriceDetails)
     {
+        
+        
         $shipping_method = $validated_data['shipping_method'] ?? "";
         
         
@@ -690,7 +953,13 @@ class Controller extends BaseController
         $productInventory->name = $this->getTextByLanguare($productInventory->name);
         return $productInventory;
     }
-    public function getTotalPriceDetails($cart)
+    public function getSellPrice($postId){
+        $priceGoc = $this->getPostMeta($postId, '_regular_price');
+        $price = $this->getPostMeta($postId, '_sale_price');
+        $price = ($price)?$price:$priceGoc;
+            return $price;
+    }
+    public function getTotalPriceDetails($cart,$postId)
     {
         
         
@@ -714,6 +983,8 @@ class Controller extends BaseController
                 $this->_messageError = $item['name'] . " hết hàng trong kho";
                 return false;
             }
+            
+            
             
 
             // trừ số lượng kho

@@ -26,7 +26,7 @@ class OrdersController extends Controller
         // $languare = env('DEFAULT_LANGUARE')?env('DEFAULT_LANGUARE'):"vi";
 
         $store = $request['data_reponse'];
-        $orders = DB::connection('mysql_external')->table('wp_wc_order_stats')->where('customer_id', $store->user_id)->orderBy('date_created', 'DESC')->get();
+        $orders = DB::connection('mysql_external')->table('wp_wc_order_stats')->join('wp_posts','wp_posts.ID','wp_wc_order_stats.order_id')->where('wp_wc_order_stats.customer_id', $store->user_id)->where('wp_posts.post_status','!=', 'trash')->orderBy('wp_wc_order_stats.date_created', 'DESC')->get();
         
         foreach ($orders as $key => $order) {
             $status = $order->status ;

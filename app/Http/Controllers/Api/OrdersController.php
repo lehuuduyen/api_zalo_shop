@@ -52,7 +52,7 @@ class OrdersController extends Controller
             $orders[$key]->discount = 0;
             $orders[$key]->total_price = $order->total_sales;
             
-            $coupon = DB::connection('mysql_external')->table('wp_wc_order_coupon_lookup')->where('order_id',$order->order_id)->where('comment_type','order_note')->first();
+            $coupon = DB::connection('mysql_external')->table('wp_wc_order_coupon_lookup')->where('order_id',$order->order_id)->first();
             if($coupon){
                 $orders[$key]->discount = $coupon->discount_amount;
                 $orders[$key]->total_price = $order->total_sales + $coupon->discount_amount;

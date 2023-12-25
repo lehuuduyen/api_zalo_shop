@@ -72,8 +72,8 @@ class OrdersController extends Controller
            
             $product[$key]['options']= $temp;
             $product[$key]['qty']= $value->product_qty;
-            $product[$key]['price']= $this->getOrderMeta($value->order_item_id,'_line_subtotal');
-            $product[$key]['subtotal']= $value->product_net_revenue;
+            $product[$key]['price']= $value->product_net_revenue;
+            $product[$key]['subtotal']= $value->product_net_revenue *$value->product_qty;
             
         }
         return $product;

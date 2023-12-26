@@ -25,6 +25,7 @@ class ProductController extends Controller
         $store = $request['data_reponse'];
 
 
+        $time = time();
 
         foreach ($products as $key => $product) {
             $products[$key]->id = $product->ID;
@@ -32,14 +33,23 @@ class ProductController extends Controller
             $postMetaStatus = $this->getPostMeta($product->ID,'_stock_status');
             $postMetaStock = $this->getPostMeta($product->ID,'_stock');
             $postMetaGiaGoc = $this->getPostMeta($product->ID,'_regular_price');
+
             $postMetaGiaKhuyenMai = $this->getPostMeta($product->ID,'_sale_price');
+            $_sale_price_dates_from = $this->getPostMeta($product->ID, '_sale_price_dates_from');
+            $_sale_price_dates_to = $this->getPostMeta($product->ID, '_sale_price_dates_to');
+
             $postMetaStock = $this->getPostMeta($product->ID,'_stock');
             $products[$key]->is_campaign = false;
             $products[$key]->price =  $postMetaGiaGoc;
             $products[$key]->sale_price =  $postMetaGiaGoc;
-            if($postMetaGiaKhuyenMai){
+            if($postMetaGiaKhuyenMai && empty($_sale_price_dates_from) && empty($_sale_price_dates_to){
                 $products[$key]->sale_price = $postMetaGiaKhuyenMai;
                 $products[$key]->is_campaign = true;
+            }
+            if($postMetaGiaKhuyenMai && $time >= $_sale_price_dates_from && $time <= $_sale_price_dates_to){
+                $products[$key]->sale_price = $postMetaGiaKhuyenMai;
+                $products[$key]->is_campaign = true;
+                $products[$key]->end_date = date('Y/m/d H:i:s',$_sale_price_dates_to);
             }
 
             $products[$key]->image_id = $this->getImage($product->ID, $store);

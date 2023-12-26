@@ -29,43 +29,50 @@ class FlashSaleController extends Controller
         $campaigns[0]->image = "";
         $data = [];
         $i = 0;
+        $time = time();
+
         foreach ($products as $key => $product) {
             $checkFlashSale = $this->getPostMeta($product->ID, '_sale_price');
+            $_sale_price_dates_from = $this->getPostMeta($product->ID, '_sale_price_dates_from');
+            $_sale_price_dates_to = $this->getPostMeta($product->ID, '_sale_price_dates_to');
             if (empty($checkFlashSale)) {
                 continue;
             }
-
-            $data[$i]['product']['id'] = $product->ID;
-            $data[$i]['product']['product_id'] = $product->ID;
-            $postMetaStatus = $this->getPostMeta($product->ID, '_stock_status');
-            $postMetaStock = $this->getPostMeta($product->ID, '_stock');
-            $postMetaGiaGoc = $this->getPostMeta($product->ID, '_regular_price');
-            $postMetaGiaKhuyenMai = $this->getPostMeta($product->ID, '_sale_price');
-            $data[$i]['product']['is_campaign'] = true;
-            $data[$i]['product']['price'] =  $postMetaGiaGoc;
-            $data[$i]['campaign_price'] = $postMetaGiaKhuyenMai;
-            $data[$i]['id'] = $product->ID;
-            $data[$i]['product_id'] = $product->ID;
-
-            $data[$i]['product']['image_id'] = $this->getImage($product->ID, $store);
-            $data[$i]['product']['name'] = $product->post_title;
-            $data[$i]['product']['summary'] = $product->post_excerpt;
-            $data[$i]['product']['description'] = $product->post_content;
-            $data[$i]['product']['badge_id'] = [];
-            $data[$i]['product']['category'] = $this->getCategoryByProduct($product->ID, $store);
-            $data[$i]['product']['galleries'] = $this->getGalleries($product->ID, $store);
-            $data[$i]['product']['product_inventory'] = $this->getProductInventory($product->ID);
-            $data[$i]['product']['delivery_option'] = [];
-            $data[$i]['product']['unit'] = [];
-            $data[$i]['product']['policy'] = [];
-            $data[$i]['product']['tag_name'] = [];
-            $data[$i]['product']['review'] = $this->getreview($product->ID);
-            $data[$i]['product']['sold_count'] =  $data[$i]['product']['product_inventory']->sold_count;
-
-            // $campaigns[0]->products = ;
-
-
-            $i++;
+            if($time >= $_sale_price_dates_from && $time <= $_sale_price_dates_to ){
+                
+                $data[$i]['product']['id'] = $product->ID;
+                $data[$i]['product']['product_id'] = $product->ID;
+                $postMetaStatus = $this->getPostMeta($product->ID, '_stock_status');
+                $postMetaStock = $this->getPostMeta($product->ID, '_stock');
+                $postMetaGiaGoc = $this->getPostMeta($product->ID, '_regular_price');
+                $postMetaGiaKhuyenMai = $this->getPostMeta($product->ID, '_sale_price');
+                $data[$i]['product']['is_campaign'] = true;
+                $data[$i]['product']['price'] =  $postMetaGiaGoc;
+                $data[$i]['campaign_price'] = $postMetaGiaKhuyenMai;
+                $data[$i]['id'] = $product->ID;
+                $data[$i]['product_id'] = $product->ID;
+                $data[$i]['end_date'] = date('Y/m/d H:i:s',$_sale_price_dates_to);
+                
+                $data[$i]['product']['image_id'] = $this->getImage($product->ID, $store);
+                $data[$i]['product']['name'] = $product->post_title;
+                $data[$i]['product']['summary'] = $product->post_excerpt;
+                $data[$i]['product']['description'] = $product->post_content;
+                $data[$i]['product']['badge_id'] = [];
+                $data[$i]['product']['category'] = $this->getCategoryByProduct($product->ID, $store);
+                $data[$i]['product']['galleries'] = $this->getGalleries($product->ID, $store);
+                $data[$i]['product']['product_inventory'] = $this->getProductInventory($product->ID);
+                $data[$i]['product']['delivery_option'] = [];
+                $data[$i]['product']['unit'] = [];
+                $data[$i]['product']['policy'] = [];
+                $data[$i]['product']['tag_name'] = [];
+                $data[$i]['product']['review'] = $this->getreview($product->ID);
+                $data[$i]['product']['sold_count'] =  $data[$i]['product']['product_inventory']->sold_count;
+                // $campaigns[0]->products = ;
+    
+    
+                $i++;
+            }
+            
         }
         $campaigns[0]->products =$data ;
 

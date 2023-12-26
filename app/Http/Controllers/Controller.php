@@ -473,8 +473,8 @@ class Controller extends BaseController
         $discount_total = 0;
         $paramCoupon = $data['coupon'];
         $coupon = DB::connection('mysql_external')->table('wp_posts')->where('post_title', $paramCoupon)->where('post_status', 'publish')->where('post_type', 'shop_coupon')->first();
-       
-        
+
+
 
         if (is_null($coupon)) {
             return $discount_total;
@@ -483,7 +483,7 @@ class Controller extends BaseController
         if($date_expires < time()){
             return $discount_total;
         }
-        
+
         $coupon_amount = $this->getPostMeta($coupon->ID,'coupon_amount');
         $coupon_type = $this->getPostMeta($coupon->ID,'discount_type');
         if($coupon_type == "percent"){
@@ -511,9 +511,9 @@ class Controller extends BaseController
         return $formattedDate;
     }
     public function createOrder($data, $user)
-    {   
-        
-        
+    {
+
+
         $timeNow = date('Y/m/d H:i:s');
         DB::connection('mysql_external')->beginTransaction();
 
@@ -533,26 +533,29 @@ class Controller extends BaseController
                     'to_ping' => '',
                     'pinged' => '',
                     'post_content_filtered' => '',
-                    
+
                     'comment_count' => '0',
                 )
             );
             // $data['message'] wp_comments
-            DB::connection('mysql_external')->table('wp_comments')->insert(
-                array(
-                    'comment_post_ID' => $postId ,
-                    'comment_author' => $user['name'],
-                    'comment_author_email' => $user['email'],
-                    'comment_author_url' => '',
-                    'comment_author_IP' => '',
-                    'comment_date_gmt' => $timeNow,
-                    'comment_date' => $timeNow,
-                    'comment_content' => $data['message'],
-                    'comment_approved' => 1,
-                    'comment_agent' => 'WooCommerce',
-                    'comment_type' => 'order_note',
-                )
-            );
+            if($data['message']){
+                DB::connection('mysql_external')->table('wp_comments')->insert(
+                    array(
+                        'comment_post_ID' => $postId ,
+                        'comment_author' => $user['name'],
+                        'comment_author_email' => $user['email'],
+                        'comment_author_url' => '',
+                        'comment_author_IP' => '',
+                        'comment_date_gmt' => $timeNow,
+                        'comment_date' => $timeNow,
+                        'comment_content' => $data['message'],
+                        'comment_approved' => 1,
+                        'comment_agent' => 'WooCommerce',
+                        'comment_type' => 'order_note',
+                    )
+                );
+            }
+
 
             $totalPriceDetails =  $this->getTotalPriceDetails($data['order'],$postId);
             if (!$totalPriceDetails) {
@@ -560,13 +563,13 @@ class Controller extends BaseController
             }
 
             $finalDetails = $this->getFinalPriceDetails($user, $data, $totalPriceDetails);
-            
-            
-            
-            
-         
-            
-            
+
+
+
+
+
+
+
             // them wp_postmeta
             $postMeta = DB::connection('mysql_external')->table('wp_postmeta')->insert(
                 array(
@@ -667,18 +670,18 @@ class Controller extends BaseController
                     ),
                 )
             );
-            
-            
-            
-           
-            
+
+
+
+
+
 
             //them wp_wc_order_coupon_lookup && wp_woocommerce_order_items
             if($finalDetails['coupon_discounted'] && $finalDetails['coupon_discounted'] >0){
                 $coupon = DB::connection('mysql_external')->table('wp_posts')->where('post_title', $data['used_coupon'])->where('post_status', 'publish')->where('post_type', 'shop_coupon')->first();
                 $coupon_amount = $this->getPostMeta($coupon->ID,'coupon_amount');
                 $coupon_type = $this->getPostMeta($coupon->ID,'discount_type');
-                
+
                 DB::connection('mysql_external')->table('wp_wc_order_coupon_lookup')->insertGetId(
                     array(
                         'order_id' => $postId,
@@ -694,8 +697,8 @@ class Controller extends BaseController
                         'order_item_name' => $data['used_coupon'],
                     )
                 );
-                
-                
+
+
                 DB::connection('mysql_external')->table('wp_woocommerce_order_itemmeta')->insert(
                     array(
                         array(
@@ -715,15 +718,15 @@ class Controller extends BaseController
                         )
                     ),
                 );
-                
+
             }
             //wp_wc_order_product_lookup
             $totalQuantity = array_sum($totalPriceDetails['quantity']);
-            
+
             foreach($totalPriceDetails['products_id'] as $key  => $productId){
                 $products = DB::connection('mysql_external')->table('wp_posts')->where('ID', $productId)->select('post_title')->first();
-                
-                
+
+
                 $price = $this->getSellPrice($productId);
                 $totalBanDau = $price * $totalPriceDetails['quantity'][$key];
                 $tongGiaGiam = 0;
@@ -798,7 +801,7 @@ class Controller extends BaseController
                             'meta_key'=>'_product_id',
                             'meta_value'=>$productId,
                         )
-                        
+
                     )
                 );
                 // wp_wc_order_product_lookup
@@ -815,12 +818,12 @@ class Controller extends BaseController
                         'product_gross_revenue' => $price * $totalPriceDetails['quantity'][$key] ,
                         'product_net_revenue' => $price * $totalPriceDetails['quantity'][$key] ,
                         'coupon_amount' => $tongGiaGiam,
-                        
+
                     )
                 );
             }
-            
-            
+
+
             //them order wp_wc_order_stats
             DB::connection('mysql_external')->table('wp_wc_order_stats')->insertGetId(
                 array(
@@ -837,11 +840,11 @@ class Controller extends BaseController
             );
 
             //tính hoa hồng
-            
+
             DB::connection('mysql_external')->commit();
 
-            
-            
+
+
             return $postId;
         } catch (\Throwable $th) {
             //throw $th;
@@ -857,35 +860,35 @@ class Controller extends BaseController
 
     public function getFinalPriceDetails($user, $validated_data, $totalPriceDetails)
     {
-        
-        
+
+
         $shipping_method = $validated_data['shipping_method'] ?? "";
-        
-        
+
+
         $state = $validated_data["state"];
         $country = $validated_data["country"];
-        
+
         $price = $totalPriceDetails;
         $coupon = ["coupon" => $validated_data['used_coupon'],"subtotal" => $price['total']];
 
-       
+
 
 
         $data = $this->get_product_shipping_tax(['country' => $country, 'state' => $state, 'shipping_method' => (int)$shipping_method]);
         $coupon['subtotal'] = $price['total'];
         $discounted_price = $this->calculateCoupon($coupon, []);
-        
-        
+
+
 
         $price['total'] -= $discounted_price;
-        
+
         $product_tax = $data['product_tax'];
         $shipping_cost = $data['shipping_cost'];
 
         $taxed_price = ($price['total'] * $product_tax) / 100;
         $subtotal = $price['total'] + $discounted_price;
         $total['total'] = $price['total'] + $taxed_price + $shipping_cost;
-        
+
         // $total['payment_meta'] = $this->payment_meta(compact('product_tax', 'shipping_cost', 'subtotal', 'total'));
         $total['coupon_discounted'] = $discounted_price;
         return $total;
@@ -979,11 +982,11 @@ class Controller extends BaseController
     }
     public function getTotalPriceDetails($cart,$postId)
     {
-        
-        
+
+
         $total = 0.0;
         $cartArr = self::getCartProducts($cart);
-        
+
         foreach ($cartArr as $key => $item) {
             $sold_count = $this->getPostMeta($item['id'], 'total_sales');
             $stock_count = $this->getPostMeta($item['id'], '_stock');
@@ -991,19 +994,19 @@ class Controller extends BaseController
             $price = $this->getPostMeta($item['id'], '_sale_price');
             $price = ($price)?$price:$priceGoc;
             $stockStatus = $this->getPostMeta($item['id'], '_stock_status');
-           
-            
+
+
             //checkcampaign
             $productId = $item['id'];
-           
+
             //check số lượng trong kho
             if(!empty($stock_count) && gettype($stock_count) == 'integer' && $stock_count < $item['qty']){
                 $this->_messageError = $item['name'] . " hết hàng trong kho";
                 return false;
             }
-            
-            
-            
+
+
+
 
             // trừ số lượng kho
             DB::connection('mysql_external')->table('wp_postmeta')->where('post_id', $productId)->where('meta_key','total_sales')->update(
@@ -1021,7 +1024,7 @@ class Controller extends BaseController
             $products_id[] = $item['id'];
             $variant_id[] = $item['variant_id'];
             $quantity[] = $item['qty'];
-           
+
         }
 
         $arr = [
@@ -1030,7 +1033,7 @@ class Controller extends BaseController
             'variants_id' => $variant_id,
             'quantity' => $quantity
         ];
-       
+
         return $arr;
     }
     public function getPostByCategoryId($id){
@@ -1086,6 +1089,6 @@ class Controller extends BaseController
         }
         return $data;
     }
-    
+
 
 }

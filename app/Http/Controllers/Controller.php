@@ -992,7 +992,14 @@ class Controller extends BaseController
             $stock_count = $this->getPostMeta($item['id'], '_stock');
             $priceGoc = $this->getPostMeta($item['id'], '_regular_price');
             $price = $this->getPostMeta($item['id'], '_sale_price');
-            $price = ($price)?$price:$priceGoc;
+            $_sale_price_dates_from = $this->getPostMeta($item['id'], '_sale_price_dates_from');
+            $_sale_price_dates_to = $this->getPostMeta($item['id'], '_sale_price_dates_to');
+            if($price && $time >= $_sale_price_dates_from && $time <= $_sale_price_dates_to ){
+            $price = $price;
+            }else{
+                $price = $priceGoc;    
+            }
+
             $stockStatus = $this->getPostMeta($item['id'], '_stock_status');
 
 

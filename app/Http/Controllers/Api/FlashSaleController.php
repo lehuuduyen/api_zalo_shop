@@ -67,13 +67,14 @@ class FlashSaleController extends Controller
                 $data[$i]['product']['tag_name'] = [];
                 $data[$i]['product']['review'] = $this->getreview($product->ID);
                 $data[$i]['product']['sold_count'] =  $data[$i]['product']['product_inventory']->sold_count;
-                // $campaigns[0]->products = ;
     
+                $campaigns[0]->end_date =date('Y/m/d H:i:s',$_sale_price_dates_to) ;
     
                 $i++;
             }
             
         }
+        
         $campaigns[0]->products =$data ;
 
         return $this->returnSuccess($campaigns);

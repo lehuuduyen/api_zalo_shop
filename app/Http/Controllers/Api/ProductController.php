@@ -42,7 +42,7 @@ class ProductController extends Controller
             $products[$key]->is_campaign = false;
             $products[$key]->price =  $postMetaGiaGoc;
             $products[$key]->sale_price =  $postMetaGiaGoc;
-            if($postMetaGiaKhuyenMai && empty($_sale_price_dates_from) && empty($_sale_price_dates_to){
+            if($postMetaGiaKhuyenMai && empty($_sale_price_dates_from) && empty($_sale_price_dates_to)){
                 $products[$key]->sale_price = $postMetaGiaKhuyenMai;
                 $products[$key]->is_campaign = true;
             }

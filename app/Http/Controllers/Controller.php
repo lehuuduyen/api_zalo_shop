@@ -986,7 +986,7 @@ class Controller extends BaseController
 
         $total = 0.0;
         $cartArr = self::getCartProducts($cart);
-
+        $time = time();
         foreach ($cartArr as $key => $item) {
             $sold_count = $this->getPostMeta($item['id'], 'total_sales');
             $stock_count = $this->getPostMeta($item['id'], '_stock');
@@ -995,7 +995,7 @@ class Controller extends BaseController
             $_sale_price_dates_from = $this->getPostMeta($item['id'], '_sale_price_dates_from');
             $_sale_price_dates_to = $this->getPostMeta($item['id'], '_sale_price_dates_to');
             if($price && $time >= $_sale_price_dates_from && $time <= $_sale_price_dates_to ){
-            $price = $price;
+                $price = $price;
             }else{
                 $price = $priceGoc;    
             }

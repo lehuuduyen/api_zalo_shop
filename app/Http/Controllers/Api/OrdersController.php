@@ -27,22 +27,24 @@ class OrdersController extends Controller
 
         $store = $request['data_reponse'];
         $orders = DB::connection('mysql_external')->table('wp_wc_order_stats')->join('wp_posts','wp_posts.ID','wp_wc_order_stats.order_id')->where('wp_wc_order_stats.customer_id', $store->user_id)->where('wp_posts.post_status','!=', 'trash')->orderBy('wp_wc_order_stats.date_created', 'DESC')->get();
-        
+
         foreach ($orders as $key => $order) {
             $status = $order->status ;
             if($status == 'wc-pending'){
                 $orders[$key]->payment_status = 'pending';
             }else if($status == 'wc-processing'){
+                $orders[$key]->payment_status = $status;
+
             $orders[$key]->status = 'pending';
             }
             $user = $this->info($order->customer_id);
             $orders[$key]->name = $user->name;
             $orders[$key]->id = $order->order_id;
             $orders[$key]->phone = $user->mobile;
-           
-            
+
+
             $orders[$key]->address = $this->getPostMeta($order->order_id,'_shipping_address_index');
-            
+
             $orders[$key]->total_amount = $order->total_sales;
             $ghichu = DB::connection('mysql_external')->table('wp_comments')->where('comment_post_ID',$order->order_id)->where('comment_type','order_note')->where('comment_author','!=','WooCommerce')->first();
             if($ghichu){
@@ -51,20 +53,20 @@ class OrdersController extends Controller
             $orders[$key]->message = $ghichu;
             $orders[$key]->discount = 0;
             $orders[$key]->total_price = $order->total_sales;
-            
+
             $coupon = DB::connection('mysql_external')->table('wp_wc_order_coupon_lookup')->where('order_id',$order->order_id)->first();
             if($coupon){
                 $orders[$key]->discount = $coupon->discount_amount;
                 $orders[$key]->total_price = $order->total_sales + $coupon->discount_amount;
             }
-            
+
             // $orders[$key]->state = $this->getState($order->state);
             $orders[$key]->order_details = $this->detailOrder($order->order_id, $store);
             $temp = new stdClass;
             $temp->shipping_cost = 0;
             $orders[$key]->payment_meta = $temp;
         }
-        
+
         return $this->returnSuccess($orders);
     }
     public function detailOrder($orderId, $store)
@@ -80,7 +82,7 @@ class OrdersController extends Controller
             $product[$key]['qty']= $value->product_qty;
             $product[$key]['price']= $total / $value->product_qty;
             $product[$key]['subtotal']= $total;
-            
+
         }
         return $product;
     }

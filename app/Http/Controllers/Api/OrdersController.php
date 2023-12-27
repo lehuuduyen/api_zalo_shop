@@ -33,7 +33,7 @@ class OrdersController extends Controller
             if($status == 'wc-pending'){
                 $orders[$key]->payment_status = 'pending';
             }else if($status == 'wc-processing'){
-                $orders[$key]->payment_status = $status;
+                $orders[$key]->payment_status ='success';
 
             $orders[$key]->status = 'pending';
             }

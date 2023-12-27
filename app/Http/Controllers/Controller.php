@@ -848,11 +848,6 @@ class Controller extends BaseController
             return $postId;
         } catch (\Throwable $th) {
             //throw $th;
-            echo '<pre>';
-            print_r($th->getMessage());
-            die;
-
-
             DB::connection('mysql_external')->rollBack();
             return false;
         }
@@ -997,17 +992,17 @@ class Controller extends BaseController
             if($price && $time >= $_sale_price_dates_from && $time <= $_sale_price_dates_to ){
                 $price = $price;
             }else{
-                $price = $priceGoc;    
+                $price = $priceGoc;
             }
 
             $stockStatus = $this->getPostMeta($item['id'], '_stock_status');
-
-
             //checkcampaign
             $productId = $item['id'];
 
             //check số lượng trong kho
-            if(!empty($stock_count) && gettype($stock_count) == 'integer' && $stock_count < $item['qty']){
+            if(!empty($stock_count) &&  $stock_count < $item['qty']){
+
+
                 $this->_messageError = $item['name'] . " hết hàng trong kho";
                 return false;
             }

@@ -29,20 +29,10 @@ class OrdersController extends Controller
         $orders = DB::connection('mysql_external')->table('wp_wc_order_stats')->join('wp_posts','wp_posts.ID','wp_wc_order_stats.order_id')->where('wp_wc_order_stats.customer_id', $store->user_id)->where('wp_posts.post_status','!=', 'trash')->orderBy('wp_wc_order_stats.date_created', 'DESC')->get();
 
         foreach ($orders as $key => $order) {
-            $status = $order->status ;
-            if($status == 'wc-pending'){
-                $orders[$key]->payment_status = 'pending';
-            }else if($status == 'wc-processing'){
-                $orders[$key]->payment_status ='success';
-
-            $orders[$key]->status = 'pending';
-            }
             $user = $this->info($order->customer_id);
             $orders[$key]->name = $user->name;
             $orders[$key]->id = $order->order_id;
             $orders[$key]->phone = $user->mobile;
-
-
             $orders[$key]->address = $this->getPostMeta($order->order_id,'_shipping_address_index');
 
             $orders[$key]->total_amount = $order->total_sales;

@@ -86,6 +86,7 @@ class OrdersController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
+                'payment_gateway' => 'required',
                 'name' => 'required',
                 'phone' => 'required',
                 'address' => 'required',
@@ -93,6 +94,7 @@ class OrdersController extends Controller
                 'email' => 'required',
 
             ], [
+                'payment_gateway.required' => "Vui lòng nhập phương thức thanh toán",
                 'name.required' => "Vui lòng nhập Họ và tên",
                 'phone.required' => "Vui lòng nhập số điện thoại",
                 'address.required' => "Vui lòng nhập địa chỉ",

@@ -514,6 +514,7 @@ class Controller extends BaseController
     {
 
 
+
         $timeNow = date('Y/m/d H:i:s');
         DB::connection('mysql_external')->beginTransaction();
 
@@ -586,7 +587,7 @@ class Controller extends BaseController
                     array(
                         'post_id'=>$postId,
                         'meta_key'=>'_payment_method',
-                        'meta_value'=>'cod',
+                        'meta_value'=>$data['payment_gateway'],
                     ),
                     array(
                         'post_id'=>$postId,

@@ -65,6 +65,40 @@ class StoreController extends Controller
         $country = DB::connection('mysql_external')->table('countries')->where('status','publish')->get();
         return $this->returnSuccess($country);
     }
+    public function getPaymentMethod(Request $request)
+    {
+        //check Cod
+        $result = [];
+        $cod = DB::connection('mysql_external')->table('wp_options')->where('option_name','woocommerce_cod_settings')->first();
+        if($cod){
+            $cod = unserialize( $cod->option_value);
+            if($cod['enabled'] == 'yes'){
+                $result['cod'] = $cod;
+            }
+        }
+        $payment = DB::connection('mysql_external')->table('wp_options')->where('option_name','woocommerce_bacs_settings')->first();
+        if($payment){
+            $payment = unserialize( $payment->option_value);
+            if($payment['enabled'] == 'yes'){
+                $payment['account'] =[];
+
+                $paymentAccount = DB::connection('mysql_external')->table('wp_options')->where('option_name','woocommerce_bacs_accounts')->first();
+                if($paymentAccount){
+                    $paymentAccount = unserialize($paymentAccount->option_value);
+                    $payment['account'] = $paymentAccount;
+
+                }
+
+
+                $result['bacs'] = $payment;
+            }
+        }
+
+
+        return $this->returnSuccess($result);
+    }
+    // _transient_woocommerce_admin_payment_gateway_suggestions_specs
+
     public function state(Request $request)
     {
        try {

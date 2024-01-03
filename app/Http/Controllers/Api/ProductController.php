@@ -17,7 +17,7 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
-        $products = DB::connection('mysql_external')->table('wp_posts')->where('post_type', 'product')->where('post_status', 'publish')->orderBy('post_modified', 'DESC')->get();
+        $products = DB::connection('mysql_external')->table($this->getPrefixTable().'_posts')->where('post_type', 'product')->where('post_status', 'publish')->orderBy('post_modified', 'DESC')->get();
         if (isset($request['category'])) {
             $products = $this->getPostByCategoryId($request['category']);
         }
@@ -83,11 +83,11 @@ class ProductController extends Controller
     {
         $store = $request['data_reponse'];
 
-        $categories = DB::connection('mysql_external')->table('wp_term_taxonomy')->join('wp_terms','wp_terms.term_id','wp_term_taxonomy.term_id')->where('wp_term_taxonomy.taxonomy', 'product_cat')->select('wp_terms.*')->get();
+        $categories = DB::connection('mysql_external')->table($this->getPrefixTable().'_term_taxonomy')->join('wp_terms','wp_terms.term_id','wp_term_taxonomy.term_id')->where('wp_term_taxonomy.taxonomy', 'product_cat')->select('wp_terms.*')->get();
 
         if ($categories) {
             foreach ($categories as $key => $val) {
-                $img = DB::connection('mysql_external')->table('wp_termmeta')->where('wp_termmeta.meta_key', 'thumbnail_id')->where('wp_termmeta.term_id', $val->term_id)->first();
+                $img = DB::connection('mysql_external')->table($this->getPrefixTable().'_termmeta')->where('wp_termmeta.meta_key', 'thumbnail_id')->where('wp_termmeta.term_id', $val->term_id)->first();
                 $categories[$key]->id =  $val->term_id;
                 $categories[$key]->image =  ($img)?$this->getImage($img->meta_value, $store,true):"";
             }
@@ -113,11 +113,11 @@ class ProductController extends Controller
         } else if (!isset($data['product_id'])) {
             return $this->returnError([], "Bắt buộc phải nhập product");
         } else {
-            $user = DB::connection('mysql_external')->table('wp_users')->where('user_login', $data['sdt'])->first();
+            $user = DB::connection('mysql_external')->table($this->getPrefixTable().'_users')->where('user_login', $data['sdt'])->first();
             if (!$user) {
                 return $this->returnError([], "Số điện thoại chưa được đăng ký");
             }
-            $insertId = DB::connection('mysql_external')->table('wp_comments')->insertGetId(
+            $insertId = DB::connection('mysql_external')->table($this->getPrefixTable().'_comments')->insertGetId(
                 array(
                     'comment_post_ID'     =>   $data['product_id'],
                     'comment_author'     =>   $store->name,
@@ -131,7 +131,7 @@ class ProductController extends Controller
             );
 
 
-            $insert = DB::connection('mysql_external')->table('wp_commentmeta')->insert(
+            $insert = DB::connection('mysql_external')->table($this->getPrefixTable().'_commentmeta')->insert(
                 array(
                     'comment_id'     =>   $insertId,
                     'meta_value'     =>   $data['rating'],
@@ -157,7 +157,7 @@ class ProductController extends Controller
         foreach ($order as $value) {
             $listProductId[] = $value['id'];
         }
-        $products = DB::connection('mysql_external')->table('wp_posts')->whereIn('id', $listProductId)->get();
+        $products = DB::connection('mysql_external')->table($this->getPrefixTable().'_posts')->whereIn('id', $listProductId)->get();
         $coupon_amount_total = $this->calculateCoupon($data, $products);
         if ($coupon_amount_total > 0) {
             return $this->returnSuccess($coupon_amount_total);

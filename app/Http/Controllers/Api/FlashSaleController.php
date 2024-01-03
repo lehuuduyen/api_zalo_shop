@@ -17,7 +17,7 @@ class FlashSaleController extends Controller
     public function index(Request $request)
     {
         // ->leftJoin('wp_postmeta','wp_postmeta.post_id','wp_posts.ID')->where('wp_postmeta.meta_key', '')->whereNull('wp_postmeta.meta_value')
-        $products = DB::connection('mysql_external')->table('wp_posts')->where('wp_posts.post_type', 'product')->where('wp_posts.post_status', 'publish')->orderBy('wp_posts.post_modified', 'DESC')->get();
+        $products = DB::connection('mysql_external')->table($this->getPrefixTable().'_posts')->where('wp_posts.post_type', 'product')->where('wp_posts.post_status', 'publish')->orderBy('wp_posts.post_modified', 'DESC')->get();
 
 
         $store = $request['data_reponse'];
@@ -39,7 +39,7 @@ class FlashSaleController extends Controller
                 continue;
             }
             if($time >= $_sale_price_dates_from && $time <= $_sale_price_dates_to ){
-                
+
                 $data[$i]['product']['id'] = $product->ID;
                 $data[$i]['product']['product_id'] = $product->ID;
                 $postMetaStatus = $this->getPostMeta($product->ID, '_stock_status');
@@ -52,7 +52,7 @@ class FlashSaleController extends Controller
                 $data[$i]['id'] = $product->ID;
                 $data[$i]['product_id'] = $product->ID;
                 $data[$i]['end_date'] = date('Y/m/d H:i:s',$_sale_price_dates_to);
-                
+
                 $data[$i]['product']['image_id'] = $this->getImage($product->ID, $store);
                 $data[$i]['product']['name'] = $product->post_title;
                 $data[$i]['product']['summary'] = $product->post_excerpt;
@@ -67,14 +67,14 @@ class FlashSaleController extends Controller
                 $data[$i]['product']['tag_name'] = [];
                 $data[$i]['product']['review'] = $this->getreview($product->ID);
                 $data[$i]['product']['sold_count'] =  $data[$i]['product']['product_inventory']->sold_count;
-    
+
                 $campaigns[0]->end_date =date('Y/m/d H:i:s',$_sale_price_dates_to) ;
-    
+
                 $i++;
             }
-            
+
         }
-        
+
         $campaigns[0]->products =$data ;
 
         return $this->returnSuccess($campaigns);

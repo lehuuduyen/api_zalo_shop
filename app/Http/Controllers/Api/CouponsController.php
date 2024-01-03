@@ -15,7 +15,7 @@ class CouponsController extends Controller
      */
     public function index()
     {
-        $coupons = DB::connection('mysql_external')->table('wp_posts')->where('post_status','publish')->where('post_type','shop_coupon')->get();
+        $coupons = DB::connection('mysql_external')->table($this->getPrefixTable().'_posts')->where('post_status','publish')->where('post_type','shop_coupon')->get();
         $listCoupons =[];
         $i =0;
         foreach($coupons as $key => $val){
@@ -28,7 +28,7 @@ class CouponsController extends Controller
             if($date_expires < time()){
                 continue;
             }
-            
+
             $coupons[$key]->title=$val->post_excerpt;
             $coupons[$key]->code=$val->post_title;
             $coupons[$key]->discount_type=$discount_type;

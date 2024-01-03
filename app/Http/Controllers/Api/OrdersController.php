@@ -16,7 +16,7 @@ class OrdersController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function info($id){
-        $user = DB::connection('mysql_external')->table('wp_users')->where('ID', $id)->select('ID','display_name as name','user_email as email','user_login as mobile')
+        $user = DB::connection('mysql_external')->table($this->getPrefixTable().'_users')->where('ID', $id)->select('ID','display_name as name','user_email as email','user_login as mobile')
         ->first();
         return $user;
     }
@@ -26,7 +26,7 @@ class OrdersController extends Controller
         // $languare = env('DEFAULT_LANGUARE')?env('DEFAULT_LANGUARE'):"vi";
 
         $store = $request['data_reponse'];
-        $orders = DB::connection('mysql_external')->table('wp_wc_order_stats')->join('wp_posts','wp_posts.ID','wp_wc_order_stats.order_id')->where('wp_wc_order_stats.customer_id', $store->user_id)->where('wp_posts.post_status','!=', 'trash')->orderBy('wp_wc_order_stats.date_created', 'DESC')->get();
+        $orders = DB::connection('mysql_external')->table($this->getPrefixTable().'_wc_order_stats')->join('wp_posts','wp_posts.ID','wp_wc_order_stats.order_id')->where('wp_wc_order_stats.customer_id', $store->user_id)->where('wp_posts.post_status','!=', 'trash')->orderBy('wp_wc_order_stats.date_created', 'DESC')->get();
 
         foreach ($orders as $key => $order) {
             $user = $this->info($order->customer_id);
@@ -36,7 +36,7 @@ class OrdersController extends Controller
             $orders[$key]->address = $this->getPostMeta($order->order_id,'_shipping_address_index');
 
             $orders[$key]->total_amount = $order->total_sales;
-            $ghichu = DB::connection('mysql_external')->table('wp_comments')->where('comment_post_ID',$order->order_id)->where('comment_type','order_note')->where('comment_author','!=','WooCommerce')->first();
+            $ghichu = DB::connection('mysql_external')->table($this->getPrefixTable().'_comments')->where('comment_post_ID',$order->order_id)->where('comment_type','order_note')->where('comment_author','!=','WooCommerce')->first();
             if($ghichu){
                 $ghichu = $ghichu->comment_content;
             }
@@ -44,7 +44,7 @@ class OrdersController extends Controller
             $orders[$key]->discount = 0;
             $orders[$key]->total_price = $order->total_sales;
 
-            $coupon = DB::connection('mysql_external')->table('wp_wc_order_coupon_lookup')->where('order_id',$order->order_id)->first();
+            $coupon = DB::connection('mysql_external')->table($this->getPrefixTable().'_wc_order_coupon_lookup')->where('order_id',$order->order_id)->first();
             if($coupon){
                 $orders[$key]->discount = $coupon->discount_amount;
                 $orders[$key]->total_price = $order->total_sales + $coupon->discount_amount;
@@ -61,7 +61,7 @@ class OrdersController extends Controller
     }
     public function detailOrder($orderId, $store)
     {
-        $ordersDetail = DB::connection('mysql_external')->table('wp_wc_order_product_lookup')->join('wp_posts','wp_posts.ID','wp_wc_order_product_lookup.product_id')->where('wp_wc_order_product_lookup.order_id', $orderId)->select('wp_wc_order_product_lookup.*','wp_posts.post_title')->get();
+        $ordersDetail = DB::connection('mysql_external')->table($this->getPrefixTable().'_wc_order_product_lookup')->join('wp_posts','wp_posts.ID','wp_wc_order_product_lookup.product_id')->where('wp_wc_order_product_lookup.order_id', $orderId)->select('wp_wc_order_product_lookup.*','wp_posts.post_title')->get();
         $products = [];
         foreach ($ordersDetail as $key => $value) {
             $product[$key]['name']=$value->post_title;
@@ -107,7 +107,7 @@ class OrdersController extends Controller
                 $data = $request->all();
                 $store = $request['data_reponse'];
                 $data['sdt'] = $store->sdt;
-                $user = DB::connection('mysql_external')->table('wp_users')->where('user_login', $data['sdt'])->first();
+                $user = DB::connection('mysql_external')->table($this->getPrefixTable().'_users')->where('user_login', $data['sdt'])->first();
                 if (!$user) {
                     return $this->returnError([], "Số điện thoại chưa được đăng ký");
                 }

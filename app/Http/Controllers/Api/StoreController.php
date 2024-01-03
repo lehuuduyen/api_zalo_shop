@@ -17,7 +17,7 @@ class StoreController extends Controller
      */
     public function index()
     {
-        $infor = DB::connection('mysql_external')->table('wp_posts')->where('post_name','lien-he')->where('post_status','publish')->where('post_type','page')->first();
+        $infor = DB::connection('mysql_external')->table($this->getPrefixTable().'_posts')->where('post_name','lien-he')->where('post_status','publish')->where('post_type','page')->first();
 
 
 
@@ -70,28 +70,22 @@ class StoreController extends Controller
     {
         //check Cod
         $result = [];
-        $cod = DB::connection('mysql_external')->table('wp_options')->where('option_name','woocommerce_cod_settings')->first();
+        $cod = DB::connection('mysql_external')->table($this->getPrefixTable().'_options')->where('option_name','woocommerce_cod_settings')->first();
         if($cod){
             $cod = unserialize( $cod->option_value);
             if($cod['enabled'] == 'yes'){
                 $result['cod'] = $cod;
             }
         }
-        $payment = DB::connection('mysql_external')->table('wp_options')->where('option_name','woocommerce_bacs_settings')->first();
+        $payment = DB::connection('mysql_external')->table($this->getPrefixTable().'_options')->where('option_name','woocommerce_bacs_settings')->first();
         if($payment){
             $payment = unserialize( $payment->option_value);
             if($payment['enabled'] == 'yes'){
                 $payment['account'] =[];
 
-                $paymentAccount = DB::connection('mysql_external')->table('wp_options')->where('option_name','woocommerce_bacs_accounts')->first();
+                $paymentAccount = DB::connection('mysql_external')->table($this->getPrefixTable().'_options')->where('option_name','woocommerce_bacs_accounts')->first();
                 if($paymentAccount){
                     $paymentAccount = unserialize($paymentAccount->option_value);
-                    foreach($paymentAccount as $key => $account){
-                        $qr = QrCode::format('png')->size(500)->generate($account['account_number']);
-                        $qr = 'data:image/png;base64,'.base64_encode($qr);
-
-                        $paymentAccount[$key]['qr'] =$qr;
-                    }
                     $payment['account'] = $paymentAccount;
                 }
 
@@ -142,20 +136,20 @@ class StoreController extends Controller
 
 
             $userId = $store->user_id;
-            $user = DB::connection('mysql_external')->table('wp_usermeta')->updateOrInsert(
+            $user = DB::connection('mysql_external')->table($this->getPrefixTable().'_usermeta')->updateOrInsert(
                 array(
                     'user_id' => $userId,'meta_key' => 'shipping_address_1'),
                 array(
                     'meta_value' => $data['address'],
                 )
             );
-            $user = DB::connection('mysql_external')->table('wp_usermeta')->updateOrInsert(
+            $user = DB::connection('mysql_external')->table($this->getPrefixTable().'_usermeta')->updateOrInsert(
                 array(
                     'user_id' => $userId,'meta_key' => 'company'),
                 array('meta_value' => $data['company'])
             );
 
-            $user = DB::connection('mysql_external')->table('wp_users')->where('user_login', $store->sdt)->update(
+            $user = DB::connection('mysql_external')->table($this->getPrefixTable().'_users')->where('user_login', $store->sdt)->update(
                 array(
                     'user_email' => $data['email'],
                 )
@@ -170,7 +164,7 @@ class StoreController extends Controller
     public function info(Request $request)
     {
         $store = $request['data_reponse'];
-        $user = DB::connection('mysql_external')->table('wp_users')->where('user_login', $store->sdt)->select('ID','display_name as name','user_email as email','user_login as mobile')
+        $user = DB::connection('mysql_external')->table($this->getPrefixTable().'_users')->where('user_login', $store->sdt)->select('ID','display_name as name','user_email as email','user_login as mobile')
         ->first();
         $address = $this->getUserMeta($user->ID,'shipping_address_1');
         $company = $this->getUserMeta($user->ID,'company');

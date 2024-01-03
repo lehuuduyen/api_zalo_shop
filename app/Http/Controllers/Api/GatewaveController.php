@@ -46,12 +46,12 @@ class GatewaveController extends Controller
                 if($store){
                     $databaseStore = $request['store'];
                     $this->connectDb($databaseStore);
-                    $user = DB::connection('mysql_external')->table('wp_users')->where('user_login', $request['sdt'])->first();
+                    $user = DB::connection('mysql_external')->table($this->getPrefixTable().'_users')->where('user_login', $request['sdt'])->first();
                     // wp_wc_customer_lookup
 
                     if (!$user) {
                         $email = $this->randomEmail();
-                        $insert = DB::connection('mysql_external')->table('wp_users')->insert(
+                        $insert = DB::connection('mysql_external')->table($this->getPrefixTable().'_users')->insert(
                             array(
                                 'user_login'     =>   $request['sdt'],
                                 'user_pass'     =>   "appid",
@@ -62,7 +62,7 @@ class GatewaveController extends Controller
                                 'ID'   =>   $request['user_id']
                             )
                         );
-                        $insertMetaUser = DB::connection('mysql_external')->table('wp_usermeta')->insert(
+                        $insertMetaUser = DB::connection('mysql_external')->table($this->getPrefixTable().'_usermeta')->insert(
                             array(
                                 'meta_key'     =>   "last_name",
                                 'meta_value'     =>  $request['name'],
@@ -74,9 +74,9 @@ class GatewaveController extends Controller
                     }else{
                         $email = $user->user_email;
                     }
-                    $customer = DB::connection('mysql_external')->table('wp_wc_customer_lookup')->where('user_id', $request['user_id'])->first();
+                    $customer = DB::connection('mysql_external')->table($this->getPrefixTable().'_wc_customer_lookup')->where('user_id', $request['user_id'])->first();
                     if(!$customer){
-                        $insertCus = DB::connection('mysql_external')->table('wp_wc_customer_lookup')->insert(
+                        $insertCus = DB::connection('mysql_external')->table($this->getPrefixTable().'_wc_customer_lookup')->insert(
                             array(
                                 'customer_id'     =>   $request['user_id'],
                                 'username'     =>   $request['sdt'],
@@ -84,7 +84,7 @@ class GatewaveController extends Controller
                                 'last_name'     =>  $request['name'],
                                 'user_id'     =>   $request['user_id'],
                                 'email'     =>   $email,
-                                
+
 
                             )
                         );

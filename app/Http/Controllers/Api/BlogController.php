@@ -18,7 +18,7 @@ class BlogController extends Controller
         $store = $request['data_reponse'];
         $this->_PRFIX_TABLE = $store->prefixTable;
 
-        $listBlogs = $this->getPostByCategory('tin-tuc');
+        $listBlogs = $this->getPostByCategory('blogs');
         if($listBlogs){
             $blogs = $listBlogs['data'];
             foreach($blogs as $key => $blog){

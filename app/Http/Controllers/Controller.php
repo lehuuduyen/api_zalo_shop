@@ -1060,14 +1060,12 @@ class Controller extends BaseController
     }
     public function lienhe($content, $text, $count)
     {
-        $position = strpos($content, $text);
-        $lineAfterPhone = "";
-        if ($position !== false) {
-            $endOfLinePosition = strpos($content, PHP_EOL, $position);
-            if ($endOfLinePosition !== false) {
-                $lineAfterPhone = substr($content, $position + $count, $endOfLinePosition );
-            }
-        }
+        $pattern = '/'.$text.' (.+?)\n/';
+        // Perform a regular expression match
+        if (preg_match($pattern, $content, $matches)) {
+            // Extracted email address
+            $lineAfterPhone = trim($matches[1]);
+        } 
         return $lineAfterPhone;
     }
     public function getPostMeta($postId, $meta)

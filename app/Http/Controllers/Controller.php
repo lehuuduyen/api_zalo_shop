@@ -1060,6 +1060,7 @@ class Controller extends BaseController
     }
     public function lienhe($content, $text, $count)
     {
+        $lineAfterPhone = '';
         $pattern = '/'.$text.' (.+?)\n/';
         // Perform a regular expression match
         if (preg_match($pattern, $content, $matches)) {

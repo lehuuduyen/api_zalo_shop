@@ -42,19 +42,19 @@ class StoreController extends Controller
         ];
         if($infor){
             $content = $infor->post_content;
-            $lineAfterPhone = $this->lienhe($content,'Điện thoại:',16);
+            $lineAfterPhone = $this->lienhe($content,'Điện thoại:',11);
 
 
             $info->phone = [
                 'title' => 'Điện thoại:',
                 'value' => $lineAfterPhone,
             ];
-            $email = $this->lienhe($content,'Email:',16);
+            $email = $this->lienhe($content,'Email:',6);
             $info->email = [
                 'title' => 'Email:',
                 'value' => $email,
             ];
-            $address = $this->lienhe($content,'Địa chỉ :',16);
+            $address = $this->lienhe($content,'Địa chỉ:',8);
             $info->address = [
                 'title' => 'Địa chỉ :',
                 'value' => $address,

@@ -17,6 +17,8 @@ class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
     public $_messageError = "Không thể tạo đơn hàng";
+    public $_PRFIX_TABLE = 'wp';
+
     public function returnSuccess($data = [], $message = "Lấy dữ liệu thành công")
     {
 
@@ -73,12 +75,12 @@ class Controller extends BaseController
         $decryptedData = openssl_decrypt($encryptedData, 'aes-256-cbc', $key, OPENSSL_RAW_DATA, $iv);
         return $decryptedData;
     }
-    public function getToken($store, $sdt, $databaseStore, $domain,$name,$user_id)
+    public function getToken($store, $sdt, $databaseStore, $domain, $name, $user_id)
     {
         $minute = (env('EXPIRED_MINUTE')) ? env('EXPIRED_MINUTE') : "";
         try {
             $date = empty($minute) ? "" : strtotime(date('d-m-Y H:i:s', strtotime("+$minute min")));
-            $token = $this->encodeData(json_encode(['store' => $store, 'sdt' => $sdt, 'databaseStore' => $databaseStore, 'domain' => $domain,'name'=>$name,'user_id'=>$user_id, 'expired_in' => strtotime($date)]));
+            $token = $this->encodeData(json_encode(['store' => $store,'prefixTable' => $this->_PRFIX_TABLE, 'sdt' => $sdt, 'databaseStore' => $databaseStore, 'domain' => $domain,'name'=>$name,'user_id'=>$user_id, 'expired_in' => strtotime($date)]));
             return $token;
         } catch (\Exception $e) {
             //throw $th;
@@ -90,12 +92,12 @@ class Controller extends BaseController
 
         $image = "";
         if (!$checkTerm) {
-            $postMeta = DB::connection('mysql_external')->table($this->getPrefixTable().'_postmeta')->where('meta_key', '_thumbnail_id')->where('post_id', $id)->first();
+            $postMeta = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_postmeta')->where('meta_key', '_thumbnail_id')->where('post_id', $id)->first();
             if ($postMeta) {
-                $image = DB::connection('mysql_external')->table($this->getPrefixTable().'_postmeta')->where('meta_key', '_wp_attached_file')->where('post_id', $postMeta->meta_value)->first();
+                $image = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_postmeta')->where('meta_key', '_wp_attached_file')->where('post_id', $postMeta->meta_value)->first();
             }
         }else{
-            $image = DB::connection('mysql_external')->table($this->getPrefixTable().'_postmeta')->where('meta_key', '_wp_attached_file')->where('post_id', $id)->first();
+            $image = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_postmeta')->where('meta_key', '_wp_attached_file')->where('post_id', $id)->first();
         }
 
 
@@ -112,7 +114,7 @@ class Controller extends BaseController
         $listImg = $this->getPostMeta($id, '_product_image_gallery');
         $arr = explode(",", $listImg);
         if (count($arr) > 0) {
-            $data = DB::connection('mysql_external')->table($this->getPrefixTable().'_posts')->whereIn('ID', $arr)->get();
+            $data = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_posts')->whereIn('ID', $arr)->get();
             if ($data) {
                 foreach ($data as $key => $value) {
                     $response[$key]['path'] =  "https://" . $store->domain . "/wp-content/uploads/" . $this->getPostMeta($value->ID, '_wp_attached_file');
@@ -216,7 +218,7 @@ class Controller extends BaseController
     public function getCategoryByProduct($id, $store)
     {
         $response = new \stdClass();
-        $cate = DB::connection('mysql_external')->table($this->getPrefixTable().'_term_relationships')->where('object_id', $id)->get();
+        $cate = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_term_relationships')->where('object_id', $id)->get();
         $term = [];
         foreach ($cate as $key => $value) {
             $term[] = $value->term_taxonomy_id;
@@ -224,18 +226,18 @@ class Controller extends BaseController
 
 
         if (count($term) > 0) {
-            $listTerm = DB::connection('mysql_external')->table($this->getPrefixTable().'_term_taxonomy')->whereIn('term_id', $term)->where('taxonomy', 'product_cat')->get();
+            $listTerm = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_term_taxonomy')->whereIn('term_id', $term)->where('taxonomy', 'product_cat')->get();
             $term = [];
             foreach ($listTerm as $val) {
                 $term[] = $val->term_id;
             }
             if (count($term) > 0) {
-                $listTerm = DB::connection('mysql_external')->table($this->getPrefixTable().'_terms')->whereIn('term_id', $term)->first();
+                $listTerm = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_terms')->whereIn('term_id', $term)->first();
                 if ($listTerm) {
                     $response->category_id =  $listTerm->term_id;
                     $response->name =  $listTerm->name;
                     $response->slug =  $listTerm->slug;
-                    $thumbnail = DB::connection('mysql_external')->table($this->getPrefixTable().'_termmeta')->where('term_id', $listTerm->term_id)->where('meta_key', 'thumbnail_id')->first();
+                    $thumbnail = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_termmeta')->where('term_id', $listTerm->term_id)->where('meta_key', 'thumbnail_id')->first();
                     $response->image =  ($thumbnail) ? $thumbnail->meta_value : "";
                     $response->sub_category = [];
                 }
@@ -297,7 +299,7 @@ class Controller extends BaseController
         return $uniqueArray;
     }
     public function getAuthor($authroId){
-        $data = DB::connection('mysql_external')->table($this->getPrefixTable().'_users')->where('ID', $authroId)->first();
+        $data = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_users')->where('ID', $authroId)->first();
         $name =($data)?$data->display_name:"";
         return $name;
     }
@@ -456,7 +458,7 @@ class Controller extends BaseController
     // updated_at: string | null;
     // name: string;
         $data =[];
-        $response = DB::connection('mysql_external')->table($this->getPrefixTable().'_comments')->join('wp_commentmeta','wp_commentmeta.comment_id','wp_comments.comment_ID')->where('wp_comments.comment_post_ID', $id)->where('wp_comments.comment_type', 'review')->where('wp_commentmeta.meta_key', 'rating')->select('wp_comments.*','wp_commentmeta.meta_value')->get();
+        $response = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_comments')->join( $this->_PRFIX_TABLE .'_commentmeta', $this->_PRFIX_TABLE .'_commentmeta.comment_id', $this->_PRFIX_TABLE .'_comments.comment_ID')->where( $this->_PRFIX_TABLE .'_comments.comment_post_ID', $id)->where( $this->_PRFIX_TABLE .'_comments.comment_type', 'review')->where( $this->_PRFIX_TABLE .'_commentmeta.meta_key', 'rating')->select( $this->_PRFIX_TABLE .'_comments.*', $this->_PRFIX_TABLE .'_commentmeta.meta_value')->get();
 
         foreach( $response as $key => $value){
             $data[$key]['id'] =$value->comment_ID;
@@ -472,7 +474,7 @@ class Controller extends BaseController
     {
         $discount_total = 0;
         $paramCoupon = $data['coupon'];
-        $coupon = DB::connection('mysql_external')->table($this->getPrefixTable().'_posts')->where('post_title', $paramCoupon)->where('post_status', 'publish')->where('post_type', 'shop_coupon')->first();
+        $coupon = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_posts')->where('post_title', $paramCoupon)->where('post_status', 'publish')->where('post_type', 'shop_coupon')->first();
 
 
 
@@ -520,7 +522,7 @@ class Controller extends BaseController
 
         try {
             // them wp_posts
-            $postId = DB::connection('mysql_external')->table($this->getPrefixTable().'_posts')->insertGetId(
+            $postId = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_posts')->insertGetId(
                 array(
                     'post_date' => $timeNow,
                     'post_date_gmt' => $timeNow,
@@ -540,7 +542,7 @@ class Controller extends BaseController
             );
             // $data['message'] wp_comments
             if($data['message']){
-                DB::connection('mysql_external')->table($this->getPrefixTable().'_comments')->insert(
+                DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_comments')->insert(
                     array(
                         'comment_post_ID' => $postId ,
                         'comment_author' => $user['name'],
@@ -572,7 +574,7 @@ class Controller extends BaseController
 
 
             // them wp_postmeta
-            $postMeta = DB::connection('mysql_external')->table($this->getPrefixTable().'_postmeta')->insert(
+            $postMeta = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_postmeta')->insert(
                 array(
                     array(
                         'post_id'=>$postId,
@@ -679,11 +681,11 @@ class Controller extends BaseController
 
             //them wp_wc_order_coupon_lookup && wp_woocommerce_order_items
             if($finalDetails['coupon_discounted'] && $finalDetails['coupon_discounted'] >0){
-                $coupon = DB::connection('mysql_external')->table($this->getPrefixTable().'_posts')->where('post_title', $data['used_coupon'])->where('post_status', 'publish')->where('post_type', 'shop_coupon')->first();
+                $coupon = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_posts')->where('post_title', $data['used_coupon'])->where('post_status', 'publish')->where('post_type', 'shop_coupon')->first();
                 $coupon_amount = $this->getPostMeta($coupon->ID,'coupon_amount');
                 $coupon_type = $this->getPostMeta($coupon->ID,'discount_type');
 
-                DB::connection('mysql_external')->table($this->getPrefixTable().'_wc_order_coupon_lookup')->insertGetId(
+                DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_wc_order_coupon_lookup')->insertGetId(
                     array(
                         'order_id' => $postId,
                         'coupon_id' => $coupon->ID,
@@ -691,7 +693,7 @@ class Controller extends BaseController
                         'discount_amount' => $finalDetails['coupon_discounted'],
                     )
                 );
-                $orderItemIdCoupon = DB::connection('mysql_external')->table($this->getPrefixTable().'_woocommerce_order_items')->insertGetId(
+                $orderItemIdCoupon = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_woocommerce_order_items')->insertGetId(
                     array(
                         'order_id' => $postId,
                         'order_item_type' => 'coupon',
@@ -700,7 +702,7 @@ class Controller extends BaseController
                 );
 
 
-                DB::connection('mysql_external')->table($this->getPrefixTable().'_woocommerce_order_itemmeta')->insert(
+                DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_woocommerce_order_itemmeta')->insert(
                     array(
                         array(
                             'order_item_id'=>$orderItemIdCoupon,
@@ -725,7 +727,7 @@ class Controller extends BaseController
             $totalQuantity = array_sum($totalPriceDetails['quantity']);
 
             foreach($totalPriceDetails['products_id'] as $key  => $productId){
-                $products = DB::connection('mysql_external')->table($this->getPrefixTable().'_posts')->where('ID', $productId)->select('post_title')->first();
+                $products = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_posts')->where('ID', $productId)->select('post_title')->first();
 
 
                 $price = $this->getSellPrice($productId);
@@ -743,14 +745,14 @@ class Controller extends BaseController
                     }
                 }
                 //wp_woocommerce_order_items
-                $orderItemId = DB::connection('mysql_external')->table($this->getPrefixTable().'_woocommerce_order_items')->insertGetId(
+                $orderItemId = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_woocommerce_order_items')->insertGetId(
                     array(
                         'order_id' => $postId,
                         'order_item_type' => 'line_item',
                         'order_item_name' => $products->post_title,
                     )
                 );
-                DB::connection('mysql_external')->table($this->getPrefixTable().'_woocommerce_order_itemmeta')->insert(
+                DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_woocommerce_order_itemmeta')->insert(
                     array(
                         array(
                             'order_item_id'=>$orderItemId,
@@ -806,7 +808,7 @@ class Controller extends BaseController
                     )
                 );
                 // wp_wc_order_product_lookup
-                DB::connection('mysql_external')->table($this->getPrefixTable().'_wc_order_product_lookup')->insert(
+                DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_wc_order_product_lookup')->insert(
                     array(
                         'order_item_id' => $orderItemId,
                         'order_id' => $postId,
@@ -826,7 +828,7 @@ class Controller extends BaseController
 
 
             //them order wp_wc_order_stats
-            DB::connection('mysql_external')->table($this->getPrefixTable().'_wc_order_stats')->insertGetId(
+            DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_wc_order_stats')->insertGetId(
                 array(
                     'order_id' => $postId,
                     'date_created' => $timeNow,
@@ -1012,12 +1014,12 @@ class Controller extends BaseController
 
 
             // trừ số lượng kho
-            DB::connection('mysql_external')->table($this->getPrefixTable().'_postmeta')->where('post_id', $productId)->where('meta_key','total_sales')->update(
+            DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_postmeta')->where('post_id', $productId)->where('meta_key','total_sales')->update(
                 array(
                     'meta_value' => $sold_count + $item['qty']
                 )
             );
-            DB::connection('mysql_external')->table($this->getPrefixTable().'_postmeta')->where('post_id', $productId)->where('meta_key','_stock')->update(
+            DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_postmeta')->where('post_id', $productId)->where('meta_key','_stock')->update(
                 array(
                     'meta_value' => $stock_count - $item['qty']
                 )
@@ -1040,18 +1042,18 @@ class Controller extends BaseController
         return $arr;
     }
     public function getPostByCategoryId($id){
-        $data = DB::connection('mysql_external')->table($this->getPrefixTable().'_posts')
-        ->join('wp_term_relationships', 'wp_term_relationships.object_id', 'wp_posts.ID')
-        ->where('term_taxonomy_id', $id)->where('post_status', 'publish')->select('wp_posts.*')->orderBy('post_modified', 'DESC')->get();
+        $data = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_posts')
+        ->join( $this->_PRFIX_TABLE .'_term_relationships',  $this->_PRFIX_TABLE .'_term_relationships.object_id',  $this->_PRFIX_TABLE .'_posts.ID')
+        ->where('term_taxonomy_id', $id)->where('post_status', 'publish')->select( $this->_PRFIX_TABLE .'_posts.*')->orderBy('post_modified', 'DESC')->get();
         return $data;
     }
     public function getPostByCategory($nameCate)
     {
-        $cate = DB::connection('mysql_external')->table($this->getPrefixTable().'_terms')->where('slug', $nameCate)->first();
+        $cate = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_terms')->where('slug', $nameCate)->first();
         $data = [];
         if ($cate) {
-            $data = DB::connection('mysql_external')->table($this->getPrefixTable().'_posts')
-                ->join('wp_term_relationships', 'wp_term_relationships.object_id', 'wp_posts.ID')
+            $data = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_posts')
+                ->join( $this->_PRFIX_TABLE .'_term_relationships',  $this->_PRFIX_TABLE .'_term_relationships.object_id',  $this->_PRFIX_TABLE .'_posts.ID')
                 ->where('term_taxonomy_id', $cate->term_id)->where('post_status', 'publish')->orderBy('post_modified', 'DESC')->get();
         }
         return ['data' => $data, 'cate' => $cate];
@@ -1070,7 +1072,7 @@ class Controller extends BaseController
     }
     public function getPostMeta($postId, $meta)
     {
-        $data = DB::connection('mysql_external')->table($this->getPrefixTable().'_postmeta')->where('post_id', $postId)->where('meta_key', $meta)->first();
+        $data = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_postmeta')->where('post_id', $postId)->where('meta_key', $meta)->first();
         if ($data) {
             return $data->meta_value;
         }
@@ -1078,7 +1080,7 @@ class Controller extends BaseController
     }
     public function getUserMeta($userId, $meta)
     {
-        $data = DB::connection('mysql_external')->table($this->getPrefixTable().'_usermeta')->where('user_id', $userId)->where('meta_key', $meta)->first();
+        $data = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_usermeta')->where('user_id', $userId)->where('meta_key', $meta)->first();
         if ($data) {
             return $data->meta_value;
         }
@@ -1086,13 +1088,20 @@ class Controller extends BaseController
     }
     public function getOrderMeta($orderId, $meta)
     {
-        $data = DB::connection('mysql_external')->table($this->getPrefixTable().'_woocommerce_order_itemmeta')->where('order_item_id', $orderId)->where('meta_key', $meta)->first();
+        $data = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_woocommerce_order_itemmeta')->where('order_item_id', $orderId)->where('meta_key', $meta)->first();
         if ($data) {
             return $data->meta_value;
         }
         return $data;
     }
     public function getPrefixTable(){
+        $tables = DB::connection('mysql_external')->select('SHOW TABLES')[0];
+        $array = get_object_vars($tables);
+        $value = array_values($array)[0];
+
+        return explode("_",$value)[0];
+    }
+    public function getPrefixTableFirst(){
         $tables = DB::connection('mysql_external')->select('SHOW TABLES')[0];
         $array = get_object_vars($tables);
         $value = array_values($array)[0];

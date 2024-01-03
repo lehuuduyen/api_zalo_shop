@@ -16,6 +16,8 @@ class BlogController extends Controller
     public function index(Request $request)
     {
         $store = $request['data_reponse'];
+        $this->_PRFIX_TABLE = $store->prefixTable;
+
         $listBlogs = $this->getPostByCategory('tin-tuc');
         if($listBlogs){
             $blogs = $listBlogs['data'];

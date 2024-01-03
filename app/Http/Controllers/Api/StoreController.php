@@ -15,9 +15,11 @@ class StoreController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $infor = DB::connection('mysql_external')->table($this->getPrefixTable().'_posts')->where('post_name','lien-he')->where('post_status','publish')->where('post_type','page')->first();
+        $store = $request['data_reponse'];
+        $this->_PRFIX_TABLE = $store->prefixTable;
+        $infor = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_posts')->where('post_name','lien-he')->where('post_status','publish')->where('post_type','page')->first();
 
 
 
@@ -69,21 +71,23 @@ class StoreController extends Controller
     public function getPaymentMethod(Request $request)
     {
         //check Cod
+        $store = $request['data_reponse'];
+        $this->_PRFIX_TABLE = $store->prefixTable;
         $result = [];
-        $cod = DB::connection('mysql_external')->table($this->getPrefixTable().'_options')->where('option_name','woocommerce_cod_settings')->first();
+        $cod = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_options')->where('option_name','woocommerce_cod_settings')->first();
         if($cod){
             $cod = unserialize( $cod->option_value);
             if($cod['enabled'] == 'yes'){
                 $result['cod'] = $cod;
             }
         }
-        $payment = DB::connection('mysql_external')->table($this->getPrefixTable().'_options')->where('option_name','woocommerce_bacs_settings')->first();
+        $payment = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_options')->where('option_name','woocommerce_bacs_settings')->first();
         if($payment){
             $payment = unserialize( $payment->option_value);
             if($payment['enabled'] == 'yes'){
                 $payment['account'] =[];
 
-                $paymentAccount = DB::connection('mysql_external')->table($this->getPrefixTable().'_options')->where('option_name','woocommerce_bacs_accounts')->first();
+                $paymentAccount = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_options')->where('option_name','woocommerce_bacs_accounts')->first();
                 if($paymentAccount){
                     $paymentAccount = unserialize($paymentAccount->option_value);
                     $payment['account'] = $paymentAccount;
@@ -122,6 +126,7 @@ class StoreController extends Controller
     {
         $data = $request->all();
         $store = $request['data_reponse'];
+        $this->_PRFIX_TABLE = $store->prefixTable;
         $validator = Validator::make($request->all(), [
             'address' => 'required',
             'email' => 'required',
@@ -136,20 +141,20 @@ class StoreController extends Controller
 
 
             $userId = $store->user_id;
-            $user = DB::connection('mysql_external')->table($this->getPrefixTable().'_usermeta')->updateOrInsert(
+            $user = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_usermeta')->updateOrInsert(
                 array(
                     'user_id' => $userId,'meta_key' => 'shipping_address_1'),
                 array(
                     'meta_value' => $data['address'],
                 )
             );
-            $user = DB::connection('mysql_external')->table($this->getPrefixTable().'_usermeta')->updateOrInsert(
+            $user = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_usermeta')->updateOrInsert(
                 array(
                     'user_id' => $userId,'meta_key' => 'company'),
                 array('meta_value' => $data['company'])
             );
 
-            $user = DB::connection('mysql_external')->table($this->getPrefixTable().'_users')->where('user_login', $store->sdt)->update(
+            $user = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_users')->where('user_login', $store->sdt)->update(
                 array(
                     'user_email' => $data['email'],
                 )
@@ -164,7 +169,8 @@ class StoreController extends Controller
     public function info(Request $request)
     {
         $store = $request['data_reponse'];
-        $user = DB::connection('mysql_external')->table($this->getPrefixTable().'_users')->where('user_login', $store->sdt)->select('ID','display_name as name','user_email as email','user_login as mobile')
+        $this->_PRFIX_TABLE = $store->prefixTable;
+        $user = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_users')->where('user_login', $store->sdt)->select('ID','display_name as name','user_email as email','user_login as mobile')
         ->first();
         $address = $this->getUserMeta($user->ID,'shipping_address_1');
         $company = $this->getUserMeta($user->ID,'company');

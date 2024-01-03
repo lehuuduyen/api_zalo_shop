@@ -17,12 +17,13 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
-        $products = DB::connection('mysql_external')->table($this->getPrefixTable().'_posts')->where('post_type', 'product')->where('post_status', 'publish')->orderBy('post_modified', 'DESC')->get();
+        $store = $request['data_reponse'];
+        $this->_PRFIX_TABLE = $store->prefixTable;
+        $products = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_posts')->where('post_type', 'product')->where('post_status', 'publish')->orderBy('post_modified', 'DESC')->get();
         if (isset($request['category'])) {
             $products = $this->getPostByCategoryId($request['category']);
         }
 
-        $store = $request['data_reponse'];
 
 
         $time = time();
@@ -82,12 +83,12 @@ class ProductController extends Controller
     public function getCategories(Request $request)
     {
         $store = $request['data_reponse'];
-
-        $categories = DB::connection('mysql_external')->table($this->getPrefixTable().'_term_taxonomy')->join('wp_terms','wp_terms.term_id','wp_term_taxonomy.term_id')->where('wp_term_taxonomy.taxonomy', 'product_cat')->select('wp_terms.*')->get();
+        $this->_PRFIX_TABLE = $store->prefixTable;
+        $categories = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_term_taxonomy')->join( $this->_PRFIX_TABLE .'_terms', $this->_PRFIX_TABLE .'_terms.term_id', $this->_PRFIX_TABLE .'_term_taxonomy.term_id')->where( $this->_PRFIX_TABLE .'_term_taxonomy.taxonomy', 'product_cat')->select( $this->_PRFIX_TABLE .'_terms.*')->get();
 
         if ($categories) {
             foreach ($categories as $key => $val) {
-                $img = DB::connection('mysql_external')->table($this->getPrefixTable().'_termmeta')->where('wp_termmeta.meta_key', 'thumbnail_id')->where('wp_termmeta.term_id', $val->term_id)->first();
+                $img = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_termmeta')->where( $this->_PRFIX_TABLE .'_termmeta.meta_key', 'thumbnail_id')->where( $this->_PRFIX_TABLE .'_termmeta.term_id', $val->term_id)->first();
                 $categories[$key]->id =  $val->term_id;
                 $categories[$key]->image =  ($img)?$this->getImage($img->meta_value, $store,true):"";
             }
@@ -106,6 +107,7 @@ class ProductController extends Controller
     public function review(Request $request)
     {
         $store = $request['data_reponse'];
+        $this->_PRFIX_TABLE = $store->prefixTable;
         $data = $request->all();
         $data['sdt'] = $store->sdt;
         if (!isset($data['rating'])) {
@@ -113,11 +115,11 @@ class ProductController extends Controller
         } else if (!isset($data['product_id'])) {
             return $this->returnError([], "Bắt buộc phải nhập product");
         } else {
-            $user = DB::connection('mysql_external')->table($this->getPrefixTable().'_users')->where('user_login', $data['sdt'])->first();
+            $user = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_users')->where('user_login', $data['sdt'])->first();
             if (!$user) {
                 return $this->returnError([], "Số điện thoại chưa được đăng ký");
             }
-            $insertId = DB::connection('mysql_external')->table($this->getPrefixTable().'_comments')->insertGetId(
+            $insertId = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_comments')->insertGetId(
                 array(
                     'comment_post_ID'     =>   $data['product_id'],
                     'comment_author'     =>   $store->name,
@@ -131,7 +133,7 @@ class ProductController extends Controller
             );
 
 
-            $insert = DB::connection('mysql_external')->table($this->getPrefixTable().'_commentmeta')->insert(
+            $insert = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_commentmeta')->insert(
                 array(
                     'comment_id'     =>   $insertId,
                     'meta_value'     =>   $data['rating'],
@@ -145,6 +147,8 @@ class ProductController extends Controller
 
     public function checkCoupon(Request $request)
     {
+        $store = $request['data_reponse'];
+        $this->_PRFIX_TABLE = $store->prefixTable;
         $data = $request->all();
         if (!isset($data['coupon'])) {
             return $this->returnError([], "Bắt buộc phải nhập coupon");
@@ -157,7 +161,7 @@ class ProductController extends Controller
         foreach ($order as $value) {
             $listProductId[] = $value['id'];
         }
-        $products = DB::connection('mysql_external')->table($this->getPrefixTable().'_posts')->whereIn('id', $listProductId)->get();
+        $products = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_posts')->whereIn('id', $listProductId)->get();
         $coupon_amount_total = $this->calculateCoupon($data, $products);
         if ($coupon_amount_total > 0) {
             return $this->returnSuccess($coupon_amount_total);

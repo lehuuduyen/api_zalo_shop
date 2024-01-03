@@ -12,12 +12,14 @@ class BrandsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-   
+
     public function index(Request $request)
     {
         $store = $request['data_reponse'];
+        $this->_PRFIX_TABLE = $store->prefixTable;
+
         $listBanner = $this->getPostByCategory('brand');
-        
+
         if($listBanner){
             $brands = $listBanner['data'];
             foreach($brands as $key => $brand){
@@ -25,7 +27,7 @@ class BrandsController extends Controller
             }
         }
         return $this->returnSuccess($brands);
-        
+
     }
 
     /**

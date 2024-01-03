@@ -16,11 +16,12 @@ class FlashSaleController extends Controller
      */
     public function index(Request $request)
     {
-        // ->leftJoin('wp_postmeta','wp_postmeta.post_id','wp_posts.ID')->where('wp_postmeta.meta_key', '')->whereNull('wp_postmeta.meta_value')
-        $products = DB::connection('mysql_external')->table($this->getPrefixTable().'_posts')->where('wp_posts.post_type', 'product')->where('wp_posts.post_status', 'publish')->orderBy('wp_posts.post_modified', 'DESC')->get();
-
-
         $store = $request['data_reponse'];
+        $this->_PRFIX_TABLE = $store->prefixTable;
+        // ->leftJoin( $this->_PRFIX_TABLE .'_postmeta', $this->_PRFIX_TABLE .'_postmeta.post_id', $this->_PRFIX_TABLE .'_posts.ID')->where( $this->_PRFIX_TABLE .'_postmeta.meta_key', '')->whereNull( $this->_PRFIX_TABLE .'_postmeta.meta_value')
+        $products = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_posts')->where( $this->_PRFIX_TABLE .'_posts.post_type', 'product')->where( $this->_PRFIX_TABLE .'_posts.post_status', 'publish')->orderBy( $this->_PRFIX_TABLE .'_posts.post_modified', 'DESC')->get();
+
+
         $campaigns = [];
         $campaigns[0]= new \stdClass();
         $campaigns[0]->title = "Flash sale";

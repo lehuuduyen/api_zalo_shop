@@ -13,9 +13,12 @@ class CouponsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $coupons = DB::connection('mysql_external')->table($this->getPrefixTable().'_posts')->where('post_status','publish')->where('post_type','shop_coupon')->get();
+        $store = $request['data_reponse'];
+        $this->_PRFIX_TABLE = $store->prefixTable;
+
+        $coupons = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_posts')->where('post_status','publish')->where('post_type','shop_coupon')->get();
         $listCoupons =[];
         $i =0;
         foreach($coupons as $key => $val){

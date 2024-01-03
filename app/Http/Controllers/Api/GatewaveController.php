@@ -46,12 +46,14 @@ class GatewaveController extends Controller
                 if($store){
                     $databaseStore = $request['store'];
                     $this->connectDb($databaseStore);
-                    $user = DB::connection('mysql_external')->table($this->getPrefixTable().'_users')->where('user_login', $request['sdt'])->first();
+                    $prefixTable = $this->getPrefixTableFirst();
+                    $this->_PRFIX_TABLE = $prefixTable;
+                    $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE.'_users')->where('user_login', $request['sdt'])->first();
                     // wp_wc_customer_lookup
 
                     if (!$user) {
                         $email = $this->randomEmail();
-                        $insert = DB::connection('mysql_external')->table($this->getPrefixTable().'_users')->insert(
+                        $insert = DB::connection('mysql_external')->table($this->_PRFIX_TABLE.'_users')->insert(
                             array(
                                 'user_login'     =>   $request['sdt'],
                                 'user_pass'     =>   "appid",
@@ -62,7 +64,7 @@ class GatewaveController extends Controller
                                 'ID'   =>   $request['user_id']
                             )
                         );
-                        $insertMetaUser = DB::connection('mysql_external')->table($this->getPrefixTable().'_usermeta')->insert(
+                        $insertMetaUser = DB::connection('mysql_external')->table($this->_PRFIX_TABLE.'_usermeta')->insert(
                             array(
                                 'meta_key'     =>   "last_name",
                                 'meta_value'     =>  $request['name'],
@@ -74,9 +76,9 @@ class GatewaveController extends Controller
                     }else{
                         $email = $user->user_email;
                     }
-                    $customer = DB::connection('mysql_external')->table($this->getPrefixTable().'_wc_customer_lookup')->where('user_id', $request['user_id'])->first();
+                    $customer = DB::connection('mysql_external')->table($this->_PRFIX_TABLE.'_wc_customer_lookup')->where('user_id', $request['user_id'])->first();
                     if(!$customer){
-                        $insertCus = DB::connection('mysql_external')->table($this->getPrefixTable().'_wc_customer_lookup')->insert(
+                        $insertCus = DB::connection('mysql_external')->table($this->_PRFIX_TABLE.'_wc_customer_lookup')->insert(
                             array(
                                 'customer_id'     =>   $request['user_id'],
                                 'username'     =>   $request['sdt'],
@@ -89,7 +91,7 @@ class GatewaveController extends Controller
                             )
                         );
                     }
-                    $hash = $this->getToken($request['store'],$request['sdt'],$databaseStore,$store->domain,$request['name'],$request['user_id']);
+                    $hash = $this->getToken($request['store'],$request['sdt'],$databaseStore,$store->domain,$request['name'],$request['user_id'],$prefixTable);
                     return $this->returnSuccess([
                         'token'=> $hash
                     ]);

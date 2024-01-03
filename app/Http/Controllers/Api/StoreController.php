@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class StoreController extends Controller
 {
@@ -85,8 +86,13 @@ class StoreController extends Controller
                 $paymentAccount = DB::connection('mysql_external')->table('wp_options')->where('option_name','woocommerce_bacs_accounts')->first();
                 if($paymentAccount){
                     $paymentAccount = unserialize($paymentAccount->option_value);
-                    $payment['account'] = $paymentAccount;
+                    foreach($paymentAccount as $key => $account){
+                        $qr = QrCode::format('png')->size(500)->generate($account['account_number']);
+                        $qr = 'data:image/png;base64,'.base64_encode($qr);
 
+                        $paymentAccount[$key]['qr'] =$qr;
+                    }
+                    $payment['account'] = $paymentAccount;
                 }
 
 

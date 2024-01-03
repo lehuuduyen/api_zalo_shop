@@ -1065,7 +1065,7 @@ class Controller extends BaseController
         if ($position !== false) {
             $endOfLinePosition = strpos($content, PHP_EOL, $position);
             if ($endOfLinePosition !== false) {
-                $lineAfterPhone = substr($content, $position + $count, $endOfLinePosition - $position - $count);
+                $lineAfterPhone = substr($content, $position + $count, $endOfLinePosition );
             }
         }
         return $lineAfterPhone;

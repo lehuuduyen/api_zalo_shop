@@ -19,7 +19,7 @@ class StoreController extends Controller
     {
         $store = $request['data_reponse'];
         $this->_PRFIX_TABLE = $store->prefixTable;
-        $infor = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_posts')->where('post_name','lien-he')->where('post_status','publish')->where('post_type','page')->first();
+        $infor = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_posts')->where('post_name','lien-he')->where('post_status','publish')->first();
 
 
 

@@ -1041,6 +1041,48 @@ class Controller extends BaseController
 
         return $arr;
     }
+    public function getHistoryUser($userId){
+        $data = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_woo_history_user_point')->where('user_id', $userId)->orderBy('id', 'DESC')->get();
+        return $data;
+    }
+
+    public function getPointUser($history){
+        $total = 0;
+        $totalDoiThuong = 0;
+        $totalOrder = 0;
+        foreach($history  as $value){
+            if($value->status == 1){
+                $total = $total + $value->point;
+                $totalDoiThuong = $totalDoiThuong + $value->point;
+                $totalOrder = $totalOrder + $value->total_order;
+
+            }
+            if($value->status == 2){
+                $totalDoiThuong = $totalDoiThuong - $value->point;
+            }
+        }
+        $checkRank = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_woo_rank')->where('minimum_spending','<=', $totalOrder)->orderBy('minimum_spending', 'DESC')->first();
+        $checkRankNext = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_woo_rank')->where('minimum_spending','>', $totalOrder)->orderBy('minimum_spending', 'ASC')->first();
+        $pointNext = 0;
+        if($checkRankNext){
+            $minium = $checkRankNext->minimum_spending;
+            $pointPriceSetiing = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_woo_setting')->where('id', 1)->first();
+            if($pointPriceSetiing){
+                
+                
+                $pointNextSetting =ceil( $minium / $pointPriceSetiing->amount_spent);
+                $pointNext = $pointNextSetting - $total;
+            }
+        }
+        return [
+            'total' =>$total,
+            'totalDoiThuong' =>$totalDoiThuong,
+            'totalOrder' =>$totalOrder, 
+            'rank' =>$checkRank, 
+            'rankNext' =>$checkRankNext, 
+            'point_next' =>$pointNext, 
+        ];
+    }
     public function getPostByCategoryId($id){
         $data = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_posts')
         ->join( $this->_PRFIX_TABLE .'_term_relationships',  $this->_PRFIX_TABLE .'_term_relationships.object_id',  $this->_PRFIX_TABLE .'_posts.ID')

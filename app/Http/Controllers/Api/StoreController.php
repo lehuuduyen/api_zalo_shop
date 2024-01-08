@@ -176,6 +176,10 @@ class StoreController extends Controller
         $company = $this->getUserMeta($user->ID,'company');
         $user->address = $address;
         $user->company = $company;
+        $user->history = $this->getHistoryUser($user->ID);
+        $user->point = $this->getPointUser($user->history);
+       
+        
         return $this->returnSuccess($user);
 
     }

@@ -30,7 +30,18 @@ class RanksController extends Controller
 
         return $this->returnSuccess($data);
     }
+    public function get_point_to_money(Request $request)
+    {
+        $store = $request['data_reponse'];
+        $this->_PRFIX_TABLE = $store->prefixTable;
+        $data = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_woo_setting')->select('points_converted_to_money')->where('id', '1')->first();
+        $points_converted_to_money = 0;
+        if($data){
+            $points_converted_to_money = $data->points_converted_to_money;
 
+        }
+        return $this->returnSuccess($points_converted_to_money);
+    }
     /**
      * Store a newly created resource in storage.
      *

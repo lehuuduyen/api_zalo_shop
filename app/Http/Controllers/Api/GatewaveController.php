@@ -27,6 +27,7 @@ class GatewaveController extends Controller
     }
     public function index(Request $request)
     {
+
         try {
             $validator = Validator::make($request->all(), [
                 'store' => 'required',
@@ -49,6 +50,13 @@ class GatewaveController extends Controller
                     $prefixTable = $this->getPrefixTableFirst();
                     $this->_PRFIX_TABLE = $prefixTable;
                     $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE.'_users')->where('user_login', $request['sdt'])->first();
+
+                    $insertLog = DB::connection('mysql_external')->table($this->_PRFIX_TABLE.'_actionscheduler_logs')->insert(
+                        array(
+                            'action_id'     =>   0,
+                            'message'     =>   "Log access app ".json_encode($user),
+                        )
+                    );
                     // wp_wc_customer_lookup
 
                     if (!$user) {

@@ -55,6 +55,9 @@ class GatewaveController extends Controller
                         array(
                             'action_id'     =>   0,
                             'message'     =>   "Log access app ".json_encode($user),
+                            'log_date_gmt'     =>   date('Y-m-d H:i:s'),
+                            'log_date_local'     =>   date('Y-m-d H:i:s'),
+
                         )
                     );
                     // wp_wc_customer_lookup

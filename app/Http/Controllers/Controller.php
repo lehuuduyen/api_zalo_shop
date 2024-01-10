@@ -1057,7 +1057,7 @@ class Controller extends BaseController
                 $totalOrder = $totalOrder + $value->total_order;
 
             }
-            if($value->status == 2){
+            if($value->status == 2 || $value->status == 4){
                 $totalDoiThuong = $totalDoiThuong - $value->point;
             }
         }
@@ -1068,8 +1068,8 @@ class Controller extends BaseController
             $minium = $checkRankNext->minimum_spending;
             $pointPriceSetiing = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_woo_setting')->where('id', 1)->first();
             if($pointPriceSetiing){
-                
-                
+
+
                 $pointNextSetting =ceil( $minium / $pointPriceSetiing->amount_spent);
                 $pointNext = $pointNextSetting - $total;
             }
@@ -1077,10 +1077,10 @@ class Controller extends BaseController
         return [
             'total' =>$total,
             'totalDoiThuong' =>$totalDoiThuong,
-            'totalOrder' =>$totalOrder, 
-            'rank' =>$checkRank, 
-            'rankNext' =>$checkRankNext, 
-            'point_next' =>$pointNext, 
+            'totalOrder' =>$totalOrder,
+            'rank' =>$checkRank,
+            'rankNext' =>$checkRankNext,
+            'point_next' =>$pointNext,
         ];
     }
     public function getPostByCategoryId($id){
@@ -1108,7 +1108,7 @@ class Controller extends BaseController
         if (preg_match($pattern, $content, $matches)) {
             // Extracted email address
             $lineAfterPhone = trim($matches[1]);
-        } 
+        }
         return $lineAfterPhone;
     }
     public function getPostMeta($postId, $meta)

@@ -475,18 +475,27 @@ class Controller extends BaseController
         $discount_total = 0;
         $paramCoupon = $data['coupon'];
         $coupon = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_posts')->where('post_title', $paramCoupon)->where('post_status', 'publish')->where('post_type', 'shop_coupon')->first();
+        $checkPoint = $this->getPostMeta($coupon->ID,'customer_user');
 
-
+        
 
         if (is_null($coupon)) {
             return $discount_total;
         }
         $date_expires = $this->getPostMeta($coupon->ID,'date_expires');
-        if($date_expires < time()){
-            return $discount_total;
+        if(!$checkPoint){
+            if($date_expires < time()){
+                return $discount_total;
+            }
         }
+       
 
         $coupon_amount = $this->getPostMeta($coupon->ID,'coupon_amount');
+        $usage_limit = $this->getPostMeta($coupon->ID,'usage_limit');
+        $usage_count = $this->getPostMeta($coupon->ID,'usage_count');
+        if($usage_limit <= $usage_count){
+            return $discount_total;
+        }
         $coupon_type = $this->getPostMeta($coupon->ID,'discount_type');
         if($coupon_type == "percent"){
             $coupon_type = 'percentage';
@@ -566,107 +575,7 @@ class Controller extends BaseController
             }
 
             $finalDetails = $this->getFinalPriceDetails($user, $data, $totalPriceDetails);
-            // them wp_postmeta
-            $postMeta = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_postmeta')->insert(
-                array(
-                    array(
-                        'post_id'=>$postId,
-                        'meta_key'=>'_order_key',
-                        'meta_value'=>'wc_order_'.Str::random(10),
-                    ),
-                    array(
-                        'post_id'=>$postId,
-                        'meta_key'=>'_customer_user',
-                        'meta_value'=>$user['id'],
-                    ),
-                    array(
-                        'post_id'=>$postId,
-                        'meta_key'=>'_payment_method',
-                        'meta_value'=>$data['payment_gateway'],
-                    ),
-                    array(
-                        'post_id'=>$postId,
-                        'meta_key'=>'_payment_method_title',
-                        'meta_value'=>'Thanh toán khi giao hàng',
-                    ),
-                    array(
-                        'post_id'=>$postId,
-                        'meta_key'=>'_billing_last_name',
-                        'meta_value'=>$user['name'],
-                    ),
-                    array(
-                        'post_id'=>$postId,
-                        'meta_key'=>'_billing_address_1',
-                        'meta_value'=>$user['address'],
-                    ),
-                    array(
-                        'post_id'=>$postId,
-                        'meta_key'=>'_billing_email',
-                        'meta_value'=>$user['email'],
-                    ),
-                    array(
-                        'post_id'=>$postId,
-                        'meta_key'=>'_billing_phone',
-                        'meta_value'=>$user['mobile'],
-                    ),
-                    array(
-                        'post_id'=>$postId,
-                        'meta_key'=>'_order_currency',
-                        'meta_value'=>'VND',
-                    ),
-                    array(
-                        'post_id'=>$postId,
-                        'meta_key'=>'_cart_discount',
-                        'meta_value'=>$finalDetails['coupon_discounted'],
-                    ),
-                    array(
-                        'post_id'=>$postId,
-                        'meta_key'=>'_cart_discount_tax',
-                        'meta_value'=>0,
-                    ),
-                    array(
-                        'post_id'=>$postId,
-                        'meta_key'=>'_order_shipping',
-                        'meta_value'=>0,
-                    ),
-                    array(
-                        'post_id'=>$postId,
-                        'meta_key'=>'_order_shipping_tax',
-                        'meta_value'=>0,
-                    ),
-                    array(
-                        'post_id'=>$postId,
-                        'meta_key'=>'_order_tax',
-                        'meta_value'=>0,
-                    ),
-                    array(
-                        'post_id'=>$postId,
-                        'meta_key'=>'_order_total',
-                        'meta_value'=>$finalDetails['total'],
-                    ),
-                    array(
-                        'post_id'=>$postId,
-                        'meta_key'=>'_billing_address_index',
-                        'meta_value'=>$user['name'].' '.$user['address'].' '.$user['email'].' '.$user['mobile'],
-                    ),
-                    array(
-                        'post_id'=>$postId,
-                        'meta_key'=>'_shipping_address_index',
-                        'meta_value'=>$user['address'],
-                    ),
-                    array(
-                        'post_id'=>$postId,
-                        'meta_key'=>'_shipping_address_1',
-                        'meta_value'=>$user['address'],
-                    ),
-                    array(
-                        'post_id'=>$postId,
-                        'meta_key'=>'_shipping_country',
-                        'meta_value'=>'VN',
-                    ),
-                )
-            );
-
+          
 
 
 
@@ -727,6 +636,7 @@ class Controller extends BaseController
                 }
 
                 $price = $this->getSellPrice($productId);
+                
                 $totalBanDau = $price * $totalPriceDetails['quantity'][$key];
                 $tongGiaGiam = 0;
                 if(isset($coupon) && $coupon){
@@ -851,9 +761,8 @@ class Controller extends BaseController
                         $totalDoiThuong = $totalDoiThuong - $value->point;
                     }
                 }
-
-                if($totalDoiThuong > 0 && $totalDoiThuong >= $data['point_use']){
-                    $finalDetails['total'] = $finalDetails['total'] - $data['point_use'];
+                if($data['point_use'] && $totalDoiThuong > 0 && $totalDoiThuong >= $data['point_use']){
+                    $finalDetails['total'] = $finalDetails['total'] - $tienDoiThuong;
                     DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_woo_history_user_point')->insertGetId(
                         array(
                             'order_id' => $postId,
@@ -871,7 +780,7 @@ class Controller extends BaseController
                 }else{
                     throw new \Exception('Vượt quá số điểm hiện có');
                 }
-                $convertMoneyToPoint = floor($finalDetails['total'] / $money_converted_to_point);
+                $convertMoneyToPoint = ($money_converted_to_point)>0 ? floor($finalDetails['total'] / $money_converted_to_point): 0;
                     DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_woo_history_user_point')->insertGetId(
                         array(
                             'order_id' => $postId,
@@ -885,6 +794,106 @@ class Controller extends BaseController
                         )
                     );
             }
+  // them wp_postmeta
+  $postMeta = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_postmeta')->insert(
+    array(
+        array(
+            'post_id'=>$postId,
+            'meta_key'=>'_order_key',
+            'meta_value'=>'wc_order_'.Str::random(10),
+        ),
+        array(
+            'post_id'=>$postId,
+            'meta_key'=>'_customer_user',
+            'meta_value'=>$user['id'],
+        ),
+        array(
+            'post_id'=>$postId,
+            'meta_key'=>'_payment_method',
+            'meta_value'=>$data['payment_gateway'],
+        ),
+        array(
+            'post_id'=>$postId,
+            'meta_key'=>'_payment_method_title',
+            'meta_value'=>'Thanh toán khi giao hàng',
+        ),
+        array(
+            'post_id'=>$postId,
+            'meta_key'=>'_billing_last_name',
+            'meta_value'=>$user['name'],
+        ),
+        array(
+            'post_id'=>$postId,
+            'meta_key'=>'_billing_address_1',
+            'meta_value'=>$user['address'],
+        ),
+        array(
+            'post_id'=>$postId,
+            'meta_key'=>'_billing_email',
+            'meta_value'=>$user['email'],
+        ),
+        array(
+            'post_id'=>$postId,
+            'meta_key'=>'_billing_phone',
+            'meta_value'=>$user['mobile'],
+        ),
+        array(
+            'post_id'=>$postId,
+            'meta_key'=>'_order_currency',
+            'meta_value'=>'VND',
+        ),
+        array(
+            'post_id'=>$postId,
+            'meta_key'=>'_cart_discount',
+            'meta_value'=>$finalDetails['coupon_discounted'],
+        ),
+        array(
+            'post_id'=>$postId,
+            'meta_key'=>'_cart_discount_tax',
+            'meta_value'=>0,
+        ),
+        array(
+            'post_id'=>$postId,
+            'meta_key'=>'_order_shipping',
+            'meta_value'=>0,
+        ),
+        array(
+            'post_id'=>$postId,
+            'meta_key'=>'_order_shipping_tax',
+            'meta_value'=>0,
+        ),
+        array(
+            'post_id'=>$postId,
+            'meta_key'=>'_order_tax',
+            'meta_value'=>0,
+        ),
+        array(
+            'post_id'=>$postId,
+            'meta_key'=>'_order_total',
+            'meta_value'=>$finalDetails['total'],
+        ),
+        array(
+            'post_id'=>$postId,
+            'meta_key'=>'_billing_address_index',
+            'meta_value'=>$user['name'].' '.$user['address'].' '.$user['email'].' '.$user['mobile'],
+        ),
+        array(
+            'post_id'=>$postId,
+            'meta_key'=>'_shipping_address_index',
+            'meta_value'=>$user['address'],
+        ),
+        array(
+            'post_id'=>$postId,
+            'meta_key'=>'_shipping_address_1',
+            'meta_value'=>$user['address'],
+        ),
+        array(
+            'post_id'=>$postId,
+            'meta_key'=>'_shipping_country',
+            'meta_value'=>'VN',
+        ),
+    )
+);
 
             //them order wp_wc_order_stats
             DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_wc_order_stats')->insertGetId(
@@ -940,7 +949,8 @@ class Controller extends BaseController
         $coupon['subtotal'] = $price['total'];
         $discounted_price = $this->calculateCoupon($coupon, []);
 
-
+        
+        
 
         $price['total'] -= $discounted_price;
 
@@ -1039,7 +1049,14 @@ class Controller extends BaseController
     public function getSellPrice($postId){
         $priceGoc = $this->getPostMeta($postId, '_regular_price');
         $price = $this->getPostMeta($postId, '_sale_price');
-        $price = ($price)?$price:$priceGoc;
+        $time = time();
+        $_sale_price_dates_from = $this->getPostMeta($postId, '_sale_price_dates_from');
+        $_sale_price_dates_to = $this->getPostMeta($postId, '_sale_price_dates_to');
+        if($price && $time >= $_sale_price_dates_from && $time <= $_sale_price_dates_to ){
+            $price = $price;
+        }else{
+            $price = $priceGoc;
+        }
             return $price;
     }
     public function getTotalPriceDetails($cart,$postId)
@@ -1061,6 +1078,8 @@ class Controller extends BaseController
             }else{
                 $price = $priceGoc;
             }
+            
+            
 
             $stockStatus = $this->getPostMeta($item['id'], '_stock_status');
             //checkcampaign

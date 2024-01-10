@@ -23,22 +23,43 @@ class CouponsController extends Controller
         $i =0;
         foreach($coupons as $key => $val){
             $discount_type = $this->getPostMeta($val->ID,'discount_type');
+            $customer_user = $this->getPostMeta($val->ID,'customer_user');
+            
             if($discount_type == "percent"){
                 $discount_type = 'percentage';
             }
             $discount = $this->getPostMeta($val->ID,'coupon_amount');
             $date_expires = $this->getPostMeta($val->ID,'date_expires');
-            if($date_expires < time()){
-                continue;
+            $usage_limit = $this->getPostMeta($val->ID,'usage_limit');
+            $usage_count = $this->getPostMeta($val->ID,'usage_count');
+            if($usage_limit <= $usage_count){
+                continue;            
             }
+            if($customer_user){
+               if($store->user_id == $customer_user){
+                $coupons[$key]->title=$val->post_excerpt;
+                $coupons[$key]->code=$val->post_title;
+                $coupons[$key]->discount_type=$discount_type;
+                $coupons[$key]->discount=$discount;
+                $coupons[$key]->expire_date=date('d/m/Y H:i:s', $date_expires);
+                $listCoupons[$i] = $coupons[$key];
+                $i++;
+               }
+            }else{
+                if($date_expires < time()){
+                    continue;
+                }
+                $coupons[$key]->title=$val->post_excerpt;
+                $coupons[$key]->code=$val->post_title;
+                $coupons[$key]->discount_type=$discount_type;
+                $coupons[$key]->discount=$discount;
+                $coupons[$key]->expire_date=date('d/m/Y H:i:s', $date_expires);
+                $listCoupons[$i] = $coupons[$key];
+                $i++;
+            }
+           
 
-            $coupons[$key]->title=$val->post_excerpt;
-            $coupons[$key]->code=$val->post_title;
-            $coupons[$key]->discount_type=$discount_type;
-            $coupons[$key]->discount=$discount;
-            $coupons[$key]->expire_date=date('d/m/Y H:i:s', $date_expires);
-            $listCoupons[$i] = $coupons[$key];
-            $i++;
+            
         }
 
 

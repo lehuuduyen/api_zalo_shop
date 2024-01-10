@@ -562,17 +562,10 @@ class Controller extends BaseController
 
             $totalPriceDetails =  $this->getTotalPriceDetails($data['order'],$postId);
             if (!$totalPriceDetails) {
-                throw new \Exception('');
+                throw new \Exception('Không đủ số lượng trong kho');
             }
 
             $finalDetails = $this->getFinalPriceDetails($user, $data, $totalPriceDetails);
-
-
-
-
-
-
-
             // them wp_postmeta
             $postMeta = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_postmeta')->insert(
                 array(
@@ -825,7 +818,66 @@ class Controller extends BaseController
                     )
                 );
             }
+            if(isset($data['point_use'])){
+                $history = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_woo_history_user_point')->where('user_id', $user['id'])->orderBy('id', 'DESC')->get();
+                $setting = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_woo_setting')->where('id',1)->first();
+                $money_converted_to_point = 0;
+                $points_converted_to_money = 0;
+                if($setting){
+                    $money_converted_to_point = $setting->amount_spent;
+                    $points_converted_to_money = $setting->points_converted_to_money;
+                }
 
+                // tính điểm sang tiền
+                $tienDoiThuong = $points_converted_to_money * $data['point_use'];
+                if($tienDoiThuong > $finalDetails['total']  ){
+                    throw new \Exception('Tiền đổi thưởng không được quá tổng đơn hàng');
+                }
+
+
+
+                $totalDoiThuong = 0;
+                foreach($history  as $value){
+                    if($value->status == 1){
+                        $totalDoiThuong = $totalDoiThuong + $value->point;
+                    }
+                    if($value->status == 2 || $value->status == 4){
+                        $totalDoiThuong = $totalDoiThuong - $value->point;
+                    }
+                }
+
+
+                if($totalDoiThuong > 0 && $totalDoiThuong >= $data['point_use']){
+                    $finalDetails['total'] = $finalDetails['total'] - $data['point_use'];
+                    DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_woo_history_user_point')->insertGetId(
+                        array(
+                            'order_id' => $postId,
+                            'total_order' => $finalDetails['total'],
+                            'user_id' => $user['id'],
+                            'point' => $data['point_use'],
+                            'minimum_spending' => 0,
+                            'price_sale_off' => 0,
+                            'price_sale_off_max' => 0,
+                            'status' => 4,
+                        )
+                    );
+                }else{
+                    throw new \Exception('Vượt quá số điểm hiện có');
+                }
+                $convertMoneyToPoint = floor($finalDetails['total'] / $money_converted_to_point);
+                DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_woo_history_user_point')->insertGetId(
+                    array(
+                        'order_id' => $postId,
+                        'total_order' => $finalDetails['total'],
+                        'user_id' => $user['id'],
+                        'point' => $convertMoneyToPoint,
+                        'minimum_spending' => 0,
+                        'price_sale_off' => 0,
+                        'price_sale_off_max' => 0,
+                        'status' => 3,
+                    )
+                );
+            }
 
             //them order wp_wc_order_stats
             DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_wc_order_stats')->insertGetId(
@@ -851,8 +903,11 @@ class Controller extends BaseController
             return $postId;
         } catch (\Throwable $th) {
             //throw $th;
+
+
             DB::connection('mysql_external')->rollBack();
-            return false;
+            throw new \Exception( $th->getMessage());
+
         }
     }
 

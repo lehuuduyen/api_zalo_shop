@@ -721,7 +721,10 @@ class Controller extends BaseController
 
             foreach($totalPriceDetails['products_id'] as $key  => $productId){
                 $products = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_posts')->where('ID', $productId)->select('post_title')->first();
+                if(!$products){
+                    throw new \Exception('Sản phẩm không tồn tại');
 
+                }
 
                 $price = $this->getSellPrice($productId);
                 $totalBanDau = $price * $totalPriceDetails['quantity'][$key];
@@ -737,6 +740,8 @@ class Controller extends BaseController
                         $tongGiaGiam=$tongGiaGiam + $giagiam * $totalPriceDetails['quantity'][$key];
                     }
                 }
+
+
                 //wp_woocommerce_order_items
                 $orderItemId = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_woocommerce_order_items')->insertGetId(
                     array(
@@ -745,6 +750,7 @@ class Controller extends BaseController
                         'order_item_name' => $products->post_title,
                     )
                 );
+
                 DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_woocommerce_order_itemmeta')->insert(
                     array(
                         array(
@@ -818,7 +824,7 @@ class Controller extends BaseController
                     )
                 );
             }
-            if(isset($data['point_use'])){
+            if(array_key_exists('point_use', $data)){
                 $history = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_woo_history_user_point')->where('user_id', $user['id'])->orderBy('id', 'DESC')->get();
                 $setting = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_woo_setting')->where('id',1)->first();
                 $money_converted_to_point = 0;
@@ -846,7 +852,6 @@ class Controller extends BaseController
                     }
                 }
 
-
                 if($totalDoiThuong > 0 && $totalDoiThuong >= $data['point_use']){
                     $finalDetails['total'] = $finalDetails['total'] - $data['point_use'];
                     DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_woo_history_user_point')->insertGetId(
@@ -861,22 +866,24 @@ class Controller extends BaseController
                             'status' => 4,
                         )
                     );
+                } else if( $data['point_use'] =='' || $data['point_use'] == 0){
+
                 }else{
                     throw new \Exception('Vượt quá số điểm hiện có');
                 }
                 $convertMoneyToPoint = floor($finalDetails['total'] / $money_converted_to_point);
-                DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_woo_history_user_point')->insertGetId(
-                    array(
-                        'order_id' => $postId,
-                        'total_order' => $finalDetails['total'],
-                        'user_id' => $user['id'],
-                        'point' => $convertMoneyToPoint,
-                        'minimum_spending' => 0,
-                        'price_sale_off' => 0,
-                        'price_sale_off_max' => 0,
-                        'status' => 3,
-                    )
-                );
+                    DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_woo_history_user_point')->insertGetId(
+                        array(
+                            'order_id' => $postId,
+                            'total_order' => $finalDetails['total'],
+                            'user_id' => $user['id'],
+                            'point' => $convertMoneyToPoint,
+                            'minimum_spending' => 0,
+                            'price_sale_off' => 0,
+                            'price_sale_off_max' => 0,
+                            'status' => 3,
+                        )
+                    );
             }
 
             //them order wp_wc_order_stats
@@ -884,7 +891,9 @@ class Controller extends BaseController
                 array(
                     'order_id' => $postId,
                     'date_created' => $timeNow,
+                    'date_completed' => $timeNow,
                     'date_created_gmt' => $timeNow,
+                    'date_paid' => $timeNow,
                     'num_items_sold' => array_sum($totalPriceDetails['quantity']),
                     'net_total' => $finalDetails['total'],
                     'total_sales' => $finalDetails['total'],

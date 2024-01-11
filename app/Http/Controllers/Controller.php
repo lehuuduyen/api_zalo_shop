@@ -467,13 +467,14 @@ class Controller extends BaseController
         $discount_total = 0;
         $paramCoupon = $data['coupon'];
         $coupon = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->where('post_title', $paramCoupon)->where('post_status', 'publish')->where('post_type', 'shop_coupon')->first();
-        $checkPoint = $this->getPostMeta($coupon->ID, 'customer_user');
 
 
 
         if (is_null($coupon)) {
             return $discount_total;
         }
+        $checkPoint = $this->getPostMeta($coupon->ID, 'customer_user');
+
         $date_expires = $this->getPostMeta($coupon->ID, 'date_expires');
         if (!$checkPoint) {
             if ($date_expires < time()) {

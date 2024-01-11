@@ -69,6 +69,9 @@ class OrdersController extends Controller
                     $pointReceive = $history->point;
                 }
             }
+            if($pointUseMoney!=0){
+                $orders[$key]->total_price = $order->total_sales + $pointUseMoney;
+            }
             $orders[$key]->point_use = $pointUse;
             $orders[$key]->points_converted_to_money = $pointUseMoney;
 

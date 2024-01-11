@@ -462,7 +462,7 @@ class Controller extends BaseController
         }
         return $data;
     }
-    public function calculateCoupon($data, $products)
+    public function calculateCoupon($data, $products,$isCheckApiCoupon =false)
     {
         $discount_total = 0;
         $paramCoupon = $data['coupon'];
@@ -504,11 +504,14 @@ class Controller extends BaseController
         if ($discount_total > $data['subtotal']) {
             $discount_total = $data['subtotal'];
         }
-        DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_postmeta')->where('post_id', $coupon->ID)->where('meta_key', 'usage_count')->update(
-            array(
-                'meta_value' => $usage_count+1
-            )
-        );
+        if(!$isCheckApiCoupon){
+            DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_postmeta')->where('post_id', $coupon->ID)->where('meta_key', 'usage_count')->update(
+                array(
+                    'meta_value' => $usage_count+1
+                )
+            );
+        }
+        
         return $discount_total;
     }
     public function timeFormat()

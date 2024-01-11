@@ -63,7 +63,7 @@ class OrdersController extends Controller
             foreach($history_user_point as  $history){
                 if($history->status == 4){
                     $pointUse = $history->point;
-                    $pointUseMoney = $pointUse * $history->amount_spent_setting;
+                    $pointUseMoney = $pointUse * $history->points_converted_to_money;
                 }
                 if($history->status == 1){
                     $pointReceive = $history->point;

@@ -567,7 +567,7 @@ class Controller extends BaseController
             if (!$totalPriceDetails) {
                 throw new \Exception('Không đủ số lượng trong kho');
             }
-
+            $totalOrderBanDau = $totalPriceDetails['total'];
             $finalDetails = $this->getFinalPriceDetails($user, $data, $totalPriceDetails);
 
 
@@ -726,6 +726,7 @@ class Controller extends BaseController
                     )
                 );
             }
+
             if (array_key_exists('point_use', $data)) {
                 $history = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_point')->where('user_id', $user['id'])->orderBy('id', 'DESC')->get();
                 $setting = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_setting')->where('id', 1)->first();
@@ -761,9 +762,8 @@ class Controller extends BaseController
                             'total_order' => $finalDetails['total'],
                             'user_id' => $user['id'],
                             'point' => $data['point_use'],
-                            'minimum_spending' => 0,
-                            'price_sale_off' => 0,
-                            'price_sale_off_max' => 0,
+                            'minimum_spending' => $totalOrderBanDau,
+                            'amount_spent_setting' => $money_converted_to_point,
                             'status' => 4,
                         )
                     );
@@ -778,9 +778,8 @@ class Controller extends BaseController
                         'total_order' => $finalDetails['total'],
                         'user_id' => $user['id'],
                         'point' => $convertMoneyToPoint,
-                        'minimum_spending' => 0,
-                        'price_sale_off' => 0,
-                        'price_sale_off_max' => 0,
+                        'minimum_spending' => $totalOrderBanDau,
+                        'amount_spent_setting' => $money_converted_to_point,
                         'status' => 3,
                     )
                 );

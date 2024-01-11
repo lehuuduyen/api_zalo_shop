@@ -59,17 +59,21 @@ class OrdersController extends Controller
             $history_user_point = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_woo_history_user_point')->where( 'order_id', $order->order_id)->where( 'user_id',$order->customer_id)->get();
             $pointUse =  0;
             $pointReceive =  0;
+            $pointUseMoney =  0;
             foreach($history_user_point as  $history){
                 if($history->status == 4){
                     $pointUse = $history->point;
+                    $pointUseMoney = $pointUse * $history->amount_spent_setting;
                 }
                 if($history->status == 1){
                     $pointReceive = $history->point;
                 }
             }
             $orders[$key]->point_use = $pointUse;
+            $orders[$key]->points_converted_to_money = $pointUseMoney;
+
             $orders[$key]->point_receive = $pointReceive;
-            
+
         }
 
         return $this->returnSuccess($orders);

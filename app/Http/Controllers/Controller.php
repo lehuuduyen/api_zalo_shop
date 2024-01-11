@@ -763,7 +763,7 @@ class Controller extends BaseController
                             'user_id' => $user['id'],
                             'point' => $data['point_use'],
                             'minimum_spending' => $totalOrderBanDau,
-                            'amount_spent_setting' => $money_converted_to_point,
+                            'points_converted_to_money' => $points_converted_to_money,
                             'status' => 4,
                         )
                     );
@@ -779,7 +779,7 @@ class Controller extends BaseController
                         'user_id' => $user['id'],
                         'point' => $convertMoneyToPoint,
                         'minimum_spending' => $totalOrderBanDau,
-                        'amount_spent_setting' => $money_converted_to_point,
+                        'points_converted_to_money' => $points_converted_to_money,
                         'status' => 3,
                     )
                 );

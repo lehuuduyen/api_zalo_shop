@@ -80,7 +80,7 @@ class Controller extends BaseController
         $minute = (env('EXPIRED_MINUTE')) ? env('EXPIRED_MINUTE') : "";
         try {
             $date = empty($minute) ? "" : strtotime(date('d-m-Y H:i:s', strtotime("+$minute min")));
-            $token = $this->encodeData(json_encode(['store' => $store,'prefixTable' => $this->_PRFIX_TABLE, 'sdt' => $sdt, 'databaseStore' => $databaseStore, 'domain' => $domain,'name'=>$name,'user_id'=>$user_id, 'expired_in' => strtotime($date)]));
+            $token = $this->encodeData(json_encode(['store' => $store, 'prefixTable' => $this->_PRFIX_TABLE, 'sdt' => $sdt, 'databaseStore' => $databaseStore, 'domain' => $domain, 'name' => $name, 'user_id' => $user_id, 'expired_in' => strtotime($date)]));
             return $token;
         } catch (\Exception $e) {
             //throw $th;
@@ -92,12 +92,12 @@ class Controller extends BaseController
 
         $image = "";
         if (!$checkTerm) {
-            $postMeta = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_postmeta')->where('meta_key', '_thumbnail_id')->where('post_id', $id)->first();
+            $postMeta = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_postmeta')->where('meta_key', '_thumbnail_id')->where('post_id', $id)->first();
             if ($postMeta) {
-                $image = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_postmeta')->where('meta_key', '_wp_attached_file')->where('post_id', $postMeta->meta_value)->first();
+                $image = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_postmeta')->where('meta_key', '_wp_attached_file')->where('post_id', $postMeta->meta_value)->first();
             }
-        }else{
-            $image = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_postmeta')->where('meta_key', '_wp_attached_file')->where('post_id', $id)->first();
+        } else {
+            $image = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_postmeta')->where('meta_key', '_wp_attached_file')->where('post_id', $id)->first();
         }
 
 
@@ -114,7 +114,7 @@ class Controller extends BaseController
         $listImg = $this->getPostMeta($id, '_product_image_gallery');
         $arr = explode(",", $listImg);
         if (count($arr) > 0) {
-            $data = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_posts')->whereIn('ID', $arr)->get();
+            $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->whereIn('ID', $arr)->get();
             if ($data) {
                 foreach ($data as $key => $value) {
                     $response[$key]['path'] =  "https://" . $store->domain . "/wp-content/uploads/" . $this->getPostMeta($value->ID, '_wp_attached_file');
@@ -218,7 +218,7 @@ class Controller extends BaseController
     public function getCategoryByProduct($id, $store)
     {
         $response = new \stdClass();
-        $cate = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_term_relationships')->where('object_id', $id)->get();
+        $cate = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_term_relationships')->where('object_id', $id)->get();
         $term = [];
         foreach ($cate as $key => $value) {
             $term[] = $value->term_taxonomy_id;
@@ -226,18 +226,18 @@ class Controller extends BaseController
 
 
         if (count($term) > 0) {
-            $listTerm = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_term_taxonomy')->whereIn('term_id', $term)->where('taxonomy', 'product_cat')->get();
+            $listTerm = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_term_taxonomy')->whereIn('term_id', $term)->where('taxonomy', 'product_cat')->get();
             $term = [];
             foreach ($listTerm as $val) {
                 $term[] = $val->term_id;
             }
             if (count($term) > 0) {
-                $listTerm = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_terms')->whereIn('term_id', $term)->first();
+                $listTerm = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_terms')->whereIn('term_id', $term)->first();
                 if ($listTerm) {
                     $response->category_id =  $listTerm->term_id;
                     $response->name =  $listTerm->name;
                     $response->slug =  $listTerm->slug;
-                    $thumbnail = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_termmeta')->where('term_id', $listTerm->term_id)->where('meta_key', 'thumbnail_id')->first();
+                    $thumbnail = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_termmeta')->where('term_id', $listTerm->term_id)->where('meta_key', 'thumbnail_id')->first();
                     $response->image =  ($thumbnail) ? $thumbnail->meta_value : "";
                     $response->sub_category = [];
                 }
@@ -298,9 +298,10 @@ class Controller extends BaseController
         $uniqueArray = array_values($uniqueArray);
         return $uniqueArray;
     }
-    public function getAuthor($authroId){
-        $data = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_users')->where('ID', $authroId)->first();
-        $name =($data)?$data->display_name:"";
+    public function getAuthor($authroId)
+    {
+        $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_users')->where('ID', $authroId)->first();
+        $name = ($data) ? $data->display_name : "";
         return $name;
     }
     // id: number;
@@ -336,46 +337,37 @@ class Controller extends BaseController
         $response->sold_count = $sold_count;
         $list = [];
         $response->product_inventory_details = [];
-        if($trongLuong){
-            $list['Trọng lượng'] =[$trongLuong.' kg'] ;
-
+        if ($trongLuong) {
+            $list['Trọng lượng'] = [$trongLuong . ' kg'];
         }
-        if($length || $width || $height){
+        if ($length || $width || $height) {
             $kichThuoc = "";
-            if($length && $width && !$height){
-                $kichThuoc = $length ." x ".$width;
-            }
-            else if($length && $height && !$width){
-                $kichThuoc = $length ." x ".$height;
-            }
-            else if($width && $height && !$length){
-                $kichThuoc = $width ." x ".$height;
-            }
-            else if($length && $width && $height){
-                $kichThuoc = $length ." x ".$width ." x ".$height;
-            }
-            else if($length && !$width && !$height){
-                $kichThuoc = $length ;
-            }
-            else if($width && !$length && !$height){
-                $kichThuoc = $width ;
-            }
-            else if($height && !$width && !$length){
-                $kichThuoc = $height ;
+            if ($length && $width && !$height) {
+                $kichThuoc = $length . " x " . $width;
+            } else if ($length && $height && !$width) {
+                $kichThuoc = $length . " x " . $height;
+            } else if ($width && $height && !$length) {
+                $kichThuoc = $width . " x " . $height;
+            } else if ($length && $width && $height) {
+                $kichThuoc = $length . " x " . $width . " x " . $height;
+            } else if ($length && !$width && !$height) {
+                $kichThuoc = $length;
+            } else if ($width && !$length && !$height) {
+                $kichThuoc = $width;
+            } else if ($height && !$width && !$length) {
+                $kichThuoc = $height;
             }
 
-            if($kichThuoc){
-                $kichThuoc = $kichThuoc ." cm";
+            if ($kichThuoc) {
+                $kichThuoc = $kichThuoc . " cm";
             }
-            $list['Kích thước'] =[$kichThuoc] ;
-
-
+            $list['Kích thước'] = [$kichThuoc];
         }
-        if($proAttr ){
+        if ($proAttr) {
             foreach ($proAttr as $attr => $val) {
                 $val['attribute'] = $val;
-                $list[$val['name']]=explode('|',$val['value']);
-                $response->product_inventory_details[]=$val;
+                $list[$val['name']] = explode('|', $val['value']);
+                $response->product_inventory_details[] = $val;
             }
         }
 
@@ -449,24 +441,24 @@ class Controller extends BaseController
     }
     public function getreview($id)
     {
-    //     id: number;
-    // product_id: number;
-    // user_id: number;
-    // rating: number;
-    // review_text: string | null;
-    // created_at: string | null;
-    // updated_at: string | null;
-    // name: string;
-        $data =[];
-        $response = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_comments')->join( $this->_PRFIX_TABLE .'_commentmeta', $this->_PRFIX_TABLE .'_commentmeta.comment_id', $this->_PRFIX_TABLE .'_comments.comment_ID')->where( $this->_PRFIX_TABLE .'_comments.comment_post_ID', $id)->where( $this->_PRFIX_TABLE .'_comments.comment_type', 'review')->where( $this->_PRFIX_TABLE .'_commentmeta.meta_key', 'rating')->select( $this->_PRFIX_TABLE .'_comments.*', $this->_PRFIX_TABLE .'_commentmeta.meta_value')->get();
+        //     id: number;
+        // product_id: number;
+        // user_id: number;
+        // rating: number;
+        // review_text: string | null;
+        // created_at: string | null;
+        // updated_at: string | null;
+        // name: string;
+        $data = [];
+        $response = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_comments')->join($this->_PRFIX_TABLE . '_commentmeta', $this->_PRFIX_TABLE . '_commentmeta.comment_id', $this->_PRFIX_TABLE . '_comments.comment_ID')->where($this->_PRFIX_TABLE . '_comments.comment_post_ID', $id)->where($this->_PRFIX_TABLE . '_comments.comment_type', 'review')->where($this->_PRFIX_TABLE . '_commentmeta.meta_key', 'rating')->select($this->_PRFIX_TABLE . '_comments.*', $this->_PRFIX_TABLE . '_commentmeta.meta_value')->get();
 
-        foreach( $response as $key => $value){
-            $data[$key]['id'] =$value->comment_ID;
-            $data[$key]['product_id'] =$id;
-            $data[$key]['user_id'] =$value->user_id;
-            $data[$key]['rating'] =(int)$value->meta_value;
-            $data[$key]['review_text'] =$value->comment_content;
-            $data[$key]['name'] =$value->comment_author;
+        foreach ($response as $key => $value) {
+            $data[$key]['id'] = $value->comment_ID;
+            $data[$key]['product_id'] = $id;
+            $data[$key]['user_id'] = $value->user_id;
+            $data[$key]['rating'] = (int)$value->meta_value;
+            $data[$key]['review_text'] = $value->comment_content;
+            $data[$key]['name'] = $value->comment_author;
         }
         return $data;
     }
@@ -474,30 +466,30 @@ class Controller extends BaseController
     {
         $discount_total = 0;
         $paramCoupon = $data['coupon'];
-        $coupon = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_posts')->where('post_title', $paramCoupon)->where('post_status', 'publish')->where('post_type', 'shop_coupon')->first();
-        $checkPoint = $this->getPostMeta($coupon->ID,'customer_user');
+        $coupon = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->where('post_title', $paramCoupon)->where('post_status', 'publish')->where('post_type', 'shop_coupon')->first();
+        $checkPoint = $this->getPostMeta($coupon->ID, 'customer_user');
 
-        
+
 
         if (is_null($coupon)) {
             return $discount_total;
         }
-        $date_expires = $this->getPostMeta($coupon->ID,'date_expires');
-        if(!$checkPoint){
-            if($date_expires < time()){
+        $date_expires = $this->getPostMeta($coupon->ID, 'date_expires');
+        if (!$checkPoint) {
+            if ($date_expires < time()) {
                 return $discount_total;
             }
         }
-       
 
-        $coupon_amount = $this->getPostMeta($coupon->ID,'coupon_amount');
-        $usage_limit = $this->getPostMeta($coupon->ID,'usage_limit');
-        $usage_count = $this->getPostMeta($coupon->ID,'usage_count');
-        if($usage_limit <= $usage_count){
+
+        $coupon_amount = $this->getPostMeta($coupon->ID, 'coupon_amount');
+        $usage_limit = $this->getPostMeta($coupon->ID, 'usage_limit');
+        $usage_count = $this->getPostMeta($coupon->ID, 'usage_count');
+        if ($usage_limit <= $usage_count) {
             return $discount_total;
         }
-        $coupon_type = $this->getPostMeta($coupon->ID,'discount_type');
-        if($coupon_type == "percent"){
+        $coupon_type = $this->getPostMeta($coupon->ID, 'discount_type');
+        if ($coupon_type == "percent") {
             $coupon_type = 'percentage';
         }
 
@@ -514,7 +506,8 @@ class Controller extends BaseController
 
         return $discount_total;
     }
-    public function timeFormat(){
+    public function timeFormat()
+    {
         $now = time();
 
         // Format the date and time
@@ -531,13 +524,13 @@ class Controller extends BaseController
 
         try {
             // them wp_posts
-            $postId = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_posts')->insertGetId(
+            $postId = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->insertGetId(
                 array(
                     'post_date' => $timeNow,
                     'post_date_gmt' => $timeNow,
                     'post_modified' => $timeNow,
                     'post_modified_gmt' => $timeNow,
-                    'post_title' => 'Order &ndash; '.$this->timeFormat(),
+                    'post_title' => 'Order &ndash; ' . $this->timeFormat(),
                     'post_status' => 'wc-processing',
                     'post_type' => 'shop_order',
                     'post_content' => '',
@@ -550,10 +543,10 @@ class Controller extends BaseController
                 )
             );
             // $data['message'] wp_comments
-            if($data['message']){
-                DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_comments')->insert(
+            if ($data['message']) {
+                DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_comments')->insert(
                     array(
-                        'comment_post_ID' => $postId ,
+                        'comment_post_ID' => $postId,
                         'comment_author' => $user['name'],
                         'comment_author_email' => $user['email'],
                         'comment_author_url' => '',
@@ -569,25 +562,25 @@ class Controller extends BaseController
             }
 
 
-            $totalPriceDetails =  $this->getTotalPriceDetails($data['order'],$postId);
+            $totalPriceDetails =  $this->getTotalPriceDetails($data['order'], $postId);
             if (!$totalPriceDetails) {
                 throw new \Exception('Không đủ số lượng trong kho');
             }
 
             $finalDetails = $this->getFinalPriceDetails($user, $data, $totalPriceDetails);
-          
+
 
 
 
 
 
             //them wp_wc_order_coupon_lookup && wp_woocommerce_order_items
-            if($finalDetails['coupon_discounted'] && $finalDetails['coupon_discounted'] >0){
-                $coupon = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_posts')->where('post_title', $data['used_coupon'])->where('post_status', 'publish')->where('post_type', 'shop_coupon')->first();
-                $coupon_amount = $this->getPostMeta($coupon->ID,'coupon_amount');
-                $coupon_type = $this->getPostMeta($coupon->ID,'discount_type');
+            if ($finalDetails['coupon_discounted'] && $finalDetails['coupon_discounted'] > 0) {
+                $coupon = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->where('post_title', $data['used_coupon'])->where('post_status', 'publish')->where('post_type', 'shop_coupon')->first();
+                $coupon_amount = $this->getPostMeta($coupon->ID, 'coupon_amount');
+                $coupon_type = $this->getPostMeta($coupon->ID, 'discount_type');
 
-                DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_wc_order_coupon_lookup')->insertGetId(
+                DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_wc_order_coupon_lookup')->insertGetId(
                     array(
                         'order_id' => $postId,
                         'coupon_id' => $coupon->ID,
@@ -595,7 +588,7 @@ class Controller extends BaseController
                         'discount_amount' => $finalDetails['coupon_discounted'],
                     )
                 );
-                $orderItemIdCoupon = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_woocommerce_order_items')->insertGetId(
+                $orderItemIdCoupon = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woocommerce_order_items')->insertGetId(
                     array(
                         'order_id' => $postId,
                         'order_item_type' => 'coupon',
@@ -604,56 +597,54 @@ class Controller extends BaseController
                 );
 
 
-                DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_woocommerce_order_itemmeta')->insert(
+                DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woocommerce_order_itemmeta')->insert(
                     array(
                         array(
-                            'order_item_id'=>$orderItemIdCoupon,
-                            'meta_key'=>'coupon_data',
-                            'meta_value'=>'',
+                            'order_item_id' => $orderItemIdCoupon,
+                            'meta_key' => 'coupon_data',
+                            'meta_value' => '',
                         ),
                         array(
-                            'order_item_id'=>$orderItemIdCoupon,
-                            'meta_key'=>'discount_amount_tax',
-                            'meta_value'=>0,
+                            'order_item_id' => $orderItemIdCoupon,
+                            'meta_key' => 'discount_amount_tax',
+                            'meta_value' => 0,
                         ),
                         array(
-                            'order_item_id'=>$orderItemIdCoupon,
-                            'meta_key'=>'discount_amount',
-                            'meta_value'=>$finalDetails['coupon_discounted'],
+                            'order_item_id' => $orderItemIdCoupon,
+                            'meta_key' => 'discount_amount',
+                            'meta_value' => $finalDetails['coupon_discounted'],
                         )
                     ),
                 );
-
             }
             //wp_wc_order_product_lookup
             $totalQuantity = array_sum($totalPriceDetails['quantity']);
 
-            foreach($totalPriceDetails['products_id'] as $key  => $productId){
-                $products = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_posts')->where('ID', $productId)->select('post_title')->first();
-                if(!$products){
+            foreach ($totalPriceDetails['products_id'] as $key  => $productId) {
+                $products = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->where('ID', $productId)->select('post_title')->first();
+                if (!$products) {
                     throw new \Exception('Sản phẩm không tồn tại');
-
                 }
 
                 $price = $this->getSellPrice($productId);
-                
+
                 $totalBanDau = $price * $totalPriceDetails['quantity'][$key];
                 $tongGiaGiam = 0;
-                if(isset($coupon) && $coupon){
-                    if($coupon_type == 'fixed_cart'){
+                if (isset($coupon) && $coupon) {
+                    if ($coupon_type == 'fixed_cart') {
                         $giagiam = round($coupon_amount / $totalQuantity * $totalPriceDetails['quantity'][$key]);
                         $price = $price - $giagiam;
-                        $tongGiaGiam=$tongGiaGiam + $giagiam;
-                    }else{
+                        $tongGiaGiam = $tongGiaGiam + $giagiam;
+                    } else {
                         $giagiam = round($price * $coupon_amount  / 100);
                         $price = $price - $giagiam;
-                        $tongGiaGiam=$tongGiaGiam + $giagiam * $totalPriceDetails['quantity'][$key];
+                        $tongGiaGiam = $tongGiaGiam + $giagiam * $totalPriceDetails['quantity'][$key];
                     }
                 }
 
 
                 //wp_woocommerce_order_items
-                $orderItemId = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_woocommerce_order_items')->insertGetId(
+                $orderItemId = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woocommerce_order_items')->insertGetId(
                     array(
                         'order_id' => $postId,
                         'order_item_type' => 'line_item',
@@ -661,63 +652,63 @@ class Controller extends BaseController
                     )
                 );
 
-                DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_woocommerce_order_itemmeta')->insert(
+                DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woocommerce_order_itemmeta')->insert(
                     array(
                         array(
-                            'order_item_id'=>$orderItemId,
-                            'meta_key'=>'_reduced_stock',
-                            'meta_value'=>$totalPriceDetails['quantity'][$key],
+                            'order_item_id' => $orderItemId,
+                            'meta_key' => '_reduced_stock',
+                            'meta_value' => $totalPriceDetails['quantity'][$key],
                         ),
                         array(
-                            'order_item_id'=>$orderItemId,
-                            'meta_key'=>'_line_tax_data',
-                            'meta_value'=>'',
+                            'order_item_id' => $orderItemId,
+                            'meta_key' => '_line_tax_data',
+                            'meta_value' => '',
                         ),
                         array(
-                            'order_item_id'=>$orderItemId,
-                            'meta_key'=>'_line_tax',
-                            'meta_value'=>0,
+                            'order_item_id' => $orderItemId,
+                            'meta_key' => '_line_tax',
+                            'meta_value' => 0,
                         ),
                         array(
-                            'order_item_id'=>$orderItemId,
-                            'meta_key'=>'_line_total',
-                            'meta_value'=>$price * $totalPriceDetails['quantity'][$key],
+                            'order_item_id' => $orderItemId,
+                            'meta_key' => '_line_total',
+                            'meta_value' => $price * $totalPriceDetails['quantity'][$key],
                         ),
                         array(
-                            'order_item_id'=>$orderItemId,
-                            'meta_key'=>'_line_subtotal_tax',
-                            'meta_value'=>0,
+                            'order_item_id' => $orderItemId,
+                            'meta_key' => '_line_subtotal_tax',
+                            'meta_value' => 0,
                         ),
                         array(
-                            'order_item_id'=>$orderItemId,
-                            'meta_key'=>'_line_subtotal',
-                            'meta_value'=>$totalBanDau ,
+                            'order_item_id' => $orderItemId,
+                            'meta_key' => '_line_subtotal',
+                            'meta_value' => $totalBanDau,
                         ),
                         array(
-                            'order_item_id'=>$orderItemId,
-                            'meta_key'=>'_tax_class',
-                            'meta_value'=>'',
+                            'order_item_id' => $orderItemId,
+                            'meta_key' => '_tax_class',
+                            'meta_value' => '',
                         ),
                         array(
-                            'order_item_id'=>$orderItemId,
-                            'meta_key'=>'_qty',
-                            'meta_value'=>$totalPriceDetails['quantity'][$key],
+                            'order_item_id' => $orderItemId,
+                            'meta_key' => '_qty',
+                            'meta_value' => $totalPriceDetails['quantity'][$key],
                         ),
                         array(
-                            'order_item_id'=>$orderItemId,
-                            'meta_key'=>'_variation_id',
-                            'meta_value'=>0,
+                            'order_item_id' => $orderItemId,
+                            'meta_key' => '_variation_id',
+                            'meta_value' => 0,
                         ),
                         array(
-                            'order_item_id'=>$orderItemId,
-                            'meta_key'=>'_product_id',
-                            'meta_value'=>$productId,
+                            'order_item_id' => $orderItemId,
+                            'meta_key' => '_product_id',
+                            'meta_value' => $productId,
                         )
 
                     )
                 );
                 // wp_wc_order_product_lookup
-                DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_wc_order_product_lookup')->insert(
+                DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_wc_order_product_lookup')->insert(
                     array(
                         'order_item_id' => $orderItemId,
                         'order_id' => $postId,
@@ -727,43 +718,43 @@ class Controller extends BaseController
                         'date_created' => $timeNow,
                         'customer_id' => $user['id'],
                         'product_qty' => $totalPriceDetails['quantity'][$key],
-                        'product_gross_revenue' => $price * $totalPriceDetails['quantity'][$key] ,
-                        'product_net_revenue' => $price * $totalPriceDetails['quantity'][$key] ,
+                        'product_gross_revenue' => $price * $totalPriceDetails['quantity'][$key],
+                        'product_net_revenue' => $price * $totalPriceDetails['quantity'][$key],
                         'coupon_amount' => $tongGiaGiam,
 
                     )
                 );
             }
-            if(array_key_exists('point_use', $data)){
-                $history = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_woo_history_user_point')->where('user_id', $user['id'])->orderBy('id', 'DESC')->get();
-                $setting = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_woo_setting')->where('id',1)->first();
+            if (array_key_exists('point_use', $data)) {
+                $history = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_point')->where('user_id', $user['id'])->orderBy('id', 'DESC')->get();
+                $setting = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_setting')->where('id', 1)->first();
                 $money_converted_to_point = 0;
                 $points_converted_to_money = 0;
-                if($setting){
+                if ($setting) {
                     $money_converted_to_point = $setting->amount_spent;
                     $points_converted_to_money = $setting->points_converted_to_money;
                 }
 
                 // tính điểm sang tiền
                 $tienDoiThuong = $points_converted_to_money * $data['point_use'];
-                if($tienDoiThuong > $finalDetails['total']  ){
+                if ($tienDoiThuong > $finalDetails['total']) {
                     throw new \Exception('Tiền đổi thưởng không được quá tổng đơn hàng');
                 }
 
 
 
                 $totalDoiThuong = 0;
-                foreach($history  as $value){
-                    if($value->status == 1){
+                foreach ($history  as $value) {
+                    if ($value->status == 1) {
                         $totalDoiThuong = $totalDoiThuong + $value->point;
                     }
-                    if($value->status == 2 || $value->status == 4){
+                    if ($value->status == 2 || $value->status == 4) {
                         $totalDoiThuong = $totalDoiThuong - $value->point;
                     }
                 }
-                if($data['point_use'] && $totalDoiThuong > 0 && $totalDoiThuong >= $data['point_use']){
+                if ($data['point_use'] && $totalDoiThuong > 0 && $totalDoiThuong >= $data['point_use']) {
                     $finalDetails['total'] = $finalDetails['total'] - $tienDoiThuong;
-                    DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_woo_history_user_point')->insertGetId(
+                    DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_point')->insertGetId(
                         array(
                             'order_id' => $postId,
                             'total_order' => $finalDetails['total'],
@@ -775,142 +766,158 @@ class Controller extends BaseController
                             'status' => 4,
                         )
                     );
-                } else if( $data['point_use'] =='' || $data['point_use'] == 0){
-
-                }else{
+                } else if ($data['point_use'] == '' || $data['point_use'] == 0) {
+                } else {
                     throw new \Exception('Vượt quá số điểm hiện có');
                 }
-                $convertMoneyToPoint = ($money_converted_to_point)>0 ? floor($finalDetails['total'] / $money_converted_to_point): 0;
-                    DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_woo_history_user_point')->insertGetId(
-                        array(
-                            'order_id' => $postId,
-                            'total_order' => $finalDetails['total'],
-                            'user_id' => $user['id'],
-                            'point' => $convertMoneyToPoint,
-                            'minimum_spending' => 0,
-                            'price_sale_off' => 0,
-                            'price_sale_off_max' => 0,
-                            'status' => 3,
-                        )
-                    );
+                $convertMoneyToPoint = ($money_converted_to_point) > 0 ? floor($finalDetails['total'] / $money_converted_to_point) : 0;
+                DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_point')->insertGetId(
+                    array(
+                        'order_id' => $postId,
+                        'total_order' => $finalDetails['total'],
+                        'user_id' => $user['id'],
+                        'point' => $convertMoneyToPoint,
+                        'minimum_spending' => 0,
+                        'price_sale_off' => 0,
+                        'price_sale_off_max' => 0,
+                        'status' => 3,
+                    )
+                );
             }
-  // them wp_postmeta
-  $postMeta = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_postmeta')->insert(
-    array(
-        array(
-            'post_id'=>$postId,
-            'meta_key'=>'_order_key',
-            'meta_value'=>'wc_order_'.Str::random(10),
-        ),
-        array(
-            'post_id'=>$postId,
-            'meta_key'=>'_customer_user',
-            'meta_value'=>$user['id'],
-        ),
-        array(
-            'post_id'=>$postId,
-            'meta_key'=>'_payment_method',
-            'meta_value'=>$data['payment_gateway'],
-        ),
-        array(
-            'post_id'=>$postId,
-            'meta_key'=>'_payment_method_title',
-            'meta_value'=>'Thanh toán khi giao hàng',
-        ),
-        array(
-            'post_id'=>$postId,
-            'meta_key'=>'_billing_last_name',
-            'meta_value'=>$user['name'],
-        ),
-        array(
-            'post_id'=>$postId,
-            'meta_key'=>'_billing_address_1',
-            'meta_value'=>$user['address'],
-        ),
-        array(
-            'post_id'=>$postId,
-            'meta_key'=>'_billing_email',
-            'meta_value'=>$user['email'],
-        ),
-        array(
-            'post_id'=>$postId,
-            'meta_key'=>'_billing_phone',
-            'meta_value'=>$user['mobile'],
-        ),
-        array(
-            'post_id'=>$postId,
-            'meta_key'=>'_order_currency',
-            'meta_value'=>'VND',
-        ),
-        array(
-            'post_id'=>$postId,
-            'meta_key'=>'_cart_discount',
-            'meta_value'=>$finalDetails['coupon_discounted'],
-        ),
-        array(
-            'post_id'=>$postId,
-            'meta_key'=>'_cart_discount_tax',
-            'meta_value'=>0,
-        ),
-        array(
-            'post_id'=>$postId,
-            'meta_key'=>'_order_shipping',
-            'meta_value'=>0,
-        ),
-        array(
-            'post_id'=>$postId,
-            'meta_key'=>'_order_shipping_tax',
-            'meta_value'=>0,
-        ),
-        array(
-            'post_id'=>$postId,
-            'meta_key'=>'_order_tax',
-            'meta_value'=>0,
-        ),
-        array(
-            'post_id'=>$postId,
-            'meta_key'=>'_order_total',
-            'meta_value'=>$finalDetails['total'],
-        ),
-        array(
-            'post_id'=>$postId,
-            'meta_key'=>'_billing_address_index',
-            'meta_value'=>$user['name'].' '.$user['address'].' '.$user['email'].' '.$user['mobile'],
-        ),
-        array(
-            'post_id'=>$postId,
-            'meta_key'=>'_shipping_address_index',
-            'meta_value'=>$user['address'],
-        ),
-        array(
-            'post_id'=>$postId,
-            'meta_key'=>'_shipping_address_1',
-            'meta_value'=>$user['address'],
-        ),
-        array(
-            'post_id'=>$postId,
-            'meta_key'=>'_shipping_country',
-            'meta_value'=>'VN',
-        ),
-    )
-);
-
-            //them order wp_wc_order_stats
-            DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_wc_order_stats')->insertGetId(
+            // them wp_postmeta
+            $postMeta = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_postmeta')->insert(
                 array(
-                    'order_id' => $postId,
-                    'date_created' => $timeNow,
-                    'date_completed' => $timeNow,
-                    'date_created_gmt' => $timeNow,
-                    'date_paid' => $timeNow,
-                    'num_items_sold' => array_sum($totalPriceDetails['quantity']),
-                    'net_total' => $finalDetails['total'],
-                    'total_sales' => $finalDetails['total'],
-                    'returning_customer' => 1,
-                    'customer_id' => $user['id'],
-                    'status' => 'wc-pending',
+                    array(
+                        'post_id' => $postId,
+                        'meta_key' => '_order_key',
+                        'meta_value' => 'wc_order_' . Str::random(10),
+                    ),
+                    array(
+                        'post_id' => $postId,
+                        'meta_key' => '_customer_user',
+                        'meta_value' => $user['id'],
+                    ),
+                    array(
+                        'post_id' => $postId,
+                        'meta_key' => '_payment_method',
+                        'meta_value' => $data['payment_gateway'],
+                    ),
+                    array(
+                        'post_id' => $postId,
+                        'meta_key' => '_payment_method_title',
+                        'meta_value' => 'Thanh toán khi giao hàng',
+                    ),
+                    array(
+                        'post_id' => $postId,
+                        'meta_key' => '_billing_last_name',
+                        'meta_value' => $user['name'],
+                    ),
+                    array(
+                        'post_id' => $postId,
+                        'meta_key' => '_billing_address_1',
+                        'meta_value' => $user['address'],
+                    ),
+                    array(
+                        'post_id' => $postId,
+                        'meta_key' => '_billing_email',
+                        'meta_value' => $user['email'],
+                    ),
+                    array(
+                        'post_id' => $postId,
+                        'meta_key' => '_billing_phone',
+                        'meta_value' => $user['mobile'],
+                    ),
+                    array(
+                        'post_id' => $postId,
+                        'meta_key' => '_order_currency',
+                        'meta_value' => 'VND',
+                    ),
+                    array(
+                        'post_id' => $postId,
+                        'meta_key' => '_cart_discount',
+                        'meta_value' => $finalDetails['coupon_discounted'],
+                    ),
+                    array(
+                        'post_id' => $postId,
+                        'meta_key' => '_cart_discount_tax',
+                        'meta_value' => 0,
+                    ),
+                    array(
+                        'post_id' => $postId,
+                        'meta_key' => '_order_shipping',
+                        'meta_value' => 0,
+                    ),
+                    array(
+                        'post_id' => $postId,
+                        'meta_key' => '_order_shipping_tax',
+                        'meta_value' => 0,
+                    ),
+                    array(
+                        'post_id' => $postId,
+                        'meta_key' => '_order_tax',
+                        'meta_value' => 0,
+                    ),
+                    array(
+                        'post_id' => $postId,
+                        'meta_key' => '_order_total',
+                        'meta_value' => $finalDetails['total'],
+                    ),
+                    array(
+                        'post_id' => $postId,
+                        'meta_key' => '_billing_address_index',
+                        'meta_value' => $user['name'] . ' ' . $user['address'] . ' ' . $user['email'] . ' ' . $user['mobile'],
+                    ),
+                    array(
+                        'post_id' => $postId,
+                        'meta_key' => '_shipping_address_index',
+                        'meta_value' => $user['address'],
+                    ),
+                    array(
+                        'post_id' => $postId,
+                        'meta_key' => '_shipping_address_1',
+                        'meta_value' => $user['address'],
+                    ),
+                    array(
+                        'post_id' => $postId,
+                        'meta_key' => '_shipping_country',
+                        'meta_value' => 'VN',
+                    ),
                 )
             );
+            //them order wp_wc_order_stats
+
+            try {
+                DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_wc_order_stats')->insertGetId(
+                    array(
+                        'order_id' => $postId,
+                        'date_created' => $timeNow,
+                        'date_completed' => $timeNow,
+                        'date_created_gmt' => $timeNow,
+                        'date_paid' => $timeNow,
+                        'num_items_sold' => array_sum($totalPriceDetails['quantity']),
+                        'net_total' => $finalDetails['total'],
+                        'total_sales' => $finalDetails['total'],
+                        'returning_customer' => 1,
+                        'customer_id' => $user['id'],
+                        'status' => 'wc-pending',
+                    )
+                );
+            } catch (\Throwable $th) {
+                DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_wc_order_stats')->insertGetId(
+                    array(
+                        'order_id' => $postId,
+                        'date_created' => $timeNow,
+                        'date_created_gmt' => $timeNow,
+                        'num_items_sold' => array_sum($totalPriceDetails['quantity']),
+                        'net_total' => $finalDetails['total'],
+                        'total_sales' => $finalDetails['total'],
+                        'returning_customer' => 1,
+                        'customer_id' => $user['id'],
+                        'status' => 'wc-pending',
+                    )
+                );
+            }
+
 
             //tính hoa hồng
 
@@ -924,8 +931,7 @@ class Controller extends BaseController
 
 
             DB::connection('mysql_external')->rollBack();
-            throw new \Exception( $th->getMessage());
-
+            throw new \Exception($th->getMessage());
         }
     }
 
@@ -940,7 +946,7 @@ class Controller extends BaseController
         $country = $validated_data["country"];
 
         $price = $totalPriceDetails;
-        $coupon = ["coupon" => $validated_data['used_coupon'],"subtotal" => $price['total']];
+        $coupon = ["coupon" => $validated_data['used_coupon'], "subtotal" => $price['total']];
 
 
 
@@ -949,8 +955,8 @@ class Controller extends BaseController
         $coupon['subtotal'] = $price['total'];
         $discounted_price = $this->calculateCoupon($coupon, []);
 
-        
-        
+
+
 
         $price['total'] -= $discounted_price;
 
@@ -1046,20 +1052,21 @@ class Controller extends BaseController
         $productInventory->name = $this->getTextByLanguare($productInventory->name);
         return $productInventory;
     }
-    public function getSellPrice($postId){
+    public function getSellPrice($postId)
+    {
         $priceGoc = $this->getPostMeta($postId, '_regular_price');
         $price = $this->getPostMeta($postId, '_sale_price');
         $time = time();
         $_sale_price_dates_from = $this->getPostMeta($postId, '_sale_price_dates_from');
         $_sale_price_dates_to = $this->getPostMeta($postId, '_sale_price_dates_to');
-        if($price && $time >= $_sale_price_dates_from && $time <= $_sale_price_dates_to ){
+        if ($price && $time >= $_sale_price_dates_from && $time <= $_sale_price_dates_to) {
             $price = $price;
-        }else{
+        } else {
             $price = $priceGoc;
         }
-            return $price;
+        return $price;
     }
-    public function getTotalPriceDetails($cart,$postId)
+    public function getTotalPriceDetails($cart, $postId)
     {
 
 
@@ -1073,20 +1080,20 @@ class Controller extends BaseController
             $price = $this->getPostMeta($item['id'], '_sale_price');
             $_sale_price_dates_from = $this->getPostMeta($item['id'], '_sale_price_dates_from');
             $_sale_price_dates_to = $this->getPostMeta($item['id'], '_sale_price_dates_to');
-            if($price && $time >= $_sale_price_dates_from && $time <= $_sale_price_dates_to ){
+            if ($price && $time >= $_sale_price_dates_from && $time <= $_sale_price_dates_to) {
                 $price = $price;
-            }else{
+            } else {
                 $price = $priceGoc;
             }
-            
-            
+
+
 
             $stockStatus = $this->getPostMeta($item['id'], '_stock_status');
             //checkcampaign
             $productId = $item['id'];
 
             //check số lượng trong kho
-            if(!empty($stock_count) &&  $stock_count < $item['qty']){
+            if (!empty($stock_count) &&  $stock_count < $item['qty']) {
 
 
                 $this->_messageError = $item['name'] . " hết hàng trong kho";
@@ -1097,12 +1104,12 @@ class Controller extends BaseController
 
 
             // trừ số lượng kho
-            DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_postmeta')->where('post_id', $productId)->where('meta_key','total_sales')->update(
+            DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_postmeta')->where('post_id', $productId)->where('meta_key', 'total_sales')->update(
                 array(
                     'meta_value' => $sold_count + $item['qty']
                 )
             );
-            DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_postmeta')->where('post_id', $productId)->where('meta_key','_stock')->update(
+            DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_postmeta')->where('post_id', $productId)->where('meta_key', '_stock')->update(
                 array(
                     'meta_value' => $stock_count - $item['qty']
                 )
@@ -1112,7 +1119,6 @@ class Controller extends BaseController
             $products_id[] = $item['id'];
             $variant_id[] = $item['variant_id'];
             $quantity[] = $item['qty'];
-
         }
 
         $arr = [
@@ -1124,61 +1130,63 @@ class Controller extends BaseController
 
         return $arr;
     }
-    public function getHistoryUser($userId){
-        $data = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_woo_history_user_point')->where('user_id', $userId)->orderBy('id', 'DESC')->get();
+    public function getHistoryUser($userId)
+    {
+        $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_point')->where('user_id', $userId)->orderBy('id', 'DESC')->get();
         return $data;
     }
 
-    public function getPointUser($history){
+    public function getPointUser($history)
+    {
         $total = 0;
         $totalDoiThuong = 0;
         $totalOrder = 0;
-        foreach($history  as $value){
-            if($value->status == 1){
+        foreach ($history  as $value) {
+            if ($value->status == 1) {
                 $total = $total + $value->point;
                 $totalDoiThuong = $totalDoiThuong + $value->point;
                 $totalOrder = $totalOrder + $value->total_order;
-
             }
-            if($value->status == 2 || $value->status == 4){
+            if ($value->status == 2 || $value->status == 4) {
                 $totalDoiThuong = $totalDoiThuong - $value->point;
             }
         }
-        $checkRank = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_woo_rank')->where('minimum_spending','<=', $totalOrder)->orderBy('minimum_spending', 'DESC')->first();
-        $checkRankNext = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_woo_rank')->where('minimum_spending','>', $totalOrder)->orderBy('minimum_spending', 'ASC')->first();
+        $checkRank = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_rank')->where('minimum_spending', '<=', $totalOrder)->orderBy('minimum_spending', 'DESC')->first();
+        $checkRankNext = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_rank')->where('minimum_spending', '>', $totalOrder)->orderBy('minimum_spending', 'ASC')->first();
         $pointNext = 0;
-        if($checkRankNext){
+        if ($checkRankNext) {
             $minium = $checkRankNext->minimum_spending;
-            $pointPriceSetiing = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_woo_setting')->where('id', 1)->first();
-            if($pointPriceSetiing){
+            $pointPriceSetiing = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_setting')->where('id', 1)->first();
+            if ($pointPriceSetiing) {
 
 
-                $pointNextSetting =ceil( $minium / $pointPriceSetiing->amount_spent);
+                $pointNextSetting = ceil($minium / $pointPriceSetiing->amount_spent);
                 $pointNext = $pointNextSetting - $total;
             }
         }
         return [
-            'total' =>$total,
-            'totalDoiThuong' =>$totalDoiThuong,
-            'totalOrder' =>$totalOrder,
-            'rank' =>$checkRank,
-            'rankNext' =>$checkRankNext,
-            'point_next' =>$pointNext,
+            'total' => $total,
+            'totalDoiThuong' => $totalDoiThuong,
+            'totalOrder' => $totalOrder,
+            'rank' => $checkRank,
+            'rankNext' => $checkRankNext,
+            'point_next' => $pointNext,
         ];
     }
-    public function getPostByCategoryId($id){
-        $data = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_posts')
-        ->join( $this->_PRFIX_TABLE .'_term_relationships',  $this->_PRFIX_TABLE .'_term_relationships.object_id',  $this->_PRFIX_TABLE .'_posts.ID')
-        ->where('term_taxonomy_id', $id)->where('post_status', 'publish')->select( $this->_PRFIX_TABLE .'_posts.*')->orderBy('post_modified', 'DESC')->get();
+    public function getPostByCategoryId($id)
+    {
+        $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')
+            ->join($this->_PRFIX_TABLE . '_term_relationships',  $this->_PRFIX_TABLE . '_term_relationships.object_id',  $this->_PRFIX_TABLE . '_posts.ID')
+            ->where('term_taxonomy_id', $id)->where('post_status', 'publish')->select($this->_PRFIX_TABLE . '_posts.*')->orderBy('post_modified', 'DESC')->get();
         return $data;
     }
     public function getPostByCategory($nameCate)
     {
-        $cate = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_terms')->where('slug', $nameCate)->first();
+        $cate = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_terms')->where('slug', $nameCate)->first();
         $data = [];
         if ($cate) {
-            $data = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_posts')
-                ->join( $this->_PRFIX_TABLE .'_term_relationships',  $this->_PRFIX_TABLE .'_term_relationships.object_id',  $this->_PRFIX_TABLE .'_posts.ID')
+            $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')
+                ->join($this->_PRFIX_TABLE . '_term_relationships',  $this->_PRFIX_TABLE . '_term_relationships.object_id',  $this->_PRFIX_TABLE . '_posts.ID')
                 ->where('term_taxonomy_id', $cate->term_id)->where('post_status', 'publish')->orderBy('post_modified', 'DESC')->get();
         }
         return ['data' => $data, 'cate' => $cate];
@@ -1186,7 +1194,7 @@ class Controller extends BaseController
     public function lienhe($content, $text, $count)
     {
         $lineAfterPhone = '';
-        $pattern = '/'.$text.' (.+?)\n/';
+        $pattern = '/' . $text . ' (.+?)\n/';
         // Perform a regular expression match
         if (preg_match($pattern, $content, $matches)) {
             // Extracted email address
@@ -1196,7 +1204,7 @@ class Controller extends BaseController
     }
     public function getPostMeta($postId, $meta)
     {
-        $data = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_postmeta')->where('post_id', $postId)->where('meta_key', $meta)->first();
+        $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_postmeta')->where('post_id', $postId)->where('meta_key', $meta)->first();
         if ($data) {
             return $data->meta_value;
         }
@@ -1204,7 +1212,7 @@ class Controller extends BaseController
     }
     public function getUserMeta($userId, $meta)
     {
-        $data = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_usermeta')->where('user_id', $userId)->where('meta_key', $meta)->first();
+        $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->where('user_id', $userId)->where('meta_key', $meta)->first();
         if ($data) {
             return $data->meta_value;
         }
@@ -1212,25 +1220,26 @@ class Controller extends BaseController
     }
     public function getOrderMeta($orderId, $meta)
     {
-        $data = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_woocommerce_order_itemmeta')->where('order_item_id', $orderId)->where('meta_key', $meta)->first();
+        $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woocommerce_order_itemmeta')->where('order_item_id', $orderId)->where('meta_key', $meta)->first();
         if ($data) {
             return $data->meta_value;
         }
         return $data;
     }
-    public function getPrefixTable(){
+    public function getPrefixTable()
+    {
         $tables = DB::connection('mysql_external')->select('SHOW TABLES')[0];
         $array = get_object_vars($tables);
         $value = array_values($array)[0];
 
-        return explode("_",$value)[0];
+        return explode("_", $value)[0];
     }
-    public function getPrefixTableFirst(){
+    public function getPrefixTableFirst()
+    {
         $tables = DB::connection('mysql_external')->select('SHOW TABLES')[0];
         $array = get_object_vars($tables);
         $value = array_values($array)[0];
 
-        return explode("_",$value)[0];
+        return explode("_", $value)[0];
     }
-
 }

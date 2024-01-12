@@ -23,10 +23,10 @@ class RanksController extends Controller
             if($value->is_limit){
                 $content = 'Số tiền khuyến mãi tối đa đơn hàng: '.$value->price_sale_off_max;
             }
-            $data[$key]->coupon=['coupon'=>'Ưu đãi voucher '.$value->minimum_spending,'content'=>$content];
+            $data[$key]->coupon=['coupon'=>'Ưu đãi voucher '.$value->price_sale_off,'content'=>$content];
         }
-       
-        
+
+
 
         return $this->returnSuccess($data);
     }

@@ -791,6 +791,24 @@ class Controller extends BaseController
                     )
                 );
             }
+            //them hoa hồng 
+            $getUserParent = $this->getUserMeta($user['id'],'user_parent');
+            if($getUserParent){
+                DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->insertGetId(
+                    array(
+                        'order_id' => $postId,
+                        'total_order' => $finalDetails['total'],
+                        'user_id' => $user['id'],
+                        'commission' => 1,
+                        'minimum_spending' => $totalOrderBanDau,
+                        'date' => date('d'),
+                        'month' => date('m'),
+                        'year' => date('Y'),
+                        'status' => 3,
+                    )
+                );
+            }
+
             // them wp_postmeta
             $postMeta = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_postmeta')->insert(
                 array(

@@ -141,6 +141,24 @@ class StoreController extends Controller
 
 
             $userId = $store->user_id;
+            
+            $getUserParent = $this->getUserMeta($userId,'user_parent');
+            if(isset($data['user_parent']) && !empty($data['user_parent']) &&  !$getUserParent)
+            {
+                $checkUserParent = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_users')->where('user_login',$data['user_parent'])->first();
+                if($checkUserParent && $store->sdt != $data['user_parent'] ){
+                    $user = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_usermeta')->insert(
+                        array(
+                            'user_id' => $userId,'meta_key' => 'user_parent','meta_value'=>$checkUserParent->ID),
+                       
+                    );
+                }else{
+                    return $this->returnError(new \stdClass, 'Mã giới thiệu không tồn tại');
+
+                }
+            }
+            
+            
             $user = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_usermeta')->updateOrInsert(
                 array(
                     'user_id' => $userId,'meta_key' => 'shipping_address_1'),

@@ -141,7 +141,7 @@ class StoreController extends Controller
 
 
             $userId = $store->user_id;
-            
+
             $getUserParent = $this->getUserMeta($userId,'user_parent');
             if(isset($data['user_parent']) && !empty($data['user_parent']) &&  !$getUserParent)
             {
@@ -150,15 +150,14 @@ class StoreController extends Controller
                     $user = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_usermeta')->insert(
                         array(
                             'user_id' => $userId,'meta_key' => 'user_parent','meta_value'=>$checkUserParent->ID),
-                       
                     );
                 }else{
                     return $this->returnError(new \stdClass, 'Mã giới thiệu không tồn tại');
 
                 }
             }
-            
-            
+
+
             $user = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_usermeta')->updateOrInsert(
                 array(
                     'user_id' => $userId,'meta_key' => 'shipping_address_1'),
@@ -188,7 +187,7 @@ class StoreController extends Controller
     {
         $store = $request['data_reponse'];
         $this->_PRFIX_TABLE = $store->prefixTable;
-        $user = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_users')->where('user_login', $store->sdt)->select('ID','display_name as name','user_email as email','user_login as mobile')
+        $user = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_users')->where('user_login', $store->sdt)->select('ID','display_name as name','user_email as email','user_login as mobile','user_parent')
         ->first();
         $address = $this->getUserMeta($user->ID,'shipping_address_1');
         $company = $this->getUserMeta($user->ID,'company');
@@ -196,8 +195,8 @@ class StoreController extends Controller
         $user->company = $company;
         $user->history = $this->getHistoryUser($user->ID);
         $user->point = $this->getPointUser($user->history);
-       
-        
+
+
         return $this->returnSuccess($user);
 
     }

@@ -511,7 +511,7 @@ class Controller extends BaseController
                 )
             );
         }
-        
+
         return $discount_total;
     }
     public function timeFormat()
@@ -791,15 +791,17 @@ class Controller extends BaseController
                     )
                 );
             }
-            //them hoa hồng 
+            //them hoa hồng
             $getUserParent = $this->getUserMeta($user['id'],'user_parent');
-            if($getUserParent){
+            $configAff = $this->getOptionsMeta('woo_aff_setting');
+            if($getUserParent && $configAff){
+                $commissions = $finalDetails['total'] * $configAff / 100;
                 DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->insertGetId(
                     array(
                         'order_id' => $postId,
                         'total_order' => $finalDetails['total'],
                         'user_id' => $user['id'],
-                        'commission' => 1,
+                        'commission' => $commissions,
                         'minimum_spending' => $totalOrderBanDau,
                         'date' => date('d'),
                         'month' => date('m'),
@@ -1240,6 +1242,14 @@ class Controller extends BaseController
         $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->where('user_id', $userId)->where('meta_key', $meta)->first();
         if ($data) {
             return $data->meta_value;
+        }
+        return $data;
+    }
+    public function getOptionsMeta( $meta)
+    {
+        $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_options')->where('option_name', $meta)->first();
+        if ($data) {
+            return $data->option_value;
         }
         return $data;
     }

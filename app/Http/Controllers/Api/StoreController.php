@@ -187,11 +187,13 @@ class StoreController extends Controller
     {
         $store = $request['data_reponse'];
         $this->_PRFIX_TABLE = $store->prefixTable;
-        $user = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_users')->where('user_login', $store->sdt)->select('ID','display_name as name','user_email as email','user_login as mobile','user_parent')
+        $user = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_users')->where('user_login', $store->sdt)->select('ID','display_name as name','user_email as email','user_login as mobile')
         ->first();
+
         $address = $this->getUserMeta($user->ID,'shipping_address_1');
         $company = $this->getUserMeta($user->ID,'company');
         $user->address = $address;
+        $user->user_parent =$this->getUserMeta($user->ID,'user_parent');
         $user->company = $company;
         $user->history = $this->getHistoryUser($user->ID);
         $user->point = $this->getPointUser($user->history);

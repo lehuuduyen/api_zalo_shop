@@ -36,6 +36,7 @@ Route::group([  'middleware' => ['CorsApi','CheckStore']], function()
     Route::get('get_payment_method', 'App\Http\Controllers\Api\StoreController@getPaymentMethod');
     Route::put('user', 'App\Http\Controllers\Api\StoreController@update');
     Route::get('user', 'App\Http\Controllers\Api\StoreController@info');
+    Route::get('user_child', 'App\Http\Controllers\Api\StoreController@userChild');
     Route::get('ranks', 'App\Http\Controllers\Api\RanksController@index');
     Route::get('get_point_to_money', 'App\Http\Controllers\Api\RanksController@get_point_to_money');
     Route::prefix('booking')->group(function () {

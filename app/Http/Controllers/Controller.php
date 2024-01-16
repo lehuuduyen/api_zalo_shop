@@ -1277,4 +1277,30 @@ class Controller extends BaseController
 
         return explode("_", $value)[0];
     }
+    public function getUserChild($userParent){
+        $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->where('meta_key', 'user_parent')->where('meta_value', $userParent)->pluck('user_id')->toArray();
+
+        return $data;
+    }
+    public function choDoiSoat($userParent){
+        $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->where('user_id', $userParent)->where('status', 4)->sum('commission');
+        return $data;
+    }
+    public function thucNhan($userParent){
+        $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->where('user_id', $userParent)->where('status', 2)->sum('commission');
+        return $data;
+    }
+    public function tongHoaHong($userChild){
+        $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->whereIn('user_id', $userChild)->where('status', 1)->sum('commission');
+        return $data;
+    }
+    public function tongDoanhThu($userChild){
+        $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->whereIn('user_id', $userChild)->where('status', 1)->sum('total_order');
+        return $data;
+    }
+    public function tongDonHang($userChild){
+        $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->whereIn('user_id', $userChild)->where('status', 1)->get()->count();
+        return $data;
+    }
+
 }

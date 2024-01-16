@@ -198,6 +198,15 @@ class StoreController extends Controller
         $user->history = $this->getHistoryUser($user->ID);
         $user->point = $this->getPointUser($user->history);
 
+        $userChild = $this->getUserChild($user->ID);
+        $user->cho_doi_soat = $this->choDoiSoat($user->ID);
+        $user->thuc_nhan = $this->thucNhan($user->ID);
+        $user->tong_hoa_hong = $this->tongHoaHong($userChild);
+        $user->hoa_hong = $user->tong_hoa_hong - $user->thuc_nhan - $user->cho_doi_soat;
+        $user->hoa_hong_da_rut = $user->thuc_nhan;
+        $user->tong_doanh_thu = $this->tongDoanhThu($userChild);
+        $user->tong_don_hang = $this->tongDonHang($userChild);
+
 
         return $this->returnSuccess($user);
 

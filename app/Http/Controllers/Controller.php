@@ -1286,20 +1286,36 @@ class Controller extends BaseController
         $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->where('user_id', $userParent)->where('status', 4)->sum('commission');
         return $data;
     }
-    public function thucNhan($userParent){
+    public function thucNhan($userParent,$date =null,$month =null,$year =null){
+        if($date && $month && $year){
+            $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->where('user_id', $userParent)->where('status', 2)->where('date', $date)->where('month', $month)->where('year', $year)->sum('commission');
+        }else{
         $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->where('user_id', $userParent)->where('status', 2)->sum('commission');
+        }
         return $data;
     }
-    public function tongHoaHong($userChild){
-        $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->whereIn('user_id', $userChild)->where('status', 1)->sum('commission');
+    public function tongHoaHong($userChild,$date =null,$month =null,$year =null){
+        if($date && $month && $year){
+            $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->whereIn('user_id', $userChild)->where('status', 1)->where('date', $date)->where('month', $month)->where('year', $year)->sum('commission');
+        }else{
+            $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->whereIn('user_id', $userChild)->where('status', 1)->sum('commission');
+        }
         return $data;
     }
-    public function tongDoanhThu($userChild){
-        $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->whereIn('user_id', $userChild)->where('status', 1)->sum('total_order');
+    public function tongDoanhThu($userChild,$date =null,$month =null,$year =null){
+        if($date && $month && $year){
+            $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->whereIn('user_id', $userChild)->where('status', 1)->where('date', $date)->where('month', $month)->where('year', $year)->sum('total_order');
+        }else{
+            $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->whereIn('user_id', $userChild)->where('status', 1)->sum('total_order');
+        }
         return $data;
     }
-    public function tongDonHang($userChild){
-        $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->whereIn('user_id', $userChild)->where('status', 1)->get()->count();
+    public function tongDonHang($userChild,$date =null,$month =null,$year =null){
+        if($date && $month && $year){
+            $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->whereIn('user_id', $userChild)->where('status', 1)->where('date', $date)->where('month', $month)->where('year', $year)->get()->count();
+        }else{
+            $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->whereIn('user_id', $userChild)->where('status', 1)->get()->count();
+        }
         return $data;
     }
 

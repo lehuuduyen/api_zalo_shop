@@ -19,7 +19,7 @@ class StoreController extends Controller
     {
         $store = $request['data_reponse'];
         $this->_PRFIX_TABLE = $store->prefixTable;
-        $infor = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_posts')->where('post_name','lien-he')->where('post_status','publish')->where('post_type','page')->first();
+        $infor = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->where('post_name', 'lien-he')->where('post_status', 'publish')->where('post_type', 'page')->first();
 
 
 
@@ -40,21 +40,21 @@ class StoreController extends Controller
             'title' => "",
             'value' => "",
         ];
-        if($infor){
+        if ($infor) {
             $content = $infor->post_content;
-            $lineAfterPhone = $this->lienhe($content,'Điện thoại:',11);
+            $lineAfterPhone = $this->lienhe($content, 'Điện thoại:', 11);
 
 
             $info->phone = [
                 'title' => 'Điện thoại:',
                 'value' => $lineAfterPhone,
             ];
-            $email = $this->lienhe($content,'Email:',6);
+            $email = $this->lienhe($content, 'Email:', 6);
             $info->email = [
                 'title' => 'Email:',
                 'value' => $email,
             ];
-            $address = $this->lienhe($content,'Địa chỉ:',8);
+            $address = $this->lienhe($content, 'Địa chỉ:', 8);
             $info->address = [
                 'title' => 'Địa chỉ :',
                 'value' => $address,
@@ -65,7 +65,7 @@ class StoreController extends Controller
     }
     public function country(Request $request)
     {
-        $country = DB::connection('mysql_external')->table('countries')->where('status','publish')->get();
+        $country = DB::connection('mysql_external')->table('countries')->where('status', 'publish')->get();
         return $this->returnSuccess($country);
     }
     public function getPaymentMethod(Request $request)
@@ -74,21 +74,21 @@ class StoreController extends Controller
         $store = $request['data_reponse'];
         $this->_PRFIX_TABLE = $store->prefixTable;
         $result = [];
-        $cod = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_options')->where('option_name','woocommerce_cod_settings')->first();
-        if($cod){
-            $cod = unserialize( $cod->option_value);
-            if($cod['enabled'] == 'yes'){
+        $cod = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_options')->where('option_name', 'woocommerce_cod_settings')->first();
+        if ($cod) {
+            $cod = unserialize($cod->option_value);
+            if ($cod['enabled'] == 'yes') {
                 $result['cod'] = $cod;
             }
         }
-        $payment = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_options')->where('option_name','woocommerce_bacs_settings')->first();
-        if($payment){
-            $payment = unserialize( $payment->option_value);
-            if($payment['enabled'] == 'yes'){
-                $payment['account'] =[];
+        $payment = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_options')->where('option_name', 'woocommerce_bacs_settings')->first();
+        if ($payment) {
+            $payment = unserialize($payment->option_value);
+            if ($payment['enabled'] == 'yes') {
+                $payment['account'] = [];
 
-                $paymentAccount = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_options')->where('option_name','woocommerce_bacs_accounts')->first();
-                if($paymentAccount){
+                $paymentAccount = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_options')->where('option_name', 'woocommerce_bacs_accounts')->first();
+                if ($paymentAccount) {
                     $paymentAccount = unserialize($paymentAccount->option_value);
                     $payment['account'] = $paymentAccount;
                 }
@@ -105,16 +105,15 @@ class StoreController extends Controller
 
     public function state(Request $request)
     {
-       try {
-        //code...
-        $state = DB::connection('mysql_external')->table('states')->where('status','publish')->where('country_id',$request['country_id'])->get();
+        try {
+            //code...
+            $state = DB::connection('mysql_external')->table('states')->where('status', 'publish')->where('country_id', $request['country_id'])->get();
 
-        return $this->returnSuccess($state);
-       } catch (\Throwable $th) {
-        //throw $th;
-        return $this->returnError([],$th->getMessage());
-
-       }
+            return $this->returnSuccess($state);
+        } catch (\Throwable $th) {
+            //throw $th;
+            return $this->returnError([], $th->getMessage());
+        }
     }
     /**
      * Store a newly created resource in storage.
@@ -142,58 +141,56 @@ class StoreController extends Controller
 
             $userId = $store->user_id;
 
-            $getUserParent = $this->getUserMeta($userId,'user_parent');
-            if(isset($data['user_parent']) && !empty($data['user_parent']) &&  !$getUserParent)
-            {
-                $checkUserParent = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_users')->where('user_login',$data['user_parent'])->first();
-                if($checkUserParent && $store->sdt != $data['user_parent'] ){
-                    $user = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_usermeta')->insert(
+            $getUserParent = $this->getUserMeta($userId, 'user_parent');
+            if (isset($data['user_parent']) && !empty($data['user_parent']) &&  !$getUserParent) {
+                $checkUserParent = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_users')->where('user_login', $data['user_parent'])->first();
+                if ($checkUserParent && $store->sdt != $data['user_parent']) {
+                    $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->insert(
                         array(
-                            'user_id' => $userId,'meta_key' => 'user_parent','meta_value'=>$checkUserParent->ID),
+                            'user_id' => $userId, 'meta_key' => 'user_parent', 'meta_value' => $checkUserParent->ID
+                        ),
                     );
-                }else{
+                } else {
                     return $this->returnError(new \stdClass, 'Mã giới thiệu không tồn tại');
-
                 }
             }
 
 
-            $user = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_usermeta')->updateOrInsert(
+            $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
                 array(
-                    'user_id' => $userId,'meta_key' => 'shipping_address_1'),
+                    'user_id' => $userId, 'meta_key' => 'shipping_address_1'
+                ),
                 array(
                     'meta_value' => $data['address'],
                 )
             );
-            $user = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_usermeta')->updateOrInsert(
+            $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
                 array(
-                    'user_id' => $userId,'meta_key' => 'company'),
+                    'user_id' => $userId, 'meta_key' => 'company'
+                ),
                 array('meta_value' => $data['company'])
             );
 
-            $user = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_users')->where('user_login', $store->sdt)->update(
+            $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_users')->where('user_login', $store->sdt)->update(
                 array(
                     'user_email' => $data['email'],
                 )
             );
 
-            return $this->returnSuccess($userId,'Cập nhật thành công');
-
+            return $this->returnSuccess($userId, 'Cập nhật thành công');
         }
-
-
     }
     public function info(Request $request)
     {
         $store = $request['data_reponse'];
         $this->_PRFIX_TABLE = $store->prefixTable;
-        $user = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_users')->where('user_login', $store->sdt)->select('ID','display_name as name','user_email as email','user_login as mobile')
-        ->first();
+        $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_users')->where('user_login', $store->sdt)->select('ID', 'display_name as name', 'user_email as email', 'user_login as mobile')
+            ->first();
 
-        $address = $this->getUserMeta($user->ID,'shipping_address_1');
-        $company = $this->getUserMeta($user->ID,'company');
+        $address = $this->getUserMeta($user->ID, 'shipping_address_1');
+        $company = $this->getUserMeta($user->ID, 'company');
         $user->address = $address;
-        $user->user_parent =$this->getUserMeta($user->ID,'user_parent');
+        $user->user_parent = $this->getUserMeta($user->ID, 'user_parent');
         $user->company = $company;
         $user->history = $this->getHistoryUser($user->ID);
         $user->point = $this->getPointUser($user->history);
@@ -207,9 +204,61 @@ class StoreController extends Controller
         $user->tong_doanh_thu = $this->tongDoanhThu($userChild);
         $user->tong_don_hang = $this->tongDonHang($userChild);
 
+        $getWeek = $this->getWeek();
+        $arr[0]['label'] = 'Tổng hoa hồng';
+        $arr[1]['label'] = 'Tổng doanh thu';
+        $arr[2]['label'] = 'Tổng hoa hồng đã rút';
+        $arr[3]['label'] = 'Tổng đơn';
+        $listTongHoaHong =[];
+        $listTongDoanhThu =[];
+        $listTongHoaHongDaRut =[];
+        $listTongDon =[];
+        foreach($getWeek as $day){
+            $arrDay = explode('-',$day);
+            $date = $arrDay[2] ;
+            $month = $arrDay[1] ;
+            $year = $arrDay[0] ;
+            $tongHoaHong = $this->tongHoaHong($userChild,$date,$month,$year);
+            $tongDoanhThu = $this->tongDoanhThu($userChild,$date,$month,$year);
+            $tongHoaHongDaRut = $this->thucNhan($user->ID,$date,$month,$year);
+            $tongDon =  $this->tongDonHang($userChild,$date,$month,$year);
+            $listTongHoaHong[]=$tongHoaHong;
+            $listTongDoanhThu[]=$tongDoanhThu;
+            $listTongHoaHongDaRut[]=$tongHoaHongDaRut;
+            $listTongDon[]=$tongDon;
+        }
+        $arr[0]['data'] = $listTongHoaHong;
+        $arr[1]['data'] = $listTongDoanhThu;
+        $arr[2]['data'] = $listTongHoaHongDaRut;
+        $arr[3]['data'] = $listTongDon;
 
+        $arr[0]['backgroundColor'] = '#F57C00';
+        $arr[1]['backgroundColor'] = '#00E572';
+        $arr[2]['backgroundColor'] = '#EB00F0';
+        $arr[3]['backgroundColor'] = '#3D3BC2';
+        $user->bieu_do =$arr;
         return $this->returnSuccess($user);
+    }
+    public function getWeek()
+    {
+        $today = date("Y-m-d");
+        $list = [];
+        // Lấy ngày của tuần đầu tiên
+        $firstDayOfWeek = date("Y-m-d", strtotime('monday this week', strtotime($today)));
 
+        // Tạo một mảng để lưu trữ các ngày trong tuần
+        $daysOfWeek = array();
+
+        // Lặp qua từng ngày trong tuần và thêm vào mảng
+        for ($i = 0; $i < 7; $i++) {
+            $daysOfWeek[] = date("Y-m-d", strtotime("+" . $i . " days", strtotime($firstDayOfWeek)));
+        }
+
+        // Hiển thị các ngày trong tuần
+        foreach ($daysOfWeek as $day) {
+            $list[]=$day;
+        }
+        return $list;
     }
     /**
      * Display the specified resource.
@@ -240,10 +289,10 @@ class StoreController extends Controller
     {
         $store = $request['data_reponse'];
         $banner = DB::connection('mysql_external')->table('badges')->where('status', 'active')
-        ->get();
-        foreach($banner as $key =>   $value){
+            ->get();
+        foreach ($banner as $key =>   $value) {
             $banner[$key]->name = $this->getTextByLanguare($value->name);
-            $banner[$key]->image = $this->getImage($value->image,$store);
+            $banner[$key]->image = $this->getImage($value->image, $store);
         }
         return $this->returnSuccess($banner);
     }

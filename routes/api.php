@@ -31,12 +31,16 @@ Route::group([  'middleware' => ['CorsApi','CheckStore']], function()
     Route::get('campaigns', 'App\Http\Controllers\Api\FlashSaleController@index');
     Route::get('categories', 'App\Http\Controllers\Api\ProductController@getCategories');
     Route::post('order', 'App\Http\Controllers\Api\OrdersController@store');
+    Route::put('update_payment_method', 'App\Http\Controllers\Api\StoreController@update_payment_method');
+    Route::post('withdraw', 'App\Http\Controllers\Api\StoreController@withdraw');
+
     Route::get('country', 'App\Http\Controllers\Api\StoreController@country');
     Route::get('state', 'App\Http\Controllers\Api\StoreController@state');
     Route::get('get_payment_method', 'App\Http\Controllers\Api\StoreController@getPaymentMethod');
     Route::put('user', 'App\Http\Controllers\Api\StoreController@update');
     Route::get('user', 'App\Http\Controllers\Api\StoreController@info');
     Route::get('user_child', 'App\Http\Controllers\Api\StoreController@userChild');
+    Route::get('history_withdraw', 'App\Http\Controllers\Api\StoreController@historyWithdraw');
     Route::get('ranks', 'App\Http\Controllers\Api\RanksController@index');
     Route::get('get_point_to_money', 'App\Http\Controllers\Api\RanksController@get_point_to_money');
     Route::prefix('booking')->group(function () {

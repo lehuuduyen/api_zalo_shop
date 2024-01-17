@@ -180,6 +180,7 @@ class StoreController extends Controller
             return $this->returnSuccess($userId, 'Cập nhật thành công');
         }
     }
+
     public function info(Request $request)
     {
         $store = $request['data_reponse'];
@@ -192,6 +193,8 @@ class StoreController extends Controller
         $user->address = $address;
         $user->user_parent = $this->getUserMeta($user->ID, 'user_parent');
         $user->company = $company;
+        $paymentMethod = $this->getUserMeta($user->ID, 'payment_method');
+        $user->payment_method = ($paymentMethod) ? json_decode($paymentMethod) : "";
         $user->history = $this->getHistoryUser($user->ID);
         $user->point = $this->getPointUser($user->history);
 
@@ -209,23 +212,23 @@ class StoreController extends Controller
         $arr[1]['label'] = 'Tổng doanh thu';
         $arr[2]['label'] = 'Tổng hoa hồng đã rút';
         $arr[3]['label'] = 'Tổng đơn';
-        $listTongHoaHong =[];
-        $listTongDoanhThu =[];
-        $listTongHoaHongDaRut =[];
-        $listTongDon =[];
-        foreach($getWeek as $day){
-            $arrDay = explode('-',$day);
-            $date = $arrDay[2] ;
-            $month = $arrDay[1] ;
-            $year = $arrDay[0] ;
-            $tongHoaHong = $this->tongHoaHong($userChild,$date,$month,$year);
-            $tongDoanhThu = $this->tongDoanhThu($userChild,$date,$month,$year);
-            $tongHoaHongDaRut = $this->thucNhan($user->ID,$date,$month,$year);
-            $tongDon =  $this->tongDonHang($userChild,$date,$month,$year);
-            $listTongHoaHong[]=$tongHoaHong;
-            $listTongDoanhThu[]=$tongDoanhThu;
-            $listTongHoaHongDaRut[]=$tongHoaHongDaRut;
-            $listTongDon[]=$tongDon;
+        $listTongHoaHong = [];
+        $listTongDoanhThu = [];
+        $listTongHoaHongDaRut = [];
+        $listTongDon = [];
+        foreach ($getWeek as $day) {
+            $arrDay = explode('-', $day);
+            $date = $arrDay[2];
+            $month = $arrDay[1];
+            $year = $arrDay[0];
+            $tongHoaHong = $this->tongHoaHong($userChild, $date, $month, $year);
+            $tongDoanhThu = $this->tongDoanhThu($userChild, $date, $month, $year);
+            $tongHoaHongDaRut = $this->thucNhan($user->ID, $date, $month, $year);
+            $tongDon =  $this->tongDonHang($userChild, $date, $month, $year);
+            $listTongHoaHong[] = $tongHoaHong;
+            $listTongDoanhThu[] = $tongDoanhThu;
+            $listTongHoaHongDaRut[] = $tongHoaHongDaRut;
+            $listTongDon[] = $tongDon;
         }
         $arr[0]['data'] = $listTongHoaHong;
         $arr[1]['data'] = $listTongDoanhThu;
@@ -236,8 +239,116 @@ class StoreController extends Controller
         $arr[1]['backgroundColor'] = '#00E572';
         $arr[2]['backgroundColor'] = '#EB00F0';
         $arr[3]['backgroundColor'] = '#3D3BC2';
-        $user->bieu_do =$arr;
+        $user->bieu_do = $arr;
         return $this->returnSuccess($user);
+    }
+    public function userChild(Request $request)
+    {
+        $store = $request['data_reponse'];
+        $this->_PRFIX_TABLE = $store->prefixTable;
+        $userId = $store->user_id;
+        $userChild = $this->getUserChild($userId);
+        $listUserChild = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_users')->select('ID', 'user_nicename', 'user_login as mobile')->whereIn('ID', $userChild);
+        if (isset($request['search'])) {
+            $listUserChild = $listUserChild->where('user_nicename', 'like', '%' . $request['search'] . '%');
+        }
+        if (isset($request['order'])) {
+            $listUserChild = $listUserChild->orderBy('ID', $request['order']);
+        }
+        $listUserChild = $listUserChild->get();
+        foreach ($listUserChild as $key => $user) {
+            $listUserChild[$key]->tong_hoa_hong = $this->tongHoaHong([$user->ID]);
+            $listUserChild[$key]->tong_doanh_thu = $this->tongDoanhThu([$user->ID]);
+        }
+        return $this->returnSuccess($listUserChild);
+    }
+    public function historyWithdraw(Request $request)
+    {
+        $store = $request['data_reponse'];
+        $this->_PRFIX_TABLE = $store->prefixTable;
+        $userId = $store->user_id;
+        $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->where('user_id', $userId)->whereIn('status', [2, 4])->get();
+
+        return $this->returnSuccess($data);
+    }
+    public function update_payment_method(Request $request)
+    {
+        $data = $request->all();
+        $store = $request['data_reponse'];
+        $this->_PRFIX_TABLE = $store->prefixTable;
+        $validator = Validator::make($request->all(), [
+            'name' => 'required',
+            'stk' => 'required',
+            'bankname' => 'required',
+
+        ], [
+            'name.required' => "Vui lòng tên tài khoản ",
+            'stk.required' => "Vui lòng nhập STK",
+            'bankname.required' => "Vui lòng nhập tên ngân hàng",
+        ]);
+        if ($validator->fails()) {
+            return $this->returnError(new \stdClass, $validator->errors()->first());
+        } else {
+            $userId = $store->user_id;
+            $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
+                array(
+                    'user_id' => $userId, 'meta_key' => 'payment_method'
+                ),
+                array(
+                    'meta_value' => json_encode(['name' => $data['name'], 'stk' => $data['stk'], 'bankname' => $data['bankname']]),
+                )
+            );
+            return $this->returnSuccess($userId, 'Cập nhật thành công');
+        }
+    }
+    public function withdraw(Request $request)
+    {
+        $data = $request->all();
+        $store = $request['data_reponse'];
+        $this->_PRFIX_TABLE = $store->prefixTable;
+        $validator = Validator::make($request->all(), [
+            'name' => 'required',
+            'stk' => 'required',
+            'bankname' => 'required',
+            'money' => 'required',
+
+        ], [
+            'name.required' => "Vui lòng tên tài khoản ",
+            'stk.required' => "Vui lòng nhập STK",
+            'bankname.required' => "Vui lòng nhập tên ngân hàng",
+            'money.required' => "Vui lòng nhập tiền rút",
+        ]);
+        if ($validator->fails()) {
+            return $this->returnError(new \stdClass, $validator->errors()->first());
+        } else {
+            if ($data['money'] < 100) {
+                return $this->returnError(new \stdClass, "Số tiền rút phải lớn hơn 100000");
+            }
+            $userId = $store->user_id;
+
+            $userChild = $this->getUserChild($userId);
+            $cho_doi_soat = $this->choDoiSoat($userId);
+            $thuc_nhan = $this->thucNhan($userId);
+            $tong_hoa_hong = $this->tongHoaHong($userChild);
+            $hoa_hong = $tong_hoa_hong - $thuc_nhan - $cho_doi_soat;
+            if($data['money'] > $hoa_hong){
+                return $this->returnError(new \stdClass, "Tiền hoa hồng chỉ còn ".$hoa_hong);
+            }
+            $paymentMethod = json_encode(['name' => $data['name'], 'stk' => $data['stk'], 'bankname' => $data['bankname']]);
+            DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->insertGetId(
+                array(
+                    'user_id' => $userId,
+                    'total_order' => 0  ,
+                    'commission' => $data['money'],
+                    'payment_method' => $paymentMethod,
+                    'date' => date('d'),
+                    'month' => date('m'),
+                    'year' => date('Y'),
+                    'status' => 4,
+                )
+            );
+            return $this->returnSuccess($userId, 'Cập nhật thành công');
+        }
     }
     public function getWeek()
     {
@@ -256,7 +367,7 @@ class StoreController extends Controller
 
         // Hiển thị các ngày trong tuần
         foreach ($daysOfWeek as $day) {
-            $list[]=$day;
+            $list[] = $day;
         }
         return $list;
     }

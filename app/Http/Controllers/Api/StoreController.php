@@ -250,7 +250,7 @@ class StoreController extends Controller
         $userChild = $this->getUserChild($userId);
         $listUserChild = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_users')->select('ID', 'user_nicename', 'user_login as mobile')->whereIn('ID', $userChild);
         if (isset($request['search'])) {
-            $listUserChild = $listUserChild->where('user_nicename', 'like', '%' . $request['search'] . '%');
+            $listUserChild = $listUserChild->where('user_login', 'like', '%' . $request['search'] . '%');
         }
         if (isset($request['order'])) {
             $listUserChild = $listUserChild->orderBy('ID', $request['order']);

@@ -1279,6 +1279,16 @@ class Controller extends BaseController
     }
     public function getUserChild($userParent){
         $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->where('meta_key', 'user_parent')->where('meta_value', $userParent)->pluck('user_id')->toArray();
+        if($data){
+            $data2 = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->where('meta_key', 'user_parent')->whereIn('meta_value', $data)->pluck('user_id')->toArray();
+            if($data2){
+                $data = array_merge($data,$data2);
+            }
+        }
+        return $data;
+    }
+    public function getUserChild2($listChild1){
+        $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->where('meta_key', 'user_parent')->whereIn('meta_value', $listChild1)->pluck('user_id')->toArray();
 
         return $data;
     }

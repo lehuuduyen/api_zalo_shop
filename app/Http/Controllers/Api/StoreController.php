@@ -138,7 +138,6 @@ class StoreController extends Controller
             return $this->returnError(new \stdClass, $validator->errors()->first());
         } else {
 
-
             $userId = $store->user_id;
 
             $getUserParent = $this->getUserMeta($userId, 'user_parent');
@@ -199,13 +198,15 @@ class StoreController extends Controller
         $user->point = $this->getPointUser($user->history);
 
         $userChild = $this->getUserChild($user->ID);
+        $userChild2 = $this->getUserChild2($userChild);
+        
         $user->cho_doi_soat = $this->choDoiSoat($user->ID);
         $user->thuc_nhan = $this->thucNhan($user->ID);
-        $user->tong_hoa_hong = $this->tongHoaHong($userChild);
+        $user->tong_hoa_hong = $this->tongHoaHong($userChild,$userChild2);
         $user->hoa_hong = $user->tong_hoa_hong - $user->thuc_nhan - $user->cho_doi_soat;
         $user->hoa_hong_da_rut = $user->thuc_nhan;
-        $user->tong_doanh_thu = $this->tongDoanhThu($userChild);
-        $user->tong_don_hang = $this->tongDonHang($userChild);
+        $user->tong_doanh_thu = $this->tongDoanhThu($userChild,$userChild2);
+        $user->tong_don_hang = $this->tongDonHang($userChild,$userChild2);
 
         $getWeek = $this->getWeek();
         $arr[0]['label'] = 'Tổng hoa hồng';
@@ -221,10 +222,10 @@ class StoreController extends Controller
             $date = $arrDay[2];
             $month = $arrDay[1];
             $year = $arrDay[0];
-            $tongHoaHong = $this->tongHoaHong($userChild, $date, $month, $year);
-            $tongDoanhThu = $this->tongDoanhThu($userChild, $date, $month, $year);
+            $tongHoaHong = $this->tongHoaHong($userChild,$userChild2, $date, $month, $year);
+            $tongDoanhThu = $this->tongDoanhThu($userChild,$userChild2, $date, $month, $year);
             $tongHoaHongDaRut = $this->thucNhan($user->ID, $date, $month, $year);
-            $tongDon =  $this->tongDonHang($userChild, $date, $month, $year);
+            $tongDon =  $this->tongDonHang($userChild,$userChild2, $date, $month, $year);
             $listTongHoaHong[] = $tongHoaHong;
             $listTongDoanhThu[] = $tongDoanhThu;
             $listTongHoaHongDaRut[] = $tongHoaHongDaRut;
@@ -248,6 +249,9 @@ class StoreController extends Controller
         $this->_PRFIX_TABLE = $store->prefixTable;
         $userId = $store->user_id;
         $userChild = $this->getUserChild($userId);
+        $userChild2 = $this->getUserChild2($userChild);
+        $userChild = array_merge($userChild,$userChild2);
+        
         $listUserChild = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_users')->select('ID', 'user_nicename', 'user_login as mobile')->whereIn('ID', $userChild);
         if (isset($request['search'])) {
             $listUserChild = $listUserChild->where('user_login', 'like', '%' . $request['search'] . '%');
@@ -257,8 +261,18 @@ class StoreController extends Controller
         }
         $listUserChild = $listUserChild->get();
         foreach ($listUserChild as $key => $user) {
-            $listUserChild[$key]->tong_hoa_hong = $this->tongHoaHong([$user->ID]);
-            $listUserChild[$key]->tong_doanh_thu = $this->tongDoanhThu([$user->ID]);
+            
+            if(in_array($user->ID,$userChild2)){
+                $listUserChild[$key]->tong_hoa_hong = $this->tongHoaHong([],[$user->ID]);
+                $listUserChild[$key]->tong_doanh_thu = $this->tongDoanhThu([],[$user->ID]);  
+                $listUserChild[$key]->level = "Cấp 2";  
+            }else{
+                $listUserChild[$key]->tong_hoa_hong = $this->tongHoaHong([$user->ID],[]);
+                $listUserChild[$key]->tong_doanh_thu = $this->tongDoanhThu([$user->ID],[]);  
+                $listUserChild[$key]->level = "Cấp 1";  
+
+            }
+            
         }
         return $this->returnSuccess($listUserChild);
     }
@@ -327,9 +341,11 @@ class StoreController extends Controller
             $userId = $store->user_id;
 
             $userChild = $this->getUserChild($userId);
+            $userChild2 = $this->getUserChild2($userChild);
+
             $cho_doi_soat = $this->choDoiSoat($userId);
             $thuc_nhan = $this->thucNhan($userId);
-            $tong_hoa_hong = $this->tongHoaHong($userChild);
+            $tong_hoa_hong = $this->tongHoaHong($userChild,$userChild2);
             $hoa_hong = $tong_hoa_hong - $thuc_nhan - $cho_doi_soat;
             if($data['money'] > $hoa_hong){
                 return $this->returnError(new \stdClass, "Tiền hoa hồng chỉ còn ".$hoa_hong);

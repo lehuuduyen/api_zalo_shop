@@ -193,13 +193,16 @@ class StoreController extends Controller
         $user->user_parent = $this->getUserMeta($user->ID, 'user_parent');
         $user->company = $company;
         $paymentMethod = $this->getUserMeta($user->ID, 'payment_method');
+        $is_affliate = $this->getUserMeta($user->ID, 'is_affliate');
+
         $user->payment_method = ($paymentMethod) ? json_decode($paymentMethod) : "";
         $user->history = $this->getHistoryUser($user->ID);
         $user->point = $this->getPointUser($user->history);
 
         $userChild = $this->getUserChild($user->ID);
         $userChild2 = $this->getUserChild2($userChild);
-        
+
+        $user->is_affliate = $is_affliate;
         $user->cho_doi_soat = $this->choDoiSoat($user->ID);
         $user->thuc_nhan = $this->thucNhan($user->ID);
         $user->tong_hoa_hong = $this->tongHoaHong($userChild,$userChild2);
@@ -251,7 +254,7 @@ class StoreController extends Controller
         $userChild = $this->getUserChild($userId);
         $userChild2 = $this->getUserChild2($userChild);
         $userChild = array_merge($userChild,$userChild2);
-        
+
         $listUserChild = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_users')->select('ID', 'user_nicename', 'user_login as mobile')->whereIn('ID', $userChild);
         if (isset($request['search'])) {
             $listUserChild = $listUserChild->where('user_login', 'like', '%' . $request['search'] . '%');
@@ -261,18 +264,18 @@ class StoreController extends Controller
         }
         $listUserChild = $listUserChild->get();
         foreach ($listUserChild as $key => $user) {
-            
+
             if(in_array($user->ID,$userChild2)){
                 $listUserChild[$key]->tong_hoa_hong = $this->tongHoaHong([],[$user->ID]);
-                $listUserChild[$key]->tong_doanh_thu = $this->tongDoanhThu([],[$user->ID]);  
-                $listUserChild[$key]->level = "Cấp 2";  
+                $listUserChild[$key]->tong_doanh_thu = $this->tongDoanhThu([],[$user->ID]);
+                $listUserChild[$key]->level = "Cấp 2";
             }else{
                 $listUserChild[$key]->tong_hoa_hong = $this->tongHoaHong([$user->ID],[]);
-                $listUserChild[$key]->tong_doanh_thu = $this->tongDoanhThu([$user->ID],[]);  
-                $listUserChild[$key]->level = "Cấp 1";  
+                $listUserChild[$key]->tong_doanh_thu = $this->tongDoanhThu([$user->ID],[]);
+                $listUserChild[$key]->level = "Cấp 1";
 
             }
-            
+
         }
         return $this->returnSuccess($listUserChild);
     }
@@ -284,6 +287,23 @@ class StoreController extends Controller
         $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->where('user_id', $userId)->whereIn('status', [2, 4])->get();
 
         return $this->returnSuccess($data);
+    }
+    public function register_aff(Request $request)
+    {
+        $data = $request->all();
+        $store = $request['data_reponse'];
+        $this->_PRFIX_TABLE = $store->prefixTable;
+        $userId = $store->user_id;
+
+        $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
+            array(
+                'user_id' => $userId, 'meta_key' => 'is_affliate'
+            ),
+            array(
+                'meta_value' => true,
+            )
+        );
+        return $this->returnSuccess($userId, 'Cập nhật thành công');
     }
     public function update_payment_method(Request $request)
     {
@@ -361,6 +381,32 @@ class StoreController extends Controller
                     'month' => date('m'),
                     'year' => date('Y'),
                     'status' => 4,
+                )
+            );
+            return $this->returnSuccess($userId, 'Cập nhật thành công');
+        }
+    }
+    public function history_share_link(Request $request)
+    {
+        $data = $request->all();
+        $store = $request['data_reponse'];
+        $this->_PRFIX_TABLE = $store->prefixTable;
+        $validator = Validator::make($request->all(), [
+            'user_parent' => 'required',
+            'product' => 'required',
+        ], [
+            'user_parent.required' => "Vui lòng nhập user_parent",
+            'product.required' => "Vui lòng nhập product",
+        ]);
+        if ($validator->fails()) {
+            return $this->returnError(new \stdClass, $validator->errors()->first());
+        } else {
+            $userId = $store->user_id;
+            DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_share_link')->insertGetId(
+                array(
+                    'user_id' => $userId,
+                    'user_parent' => $data['user_parent']  ,
+                    'product' => $data['product']  ,
                 )
             );
             return $this->returnSuccess($userId, 'Cập nhật thành công');

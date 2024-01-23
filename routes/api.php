@@ -32,7 +32,9 @@ Route::group([  'middleware' => ['CorsApi','CheckStore']], function()
     Route::get('categories', 'App\Http\Controllers\Api\ProductController@getCategories');
     Route::post('order', 'App\Http\Controllers\Api\OrdersController@store');
     Route::put('update_payment_method', 'App\Http\Controllers\Api\StoreController@update_payment_method');
+    Route::put('register_aff', 'App\Http\Controllers\Api\StoreController@register_aff');
     Route::post('withdraw', 'App\Http\Controllers\Api\StoreController@withdraw');
+    Route::post('history_share_link', 'App\Http\Controllers\Api\StoreController@history_share_link');
 
     Route::get('country', 'App\Http\Controllers\Api\StoreController@country');
     Route::get('state', 'App\Http\Controllers\Api\StoreController@state');

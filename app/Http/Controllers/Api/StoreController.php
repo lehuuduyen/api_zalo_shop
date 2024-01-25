@@ -68,6 +68,19 @@ class StoreController extends Controller
         $country = DB::connection('mysql_external')->table('countries')->where('status', 'publish')->get();
         return $this->returnSuccess($country);
     }
+    public function log(Request $request)
+    {
+        $log =DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_options')->updateOrInsert(
+            array(
+                'option_name' => 'logs'
+            ),
+            array(
+                'option_value' => $request['value'],
+            )
+        );
+        return $this->returnSuccess($log);
+
+    }
     public function getPaymentMethod(Request $request)
     {
         //check Cod

@@ -35,6 +35,7 @@ Route::group([  'middleware' => ['CorsApi','CheckStore']], function()
     Route::post('withdraw', 'App\Http\Controllers\Api\StoreController@withdraw');
 
     Route::get('country', 'App\Http\Controllers\Api\StoreController@country');
+    Route::post('log', 'App\Http\Controllers\Api\StoreController@log');
     Route::get('state', 'App\Http\Controllers\Api\StoreController@state');
     Route::get('get_payment_method', 'App\Http\Controllers\Api\StoreController@getPaymentMethod');
     Route::put('user', 'App\Http\Controllers\Api\StoreController@update');

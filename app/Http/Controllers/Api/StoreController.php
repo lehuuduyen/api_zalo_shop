@@ -75,7 +75,6 @@ class StoreController extends Controller
         $this->_PRFIX_TABLE = $store->prefixTable;
         $log =DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woocommerce_log')->insertGetId(
             array(
-                'timestamp' => time(),
                 'level' => 1,
                 'source' => '',
                 'message' => $request['value'],

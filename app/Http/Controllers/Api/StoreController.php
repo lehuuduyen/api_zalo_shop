@@ -70,6 +70,8 @@ class StoreController extends Controller
     }
     public function log(Request $request)
     {
+        $store = $request['data_reponse'];
+        $this->_PRFIX_TABLE = $store->prefixTable;
         $log =DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_options')->updateOrInsert(
             array(
                 'option_name' => 'logs'

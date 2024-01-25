@@ -18,6 +18,8 @@ use Illuminate\Support\Facades\Route;
 //     return $request->user();
 // });
 Route::post('gatewave', 'App\Http\Controllers\Api\GatewaveController@index')->middleware('CorsApi');
+Route::post('log', 'App\Http\Controllers\Api\StoreController@log');
+
 Route::group([  'middleware' => ['CorsApi','CheckStore']], function()
 {
     Route::get('products', 'App\Http\Controllers\Api\ProductController@index');
@@ -35,7 +37,6 @@ Route::group([  'middleware' => ['CorsApi','CheckStore']], function()
     Route::post('withdraw', 'App\Http\Controllers\Api\StoreController@withdraw');
 
     Route::get('country', 'App\Http\Controllers\Api\StoreController@country');
-    Route::post('log', 'App\Http\Controllers\Api\StoreController@log');
     Route::get('state', 'App\Http\Controllers\Api\StoreController@state');
     Route::get('get_payment_method', 'App\Http\Controllers\Api\StoreController@getPaymentMethod');
     Route::put('user', 'App\Http\Controllers\Api\StoreController@update');

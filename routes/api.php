@@ -18,10 +18,11 @@ use Illuminate\Support\Facades\Route;
 //     return $request->user();
 // });
 Route::post('gatewave', 'App\Http\Controllers\Api\GatewaveController@index')->middleware('CorsApi');
-Route::post('log', 'App\Http\Controllers\Api\StoreController@log');
 
 Route::group([  'middleware' => ['CorsApi','CheckStore']], function()
 {
+    Route::post('log', 'App\Http\Controllers\Api\StoreController@log');
+
     Route::get('products', 'App\Http\Controllers\Api\ProductController@index');
     Route::post('check_coupon', 'App\Http\Controllers\Api\ProductController@checkCoupon');
     Route::post('product/review', 'App\Http\Controllers\Api\ProductController@review');

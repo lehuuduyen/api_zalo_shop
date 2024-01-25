@@ -65,6 +65,7 @@ class StoreController extends Controller
     }
     public function country(Request $request)
     {
+        
         $country = DB::connection('mysql_external')->table('countries')->where('status', 'publish')->get();
         return $this->returnSuccess($country);
     }
@@ -72,12 +73,13 @@ class StoreController extends Controller
     {
         $store = $request['data_reponse'];
         $this->_PRFIX_TABLE = $store->prefixTable;
-        $log =DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_options')->updateOrInsert(
+        $log =DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woocommerce_log')->insertGetId(
             array(
-                'option_name' => 'logs'
-            ),
-            array(
-                'option_value' => $request['value'],
+                'timestamp' => time(),
+                'level' => 1,
+                'source' => '',
+                'message' => $request['value'],
+                
             )
         );
         return $this->returnSuccess($log);

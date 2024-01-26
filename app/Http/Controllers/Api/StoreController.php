@@ -158,27 +158,35 @@ class StoreController extends Controller
                 }
             }
 
+            if(isset( $data['address'])){
+                $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
+                    array(
+                        'user_id' => $userId, 'meta_key' => 'shipping_address_1'
+                    ),
+                    array(
+                        'meta_value' => $data['address'],
+                    )
+                );
+            }
+            if(isset( $data['company'])){
+                $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
+                    array(
+                        'user_id' => $userId, 'meta_key' => 'company'
+                    ),
+                    array('meta_value' => $data['company'])
+                );
+            }
+            if(isset( $data['email'])){
+                $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_users')->where('user_login', $store->sdt)->update(
+                    array(
+                        'user_email' => $data['email'],
+                    )
+                );
+            }
+            
+            
 
-            $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
-                array(
-                    'user_id' => $userId, 'meta_key' => 'shipping_address_1'
-                ),
-                array(
-                    'meta_value' => $data['address'],
-                )
-            );
-            $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
-                array(
-                    'user_id' => $userId, 'meta_key' => 'company'
-                ),
-                array('meta_value' => $data['company'])
-            );
-
-            $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_users')->where('user_login', $store->sdt)->update(
-                array(
-                    'user_email' => $data['email'],
-                )
-            );
+            
 
             return $this->returnSuccess($userId, 'Cập nhật thành công');
     }

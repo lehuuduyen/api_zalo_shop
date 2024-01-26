@@ -143,20 +143,7 @@ class StoreController extends Controller
         $data = $request->all();
         $store = $request['data_reponse'];
         $this->_PRFIX_TABLE = $store->prefixTable;
-        $validator = Validator::make($request->all(), [
-            'address' => 'required',
-            'email' => 'required',
-
-        ], [
-            'address.required' => "Vui lòng nhập địa chỉ ",
-            'email.required' => "Vui lòng nhập email",
-        ]);
-        if ($validator->fails()) {
-            return $this->returnError(new \stdClass, $validator->errors()->first());
-        } else {
-
             $userId = $store->user_id;
-
             $getUserParent = $this->getUserMeta($userId, 'user_parent');
             if (isset($data['user_parent']) && !empty($data['user_parent']) &&  !$getUserParent) {
                 $checkUserParent = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_users')->where('user_login', $data['user_parent'])->first();
@@ -194,7 +181,6 @@ class StoreController extends Controller
             );
 
             return $this->returnSuccess($userId, 'Cập nhật thành công');
-        }
     }
 
     public function info(Request $request)

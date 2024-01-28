@@ -190,7 +190,11 @@ class StoreController extends Controller
 
             return $this->returnSuccess($userId, 'Cập nhật thành công');
     }
-
+    public function storeImage(Request $request) {
+        $path = $request->file('photo')->store('');
+        $request->file('photo')->storeAs('', $path, 'uploads');
+        return $this->returnSuccess('/img/uploads/'.$path, 'Cập nhật thành công');
+    }
     public function info(Request $request)
     {
         $store = $request['data_reponse'];

@@ -193,7 +193,7 @@ class StoreController extends Controller
     public function storeImage(Request $request) {
         $path = $request->file('photo')->store('');
         $request->file('photo')->storeAs('', $path, 'uploads');
-        return $this->returnSuccess('/img/uploads/'.$path, 'Cập nhật thành công');
+        return $this->returnSuccess('/storage/app/'.$path, 'Cập nhật thành công');
     }
     public function info(Request $request)
     {

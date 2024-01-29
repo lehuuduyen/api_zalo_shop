@@ -873,7 +873,7 @@ class Controller extends BaseController
                     array(
                         'post_id' => $postId,
                         'meta_key' => '_billing_phone',
-                        'meta_value' => $user['mobile'],
+                        'meta_value' => str_replace('84','',$user['mobile']),
                     ),
                     array(
                         'post_id' => $postId,

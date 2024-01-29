@@ -882,6 +882,11 @@ class Controller extends BaseController
                     ),
                     array(
                         'post_id' => $postId,
+                        'meta_key' => '_order_version',
+                        'meta_value' => '8.5.2',
+                    ),
+                    array(
+                        'post_id' => $postId,
                         'meta_key' => '_order_currency',
                         'meta_value' => 'VND',
                     ),

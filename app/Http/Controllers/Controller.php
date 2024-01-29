@@ -831,7 +831,12 @@ class Controller extends BaseController
                 );
             }
 
-
+            if($data['payment_gateway'] == 'cod'){
+                $paymentTitle  = 'Thanh toán khi giao hàng';
+            }  else{
+                $paymentTitle  = 'Chuyển khoản ngân hàng';
+                
+            }
             // them wp_postmeta
             $postMeta = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_postmeta')->insert(
                 array(
@@ -853,7 +858,7 @@ class Controller extends BaseController
                     array(
                         'post_id' => $postId,
                         'meta_key' => '_payment_method_title',
-                        'meta_value' => 'Thanh toán khi giao hàng',
+                        'meta_value' => $paymentTitle,
                     ),
                     array(
                         'post_id' => $postId,
@@ -939,9 +944,7 @@ class Controller extends BaseController
                     array(
                         'order_id' => $postId,
                         'date_created' => $timeNow,
-                        'date_completed' => $timeNow,
                         'date_created_gmt' => $timeNow,
-                        'date_paid' => $timeNow,
                         'num_items_sold' => array_sum($totalPriceDetails['quantity']),
                         'net_total' => $finalDetails['total'],
                         'total_sales' => $finalDetails['total'],

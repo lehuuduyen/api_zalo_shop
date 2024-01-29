@@ -155,6 +155,8 @@ class OrdersController extends Controller
                 return $this->returnSuccess($order, "Thêm đơn hàng thành công");
             }
         } catch (\Throwable $th) {
+            $this->woo_logs('store', $th->getMessage());
+
             return $this->returnError(new \stdClass, $th->getMessage());
         }
     }

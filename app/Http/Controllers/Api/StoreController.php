@@ -65,7 +65,7 @@ class StoreController extends Controller
     }
     public function country(Request $request)
     {
-        
+
         $country = DB::connection('mysql_external')->table('countries')->where('status', 'publish')->get();
         return $this->returnSuccess($country);
     }
@@ -73,17 +73,16 @@ class StoreController extends Controller
     {
         $store = $request['data_reponse'];
         $this->_PRFIX_TABLE = $store->prefixTable;
-        $log =DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woocommerce_log')->insertGetId(
+        $log = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woocommerce_log')->insertGetId(
             array(
                 'timestamp' => date('Y-m-d H:i:s'),
                 'level' => 1,
                 'source' => '',
                 'message' => $request['value'],
-                
+
             )
         );
         return $this->returnSuccess($log);
-
     }
     public function getPaymentMethod(Request $request)
     {
@@ -140,9 +139,10 @@ class StoreController extends Controller
      */
     public function update(Request $request)
     {
-        $data = $request->all();
-        $store = $request['data_reponse'];
-        $this->_PRFIX_TABLE = $store->prefixTable;
+        try {
+            $data = $request->all();
+            $store = $request['data_reponse'];
+            $this->_PRFIX_TABLE = $store->prefixTable;
             $userId = $store->user_id;
             $getUserParent = $this->getUserMeta($userId, 'user_parent');
             if (isset($data['user_parent']) && !empty($data['user_parent']) &&  !$getUserParent) {
@@ -158,7 +158,7 @@ class StoreController extends Controller
                 }
             }
 
-            if(isset( $data['address'])){
+            if (isset($data['address'])) {
                 $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
                     array(
                         'user_id' => $userId, 'meta_key' => 'shipping_address_1'
@@ -168,7 +168,7 @@ class StoreController extends Controller
                     )
                 );
             }
-            if(isset( $data['company'])){
+            if (isset($data['company'])) {
                 $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
                     array(
                         'user_id' => $userId, 'meta_key' => 'company'
@@ -176,24 +176,25 @@ class StoreController extends Controller
                     array('meta_value' => $data['company'])
                 );
             }
-            if(isset( $data['email'])){
+            if (isset($data['email'])) {
                 $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_users')->where('user_login', $store->sdt)->update(
                     array(
                         'user_email' => $data['email'],
                     )
                 );
             }
-            
-            
-
-            
 
             return $this->returnSuccess($userId, 'Cập nhật thành công');
+        } catch (\Throwable $th) {
+            $this->woo_logs('update', $th->getMessage());
+            return $this->returnError([], "Lỗi hệ thống");
+        }
     }
-    public function storeImage(Request $request) {
+    public function storeImage(Request $request)
+    {
         $path = $request->file('photo')->store('');
         $request->file('photo')->storeAs('', $path, 'uploads');
-        return $this->returnSuccess('/storage/app/'.$path, 'Cập nhật thành công');
+        return $this->returnSuccess('/storage/app/' . $path, 'Cập nhật thành công');
     }
     public function info(Request $request)
     {
@@ -214,14 +215,14 @@ class StoreController extends Controller
 
         $userChild = $this->getUserChild($user->ID);
         $userChild2 = $this->getUserChild2($userChild);
-        
+
         $user->cho_doi_soat = $this->choDoiSoat($user->ID);
         $user->thuc_nhan = $this->thucNhan($user->ID);
-        $user->tong_hoa_hong = $this->tongHoaHong($userChild,$userChild2);
+        $user->tong_hoa_hong = $this->tongHoaHong($userChild, $userChild2);
         $user->hoa_hong = $user->tong_hoa_hong - $user->thuc_nhan - $user->cho_doi_soat;
         $user->hoa_hong_da_rut = $user->thuc_nhan;
-        $user->tong_doanh_thu = $this->tongDoanhThu($userChild,$userChild2);
-        $user->tong_don_hang = $this->tongDonHang($userChild,$userChild2);
+        $user->tong_doanh_thu = $this->tongDoanhThu($userChild, $userChild2);
+        $user->tong_don_hang = $this->tongDonHang($userChild, $userChild2);
 
         $getWeek = $this->getWeek();
         $arr[0]['label'] = 'Tổng hoa hồng';
@@ -237,10 +238,10 @@ class StoreController extends Controller
             $date = $arrDay[2];
             $month = $arrDay[1];
             $year = $arrDay[0];
-            $tongHoaHong = $this->tongHoaHong($userChild,$userChild2, $date, $month, $year);
-            $tongDoanhThu = $this->tongDoanhThu($userChild,$userChild2, $date, $month, $year);
+            $tongHoaHong = $this->tongHoaHong($userChild, $userChild2, $date, $month, $year);
+            $tongDoanhThu = $this->tongDoanhThu($userChild, $userChild2, $date, $month, $year);
             $tongHoaHongDaRut = $this->thucNhan($user->ID, $date, $month, $year);
-            $tongDon =  $this->tongDonHang($userChild,$userChild2, $date, $month, $year);
+            $tongDon =  $this->tongDonHang($userChild, $userChild2, $date, $month, $year);
             $listTongHoaHong[] = $tongHoaHong;
             $listTongDoanhThu[] = $tongDoanhThu;
             $listTongHoaHongDaRut[] = $tongHoaHongDaRut;
@@ -265,8 +266,8 @@ class StoreController extends Controller
         $userId = $store->user_id;
         $userChild = $this->getUserChild($userId);
         $userChild2 = $this->getUserChild2($userChild);
-        $userChild = array_merge($userChild,$userChild2);
-        
+        $userChild = array_merge($userChild, $userChild2);
+
         $listUserChild = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_users')->select('ID', 'user_nicename', 'user_login as mobile')->whereIn('ID', $userChild);
         if (isset($request['search'])) {
             $listUserChild = $listUserChild->where('user_login', 'like', '%' . $request['search'] . '%');
@@ -276,18 +277,16 @@ class StoreController extends Controller
         }
         $listUserChild = $listUserChild->get();
         foreach ($listUserChild as $key => $user) {
-            
-            if(in_array($user->ID,$userChild2)){
-                $listUserChild[$key]->tong_hoa_hong = $this->tongHoaHong([],[$user->ID]);
-                $listUserChild[$key]->tong_doanh_thu = $this->tongDoanhThu([],[$user->ID]);  
-                $listUserChild[$key]->level = "Cấp 2";  
-            }else{
-                $listUserChild[$key]->tong_hoa_hong = $this->tongHoaHong([$user->ID],[]);
-                $listUserChild[$key]->tong_doanh_thu = $this->tongDoanhThu([$user->ID],[]);  
-                $listUserChild[$key]->level = "Cấp 1";  
 
+            if (in_array($user->ID, $userChild2)) {
+                $listUserChild[$key]->tong_hoa_hong = $this->tongHoaHong([], [$user->ID]);
+                $listUserChild[$key]->tong_doanh_thu = $this->tongDoanhThu([], [$user->ID]);
+                $listUserChild[$key]->level = "Cấp 2";
+            } else {
+                $listUserChild[$key]->tong_hoa_hong = $this->tongHoaHong([$user->ID], []);
+                $listUserChild[$key]->tong_doanh_thu = $this->tongDoanhThu([$user->ID], []);
+                $listUserChild[$key]->level = "Cấp 1";
             }
-            
         }
         return $this->returnSuccess($listUserChild);
     }
@@ -302,83 +301,97 @@ class StoreController extends Controller
     }
     public function update_payment_method(Request $request)
     {
-        $data = $request->all();
-        $store = $request['data_reponse'];
-        $this->_PRFIX_TABLE = $store->prefixTable;
-        $validator = Validator::make($request->all(), [
-            'name' => 'required',
-            'stk' => 'required',
-            'bankname' => 'required',
+        try {
+            $data = $request->all();
+            $store = $request['data_reponse'];
+            $this->_PRFIX_TABLE = $store->prefixTable;
+            $validator = Validator::make($request->all(), [
+                'name' => 'required',
+                'stk' => 'required',
+                'bankname' => 'required',
 
-        ], [
-            'name.required' => "Vui lòng tên tài khoản ",
-            'stk.required' => "Vui lòng nhập STK",
-            'bankname.required' => "Vui lòng nhập tên ngân hàng",
-        ]);
-        if ($validator->fails()) {
-            return $this->returnError(new \stdClass, $validator->errors()->first());
-        } else {
-            $userId = $store->user_id;
-            $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
-                array(
-                    'user_id' => $userId, 'meta_key' => 'payment_method'
-                ),
-                array(
-                    'meta_value' => json_encode(['name' => $data['name'], 'stk' => $data['stk'], 'bankname' => $data['bankname']]),
-                )
-            );
-            return $this->returnSuccess($userId, 'Cập nhật thành công');
+            ], [
+                'name.required' => "Vui lòng tên tài khoản ",
+                'stk.required' => "Vui lòng nhập STK",
+                'bankname.required' => "Vui lòng nhập tên ngân hàng",
+            ]);
+            if ($validator->fails()) {
+                return $this->returnError(new \stdClass, $validator->errors()->first());
+            } else {
+                $userId = $store->user_id;
+                $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
+                    array(
+                        'user_id' => $userId, 'meta_key' => 'payment_method'
+                    ),
+                    array(
+                        'meta_value' => json_encode(['name' => $data['name'], 'stk' => $data['stk'], 'bankname' => $data['bankname']]),
+                    )
+                );
+                return $this->returnSuccess($userId, 'Cập nhật thành công');
+            }
+        } catch (\Throwable $th) {
+            //throw $th;
+            $this->woo_logs('update_payment_method', $th->getMessage());
+
+            return $this->returnError([], "Lỗi hệ thống");
         }
     }
     public function withdraw(Request $request)
     {
-        $data = $request->all();
-        $store = $request['data_reponse'];
-        $this->_PRFIX_TABLE = $store->prefixTable;
-        $validator = Validator::make($request->all(), [
-            'name' => 'required',
-            'stk' => 'required',
-            'bankname' => 'required',
-            'money' => 'required',
+        try {
+            $data = $request->all();
+            $store = $request['data_reponse'];
+            $this->_PRFIX_TABLE = $store->prefixTable;
+            $validator = Validator::make($request->all(), [
+                'name' => 'required',
+                'stk' => 'required',
+                'bankname' => 'required',
+                'money' => 'required',
 
-        ], [
-            'name.required' => "Vui lòng tên tài khoản ",
-            'stk.required' => "Vui lòng nhập STK",
-            'bankname.required' => "Vui lòng nhập tên ngân hàng",
-            'money.required' => "Vui lòng nhập tiền rút",
-        ]);
-        if ($validator->fails()) {
-            return $this->returnError(new \stdClass, $validator->errors()->first());
-        } else {
-            if ($data['money'] < 100) {
-                return $this->returnError(new \stdClass, "Số tiền rút phải lớn hơn 100000");
+            ], [
+                'name.required' => "Vui lòng tên tài khoản ",
+                'stk.required' => "Vui lòng nhập STK",
+                'bankname.required' => "Vui lòng nhập tên ngân hàng",
+                'money.required' => "Vui lòng nhập tiền rút",
+            ]);
+            if ($validator->fails()) {
+                return $this->returnError(new \stdClass, $validator->errors()->first());
+            } else {
+                if ($data['money'] < 100) {
+                    return $this->returnError(new \stdClass, "Số tiền rút phải lớn hơn 100000");
+                }
+                $userId = $store->user_id;
+
+                $userChild = $this->getUserChild($userId);
+                $userChild2 = $this->getUserChild2($userChild);
+
+                $cho_doi_soat = $this->choDoiSoat($userId);
+                $thuc_nhan = $this->thucNhan($userId);
+                $tong_hoa_hong = $this->tongHoaHong($userChild, $userChild2);
+                $hoa_hong = $tong_hoa_hong - $thuc_nhan - $cho_doi_soat;
+                if ($data['money'] > $hoa_hong) {
+                    return $this->returnError(new \stdClass, "Tiền hoa hồng chỉ còn " . $hoa_hong);
+                }
+                $paymentMethod = json_encode(['name' => $data['name'], 'stk' => $data['stk'], 'bankname' => $data['bankname']]);
+                DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->insertGetId(
+                    array(
+                        'user_id' => $userId,
+                        'total_order' => 0,
+                        'commission' => $data['money'],
+                        'payment_method' => $paymentMethod,
+                        'date' => date('d'),
+                        'month' => date('m'),
+                        'year' => date('Y'),
+                        'status' => 4,
+                    )
+                );
+                return $this->returnSuccess($userId, 'Cập nhật thành công');
             }
-            $userId = $store->user_id;
+        } catch (\Throwable $th) {
+            //throw $th;
+            $this->woo_logs('withdraw', $th->getMessage());
 
-            $userChild = $this->getUserChild($userId);
-            $userChild2 = $this->getUserChild2($userChild);
-
-            $cho_doi_soat = $this->choDoiSoat($userId);
-            $thuc_nhan = $this->thucNhan($userId);
-            $tong_hoa_hong = $this->tongHoaHong($userChild,$userChild2);
-            $hoa_hong = $tong_hoa_hong - $thuc_nhan - $cho_doi_soat;
-            if($data['money'] > $hoa_hong){
-                return $this->returnError(new \stdClass, "Tiền hoa hồng chỉ còn ".$hoa_hong);
-            }
-            $paymentMethod = json_encode(['name' => $data['name'], 'stk' => $data['stk'], 'bankname' => $data['bankname']]);
-            DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->insertGetId(
-                array(
-                    'user_id' => $userId,
-                    'total_order' => 0  ,
-                    'commission' => $data['money'],
-                    'payment_method' => $paymentMethod,
-                    'date' => date('d'),
-                    'month' => date('m'),
-                    'year' => date('Y'),
-                    'status' => 4,
-                )
-            );
-            return $this->returnSuccess($userId, 'Cập nhật thành công');
+            return $this->returnError([], "Lỗi hệ thống");
         }
     }
     public function getWeek()

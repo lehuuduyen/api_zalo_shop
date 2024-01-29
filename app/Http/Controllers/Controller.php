@@ -38,6 +38,19 @@ class Controller extends BaseController
             'message' => $message /* Or optional success message */
         ]);
     }
+    public function woo_logs($api,$message = "Lấy dữ liệu thất bại",$level=2)
+    {
+        $log = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woocommerce_log')->insertGetId(
+            array(
+                'timestamp' => date('Y-m-d H:i:s'),
+                'level' => $level,
+                'source' => $api,
+                'message' =>$message,
+
+            )
+        );
+    }
+
     public function connectDb($databaseStore)
     {
         Config::set("database.connections.mysql_external", [
@@ -462,7 +475,7 @@ class Controller extends BaseController
         }
         return $data;
     }
-    public function calculateCoupon($data, $products,$isCheckApiCoupon =false)
+    public function calculateCoupon($data, $products, $isCheckApiCoupon = false)
     {
         $discount_total = 0;
         $paramCoupon = $data['coupon'];
@@ -504,10 +517,10 @@ class Controller extends BaseController
         if ($discount_total > $data['subtotal']) {
             $discount_total = $data['subtotal'];
         }
-        if(!$isCheckApiCoupon){
+        if (!$isCheckApiCoupon) {
             DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_postmeta')->where('post_id', $coupon->ID)->where('meta_key', 'usage_count')->update(
                 array(
-                    'meta_value' => $usage_count+1
+                    'meta_value' => $usage_count + 1
                 )
             );
         }
@@ -792,14 +805,14 @@ class Controller extends BaseController
                 );
             }
             //them hoa hồng
-            $getUserParent = $this->getUserMeta($user['id'],'user_parent');
+            $getUserParent = $this->getUserMeta($user['id'], 'user_parent');
             $configAff = $this->getOptionsMeta('woo_aff_setting');
-            if($getUserParent && $configAff){
-                $getUserParent2 = $this->getUserMeta($getUserParent,'user_parent');
+            if ($getUserParent && $configAff) {
+                $getUserParent2 = $this->getUserMeta($getUserParent, 'user_parent');
                 $configAff2 = $this->getOptionsMeta('woo_aff_setting_cap2');
                 $commissions2 = 0;
                 $commissions = $finalDetails['total'] * $configAff / 100;
-                if($getUserParent2 && $configAff2){
+                if ($getUserParent2 && $configAff2) {
                     $commissions2 = $finalDetails['total'] * $configAff2 / 100;
                 }
                 DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->insertGetId(
@@ -817,7 +830,7 @@ class Controller extends BaseController
                     )
                 );
             }
-            
+
 
             // them wp_postmeta
             $postMeta = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_postmeta')->insert(
@@ -1253,7 +1266,7 @@ class Controller extends BaseController
         }
         return $data;
     }
-    public function getOptionsMeta( $meta)
+    public function getOptionsMeta($meta)
     {
         $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_options')->where('option_name', $meta)->first();
         if ($data) {
@@ -1285,59 +1298,64 @@ class Controller extends BaseController
 
         return explode("_", $value)[0];
     }
-    public function getUserChild($userParent){
+    public function getUserChild($userParent)
+    {
         $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->where('meta_key', 'user_parent')->where('meta_value', $userParent)->pluck('user_id')->toArray();
-        
+
         return $data;
     }
-    public function getUserChild2($listChild1){
+    public function getUserChild2($listChild1)
+    {
         $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->where('meta_key', 'user_parent')->whereIn('meta_value', $listChild1)->pluck('user_id')->toArray();
 
         return $data;
     }
-    public function choDoiSoat($userParent){
+    public function choDoiSoat($userParent)
+    {
         $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->where('user_id', $userParent)->where('status', 4)->sum('commission');
         return $data;
     }
-    public function thucNhan($userParent,$date =null,$month =null,$year =null){
-        if($date && $month && $year){
+    public function thucNhan($userParent, $date = null, $month = null, $year = null)
+    {
+        if ($date && $month && $year) {
             $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->where('user_id', $userParent)->where('status', 2)->where('date', $date)->where('month', $month)->where('year', $year)->sum('commission');
-        }else{
-        $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->where('user_id', $userParent)->where('status', 2)->sum('commission');
+        } else {
+            $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->where('user_id', $userParent)->where('status', 2)->sum('commission');
         }
         return $data;
     }
-    public function tongHoaHong($userChild,$userChild2,$date =null,$month =null,$year =null){
-        if($date && $month && $year){
+    public function tongHoaHong($userChild, $userChild2, $date = null, $month = null, $year = null)
+    {
+        if ($date && $month && $year) {
             $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->whereIn('user_id', $userChild)->where('status', 1)->where('date', $date)->where('month', $month)->where('year', $year)->sum('commission');
             $data2 = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->whereIn('user_id', $userChild2)->where('status', 1)->where('date', $date)->where('month', $month)->where('year', $year)->sum('commission_level2');
             $total = $data + $data2;
-        }else{
+        } else {
             $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->whereIn('user_id', $userChild)->where('status', 1)->sum('commission');
             $data2 = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->whereIn('user_id', $userChild2)->where('status', 1)->sum('commission_level2');
             $total = $data + $data2;
-            
         }
         return $total;
     }
-    public function tongDoanhThu($userChild,$userChild2,$date =null,$month =null,$year =null){
-        $userChild = array_merge($userChild,$userChild2);
-        if($date && $month && $year){
+    public function tongDoanhThu($userChild, $userChild2, $date = null, $month = null, $year = null)
+    {
+        $userChild = array_merge($userChild, $userChild2);
+        if ($date && $month && $year) {
             $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->whereIn('user_id', $userChild)->where('status', 1)->where('date', $date)->where('month', $month)->where('year', $year)->sum('total_order');
-        }else{
+        } else {
             $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->whereIn('user_id', $userChild)->where('status', 1)->sum('total_order');
         }
         return $data;
     }
-    
-    public function tongDonHang($userChild,$userChild2,$date =null,$month =null,$year =null){
-        $userChild = array_merge($userChild,$userChild2);
-        if($date && $month && $year){
+
+    public function tongDonHang($userChild, $userChild2, $date = null, $month = null, $year = null)
+    {
+        $userChild = array_merge($userChild, $userChild2);
+        if ($date && $month && $year) {
             $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->whereIn('user_id', $userChild)->where('status', 1)->where('date', $date)->where('month', $month)->where('year', $year)->get()->count();
-        }else{
+        } else {
             $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->whereIn('user_id', $userChild)->where('status', 1)->get()->count();
         }
         return $data;
     }
-
 }

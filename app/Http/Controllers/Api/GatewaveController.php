@@ -92,6 +92,8 @@ class GatewaveController extends Controller
                         );
                     }
                     $hash = $this->getToken($request['store'],$request['sdt'],$databaseStore,$store->domain,$request['name'],$request['user_id'],$prefixTable);
+                    $this->woo_logs('gateway', $hash,3);
+
                     return $this->returnSuccess([
                         'token'=> $hash
                     ]);
@@ -100,6 +102,8 @@ class GatewaveController extends Controller
                 }
             }
         } catch (\Throwable $th) {
+            $this->woo_logs('gateway', $th->getMessage());
+
             return $this->returnError(new \stdClass,$th->getMessage());
         }
     }

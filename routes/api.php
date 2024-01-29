@@ -36,7 +36,6 @@ Route::group([  'middleware' => ['CorsApi','CheckStore']], function()
     Route::post('order', 'App\Http\Controllers\Api\OrdersController@store');
     Route::put('update_payment_method', 'App\Http\Controllers\Api\StoreController@update_payment_method');
     Route::post('withdraw', 'App\Http\Controllers\Api\StoreController@withdraw');
-    Route::post('storeImage', 'App\Http\Controllers\Api\StoreController@storeImage');
 
     Route::get('country', 'App\Http\Controllers\Api\StoreController@country');
     Route::get('state', 'App\Http\Controllers\Api\StoreController@state');
@@ -47,6 +46,9 @@ Route::group([  'middleware' => ['CorsApi','CheckStore']], function()
     Route::get('history_withdraw', 'App\Http\Controllers\Api\StoreController@historyWithdraw');
     Route::get('ranks', 'App\Http\Controllers\Api\RanksController@index');
     Route::get('get_point_to_money', 'App\Http\Controllers\Api\RanksController@get_point_to_money');
+
+    Route::post('storeImage', 'App\Http\Controllers\Api\StoreController@storeImage');
+
     Route::prefix('booking')->group(function () {
         Route::get('categories', 'App\Http\Controllers\Api\ProductController@getCategories');
         Route::get('banner', 'App\Http\Controllers\Api\StoreController@banner');

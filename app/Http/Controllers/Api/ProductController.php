@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Carbon\Carbon;
+use Exception;
 use Gloudemans\Shoppingcart\Facades\Cart;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -19,7 +20,7 @@ class ProductController extends Controller
     {
         $store = $request['data_reponse'];
         $this->_PRFIX_TABLE = $store->prefixTable;
-        $products = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_posts')->where('post_type', 'product')->where('post_status', 'publish')->orderBy('post_modified', 'DESC')->get();
+        $products = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->where('post_type', 'product')->where('post_status', 'publish')->orderBy('post_modified', 'DESC')->get();
         if (isset($request['category'])) {
             $products = $this->getPostByCategoryId($request['category']);
         }
@@ -31,25 +32,25 @@ class ProductController extends Controller
         foreach ($products as $key => $product) {
             $products[$key]->id = $product->ID;
             $products[$key]->product_id = $product->ID;
-            $postMetaStatus = $this->getPostMeta($product->ID,'_stock_status');
-            $postMetaStock = $this->getPostMeta($product->ID,'_stock');
-            $postMetaGiaGoc = $this->getPostMeta($product->ID,'_regular_price');
+            $postMetaStatus = $this->getPostMeta($product->ID, '_stock_status');
+            $postMetaStock = $this->getPostMeta($product->ID, '_stock');
+            $postMetaGiaGoc = $this->getPostMeta($product->ID, '_regular_price');
 
-            $postMetaGiaKhuyenMai = $this->getPostMeta($product->ID,'_sale_price');
+            $postMetaGiaKhuyenMai = $this->getPostMeta($product->ID, '_sale_price');
             $_sale_price_dates_from = $this->getPostMeta($product->ID, '_sale_price_dates_from');
             $_sale_price_dates_to = $this->getPostMeta($product->ID, '_sale_price_dates_to');
 
-            $postMetaStock = $this->getPostMeta($product->ID,'_stock');
+            $postMetaStock = $this->getPostMeta($product->ID, '_stock');
             $products[$key]->is_campaign = false;
             $products[$key]->price =  $postMetaGiaGoc;
             $products[$key]->sale_price =  $postMetaGiaGoc;
-            if($postMetaGiaKhuyenMai && empty($_sale_price_dates_from) && empty($_sale_price_dates_to)){
+            if ($postMetaGiaKhuyenMai && empty($_sale_price_dates_from) && empty($_sale_price_dates_to)) {
                 $products[$key]->sale_price = $postMetaGiaKhuyenMai;
             }
-            if($postMetaGiaKhuyenMai && $time >= $_sale_price_dates_from && $time <= $_sale_price_dates_to){
+            if ($postMetaGiaKhuyenMai && $time >= $_sale_price_dates_from && $time <= $_sale_price_dates_to) {
                 $products[$key]->sale_price = $postMetaGiaKhuyenMai;
                 $products[$key]->is_campaign = true;
-                $products[$key]->end_date = date('Y/m/d H:i:s',$_sale_price_dates_to);
+                $products[$key]->end_date = date('Y/m/d H:i:s', $_sale_price_dates_to);
             }
 
             $products[$key]->image_id = $this->getImage($product->ID, $store);
@@ -57,11 +58,11 @@ class ProductController extends Controller
             $products[$key]->name = $product->post_title;
             $products[$key]->summary = $product->post_excerpt;
             $products[$key]->description = $product->post_content;
-            $products[$key]->badge_id =[];
+            $products[$key]->badge_id = [];
             $products[$key]->category = $this->getCategoryByProduct($product->ID, $store);
             $products[$key]->galleries = $this->getGalleries($product->ID, $store);
             $products[$key]->product_inventory = $this->getProductInventory($product->ID);
-            $products[$key]->delivery_option =[];
+            $products[$key]->delivery_option = [];
             // $products[$key]->delivery_option = $this->getProductDeliveryOption($product->id);
             $products[$key]->unit = [];
             // $products[$key]->unit = $this->getUnit($product->id);
@@ -84,13 +85,13 @@ class ProductController extends Controller
     {
         $store = $request['data_reponse'];
         $this->_PRFIX_TABLE = $store->prefixTable;
-        $categories = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_term_taxonomy')->join( $this->_PRFIX_TABLE .'_terms', $this->_PRFIX_TABLE .'_terms.term_id', $this->_PRFIX_TABLE .'_term_taxonomy.term_id')->where( $this->_PRFIX_TABLE .'_term_taxonomy.taxonomy', 'product_cat')->select( $this->_PRFIX_TABLE .'_terms.*')->get();
+        $categories = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_term_taxonomy')->join($this->_PRFIX_TABLE . '_terms', $this->_PRFIX_TABLE . '_terms.term_id', $this->_PRFIX_TABLE . '_term_taxonomy.term_id')->where($this->_PRFIX_TABLE . '_term_taxonomy.taxonomy', 'product_cat')->select($this->_PRFIX_TABLE . '_terms.*')->get();
 
         if ($categories) {
             foreach ($categories as $key => $val) {
-                $img = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_termmeta')->where( $this->_PRFIX_TABLE .'_termmeta.meta_key', 'thumbnail_id')->where( $this->_PRFIX_TABLE .'_termmeta.term_id', $val->term_id)->first();
+                $img = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_termmeta')->where($this->_PRFIX_TABLE . '_termmeta.meta_key', 'thumbnail_id')->where($this->_PRFIX_TABLE . '_termmeta.term_id', $val->term_id)->first();
                 $categories[$key]->id =  $val->term_id;
-                $categories[$key]->image =  ($img)?$this->getImage($img->meta_value, $store,true):"";
+                $categories[$key]->image =  ($img) ? $this->getImage($img->meta_value, $store, true) : "";
             }
         }
 
@@ -106,67 +107,82 @@ class ProductController extends Controller
      */
     public function review(Request $request)
     {
-        $store = $request['data_reponse'];
-        $this->_PRFIX_TABLE = $store->prefixTable;
-        $data = $request->all();
-        $data['sdt'] = $store->sdt;
-        if (!isset($data['rating'])) {
-            return $this->returnError([], "Bắt buộc phải nhập rating");
-        } else if (!isset($data['product_id'])) {
-            return $this->returnError([], "Bắt buộc phải nhập product");
-        } else {
-            $user = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_users')->where('user_login', $data['sdt'])->first();
-            if (!$user) {
-                return $this->returnError([], "Số điện thoại chưa được đăng ký");
+        try {
+            $store = $request['data_reponse'];
+            $this->_PRFIX_TABLE = $store->prefixTable;
+            $data = $request->all();
+            $data['sdt'] = $store->sdt;
+            if (!isset($data['rating'])) {
+                return $this->returnError([], "Bắt buộc phải nhập rating");
+            } else if (!isset($data['product_id'])) {
+                return $this->returnError([], "Bắt buộc phải nhập product");
+            } else {
+                $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_users')->where('user_login', $data['sdt'])->first();
+                if (!$user) {
+                    return $this->returnError([], "Số điện thoại chưa được đăng ký");
+                }
+                $insertId = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_comments')->insertGetId(
+                    array(
+                        'comment_post_ID'     =>   $data['product_id'],
+                        'comment_author'     =>   $store->name,
+                        'comment_content'     =>   $data['review_text'],
+                        'comment_type'     =>   'review',
+                        'user_id'   =>   $store->user_id,
+                        'comment_date' => date('Y/m/d H:i:s'),
+                        'comment_date_gmt' => date('Y/m/d H:i:s')
+
+                    )
+                );
+
+
+                $insert = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_commentmeta')->insert(
+                    array(
+                        'comment_id'     =>   $insertId,
+                        'meta_value'     =>   $data['rating'],
+                        'meta_key'     =>   'rating',
+                    )
+                );
+                return $this->returnSuccess($insert, 'Thêm review thành công');
             }
-            $insertId = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_comments')->insertGetId(
-                array(
-                    'comment_post_ID'     =>   $data['product_id'],
-                    'comment_author'     =>   $store->name,
-                    'comment_content'     =>   $data['review_text'],
-                    'comment_type'     =>   'review',
-                    'user_id'   =>   $store->user_id,
-                    'comment_date' => date('Y/m/d H:i:s'),
-                    'comment_date_gmt' => date('Y/m/d H:i:s')
+        } catch (\Throwable $th) {
+            //throw $th;
+            $this->woo_logs('review', $th->getMessage());
 
-                )
-            );
+            return $this->returnError([], "Lỗi hệ thống");
 
-
-            $insert = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_commentmeta')->insert(
-                array(
-                    'comment_id'     =>   $insertId,
-                    'meta_value'     =>   $data['rating'],
-                    'meta_key'     =>   'rating',
-                )
-            );
-            return $this->returnSuccess($insert, 'Thêm review thành công');
         }
     }
 
 
     public function checkCoupon(Request $request)
     {
-        $store = $request['data_reponse'];
-        $this->_PRFIX_TABLE = $store->prefixTable;
-        $data = $request->all();
-        if (!isset($data['coupon'])) {
-            return $this->returnError([], "Bắt buộc phải nhập coupon");
-        }
-        if (!isset($data['subtotal'])) {
-            return $this->returnError([], "Bắt buộc phải nhập total");
-        }
-        $order = $data['order'];
-        $listProductId = [];
-        foreach ($order as $value) {
-            $listProductId[] = $value['id'];
-        }
-        $products = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_posts')->whereIn('id', $listProductId)->get();
-        $coupon_amount_total = $this->calculateCoupon($data, $products,true);
-        if ($coupon_amount_total > 0) {
-            return $this->returnSuccess($coupon_amount_total);
-        }else{
-            return $this->returnError($coupon_amount_total, 'Mã khuyễn mãi không đúng');
+        try {
+            //code...
+            $store = $request['data_reponse'];
+            $this->_PRFIX_TABLE = $store->prefixTable;
+            $data = $request->all();
+            if (!isset($data['coupon'])) {
+                return $this->returnError([], "Bắt buộc phải nhập coupon");
+            }
+            if (!isset($data['subtotal'])) {
+                return $this->returnError([], "Bắt buộc phải nhập total");
+            }
+            $order = $data['order'];
+            $listProductId = [];
+            foreach ($order as $value) {
+                $listProductId[] = $value['id'];
+            }
+            $products = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->whereIn('id', $listProductId)->get();
+            $coupon_amount_total = $this->calculateCoupon($data, $products, true);
+            if ($coupon_amount_total > 0) {
+                return $this->returnSuccess($coupon_amount_total);
+            } else {
+                return $this->returnError($coupon_amount_total, 'Mã khuyễn mãi không đúng');
+            }
+        } catch (\Throwable $th) {
+            //throw $th;
+            $this->woo_logs('checkCoupon', $th->getMessage());
+            return $this->returnError(0, 'Mã khuyễn mãi không đúng');
         }
     }
     /**

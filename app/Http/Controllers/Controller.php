@@ -944,7 +944,9 @@ class Controller extends BaseController
                     array(
                         'order_id' => $postId,
                         'date_created' => $timeNow,
+                        'date_completed' => null,
                         'date_created_gmt' => $timeNow,
+                        'date_paid' => null,
                         'num_items_sold' => array_sum($totalPriceDetails['quantity']),
                         'net_total' => $finalDetails['total'],
                         'total_sales' => $finalDetails['total'],

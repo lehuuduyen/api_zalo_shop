@@ -145,7 +145,7 @@ class StoreController extends Controller
             $this->_PRFIX_TABLE = $store->prefixTable;
             $userId = $store->user_id;
             $getUserParent = $this->getUserMeta($userId, 'user_parent');
-            if (isset($data['user_parent']) && !empty($data['user_parent']) &&  !$getUserParent  &&  $data['user_parent'] != '77777777' ) {
+            if (isset($data['user_parent']) && !empty($data['user_parent']) &&  !$getUserParent  &&  $data['user_parent'] != '77777777' &&  $userId !=0 ) {
                 $checkUserParent = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_users')->where('user_login', $data['user_parent'])->first();
                 if ($checkUserParent && $store->sdt != $data['user_parent']) {
                     $this->woo_logs('user_parent_save', $checkUserParent->ID.'-'.$userId);

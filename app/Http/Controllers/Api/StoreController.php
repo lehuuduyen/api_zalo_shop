@@ -145,7 +145,7 @@ class StoreController extends Controller
             $this->_PRFIX_TABLE = $store->prefixTable;
             $userId = $store->user_id;
             $getUserParent = $this->getUserMeta($userId, 'user_parent');
-            if (isset($data['user_parent']) && !empty($data['user_parent']) &&  !$getUserParent) {
+            if (isset($data['user_parent']) && !empty($data['user_parent']) &&  !$getUserParent  &&  $data['user_parent'] != '77777777' ) {
                 $checkUserParent = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_users')->where('user_login', $data['user_parent'])->first();
                 if ($checkUserParent && $store->sdt != $data['user_parent']) {
                     $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->insert(

@@ -297,7 +297,7 @@ class StoreController extends Controller
         $store = $request['data_reponse'];
         $this->_PRFIX_TABLE = $store->prefixTable;
         $userId = $store->user_id;
-        $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->where('user_id', $userId)->whereIn('status', [2, 4])->get();
+        $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->where('user_id', $userId)->whereIn('status', [2, 4,5])->get();
 
         return $this->returnSuccess($data);
     }

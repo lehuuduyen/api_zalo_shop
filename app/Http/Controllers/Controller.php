@@ -1317,11 +1317,7 @@ class Controller extends BaseController
         $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_share_link')->where('user_parent', $userParent)->where('status', 2)->pluck('user_id')->toArray();
         return $data;
     }
-    public function getUserChild($userParent)
-    {
-        $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_share_link')->where('user_parent', $userParent)->pluck('user_id')->toArray();
-        return $data;
-    }
+  
     public function getUserChild2($listChild1)
     {
         return [];

@@ -1306,7 +1306,7 @@ class Controller extends BaseController
     }
     public function getUserParentLastes($userChild)
     {
-        $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_share_link')->where('user_id', $userChild)->where('status', 1)->order_by('id', 'desc')->first();
+        $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_share_link')->where('user_id', $userChild)->where('status', 1)->latest('id')->first();
         if($data){
             $data = $data->user_parent;
         }

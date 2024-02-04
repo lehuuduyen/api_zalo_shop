@@ -48,6 +48,8 @@ Route::group([  'middleware' => ['CorsApi','CheckStore']], function()
     Route::get('get_point_to_money', 'App\Http\Controllers\Api\RanksController@get_point_to_money');
 
     Route::post('storeImage', 'App\Http\Controllers\Api\StoreController@storeImage');
+    Route::put('register_aff', 'App\Http\Controllers\Api\StoreController@register_aff');
+    Route::post('history_share_link', 'App\Http\Controllers\Api\StoreController@history_share_link');
 
     Route::prefix('booking')->group(function () {
         Route::get('categories', 'App\Http\Controllers\Api\ProductController@getCategories');

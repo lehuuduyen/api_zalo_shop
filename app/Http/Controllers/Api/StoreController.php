@@ -214,6 +214,8 @@ class StoreController extends Controller
         $user->payment_method = ($paymentMethod) ? json_decode($paymentMethod) : "";
         $user->history = $this->getHistoryUser($user->ID);
         $user->point = $this->getPointUser($user->history);
+        $is_affliate = $this->getUserMeta($user->ID, 'is_affliate');
+        $user->is_affliate = $is_affliate;
 
         $userChild = $this->getUserChild($user->ID);
         $userChild2 = $this->getUserChild2($userChild);
@@ -300,6 +302,49 @@ class StoreController extends Controller
         $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->where('user_id', $userId)->whereIn('status', [2, 4,5])->get();
 
         return $this->returnSuccess($data);
+    }
+    public function register_aff(Request $request)
+    {
+        $data = $request->all();
+        $store = $request['data_reponse'];
+        $this->_PRFIX_TABLE = $store->prefixTable;
+        $userId = $store->user_id;
+
+        $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
+            array(
+                'user_id' => $userId, 'meta_key' => 'is_affliate'
+            ),
+            array(
+                'meta_value' => true,
+            )
+        );
+        return $this->returnSuccess($userId, 'Cập nhật thành công');
+    }
+    public function history_share_link(Request $request)
+    {
+        $data = $request->all();
+        $store = $request['data_reponse'];
+        $this->_PRFIX_TABLE = $store->prefixTable;
+        $validator = Validator::make($request->all(), [
+            'user_parent' => 'required',
+            'product' => 'required',
+        ], [
+            'user_parent.required' => "Vui lòng nhập user_parent",
+            'product.required' => "Vui lòng nhập product",
+        ]);
+        if ($validator->fails()) {
+            return $this->returnError(new \stdClass, $validator->errors()->first());
+        } else {
+            $userId = $store->user_id;
+            DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_share_link')->insertGetId(
+                array(
+                    'user_id' => $userId,
+                    'user_parent' => $data['user_parent']  ,
+                    'product' => $data['product']  ,
+                )
+            );
+            return $this->returnSuccess($userId, 'Cập nhật thành công');
+        }
     }
     public function update_payment_method(Request $request)
     {

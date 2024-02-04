@@ -808,20 +808,16 @@ class Controller extends BaseController
             $getUserParent = $this->getUserMeta($user['id'], 'user_parent');
             $configAff = $this->getOptionsMeta('woo_aff_setting');
             if ($getUserParent && $configAff) {
-                $getUserParent2 = $this->getUserMeta($getUserParent, 'user_parent');
-                $configAff2 = $this->getOptionsMeta('woo_aff_setting_cap2');
-                $commissions2 = 0;
+               
                 $commissions = $finalDetails['total'] * $configAff / 100;
-                if ($getUserParent2 && $configAff2) {
-                    $commissions2 = $finalDetails['total'] * $configAff2 / 100;
-                }
+                
                 DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->insertGetId(
                     array(
                         'order_id' => $postId,
                         'total_order' => $finalDetails['total'],
                         'user_id' => $user['id'],
                         'commission' => $commissions,
-                        'commission_level2' => $commissions2,
+                        'commission_level2' => 0,
                         'minimum_spending' => $totalOrderBanDau,
                         'date' => date('d'),
                         'month' => date('m'),

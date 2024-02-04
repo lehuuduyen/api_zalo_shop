@@ -805,7 +805,7 @@ class Controller extends BaseController
                 );
             }
             //them hoa hồng
-            $getUserParent = $this->getUserMeta($user['id'], 'user_parent');
+            $getUserParent = $this->getUserParentLastes($user['id']);
             $configAff = $this->getOptionsMeta('woo_aff_setting');
             if ($getUserParent && $configAff) {
                
@@ -1304,17 +1304,27 @@ class Controller extends BaseController
 
         return explode("_", $value)[0];
     }
+    public function getUserParentLastes($userChild)
+    {
+        $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_share_link')->where('user_id', $userChild)->where('status', 1)->order_by('id', 'desc')->first();
+        if($data){
+            $data = $data->user_parent;
+        }
+        return $data;
+    }
     public function getUserChild($userParent)
     {
-        $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->where('meta_key', 'user_parent')->where('meta_value', $userParent)->pluck('user_id')->toArray();
-
+        $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_share_link')->where('user_parent', $userParent)->where('status', 2)->pluck('user_id')->toArray();
+        return $data;
+    }
+    public function getUserChild($userParent)
+    {
+        $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_share_link')->where('user_parent', $userParent)->pluck('user_id')->toArray();
         return $data;
     }
     public function getUserChild2($listChild1)
     {
-        $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->where('meta_key', 'user_parent')->whereIn('meta_value', $listChild1)->pluck('user_id')->toArray();
-
-        return $data;
+        return [];
     }
     public function choDoiSoat($userParent)
     {

@@ -43,8 +43,8 @@ class GatewaveController extends Controller
                 $this->connectDb($databaseStore);
                 $prefixTable = $this->getPrefixTableFirst();
                 $this->_PRFIX_TABLE = $prefixTable;
-                $listFollow =   $this->getOptionsMeta('follow');
-                $arr = []
+                $listFollow = $this->getOptionsMeta('follow');
+                $arr = [];
                 if($listFollow){
                     $listFollow = json_decode($listFollow);
                     if(in_array($request['appid'],$listFollow)){

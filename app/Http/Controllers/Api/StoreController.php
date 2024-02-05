@@ -268,7 +268,9 @@ class StoreController extends Controller
         $this->_PRFIX_TABLE = $store->prefixTable;
         $userId = $store->user_id;
 
-        $listUserChild = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->join($this->_PRFIX_TABLE . '_users',$this->_PRFIX_TABLE . '_users.ID',$this->_PRFIX_TABLE . '_woo_history_user_commission.user_id')->where('user_parent', $userId)->where('status', 1);
+        $listUserChild = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->select($this->_PRFIX_TABLE . '_users.*',$this->_PRFIX_TABLE . '_woo_history_user_commission.commission',$this->_PRFIX_TABLE . '_woo_history_user_commission.total_order')->join($this->_PRFIX_TABLE . '_users',$this->_PRFIX_TABLE . '_users.ID',$this->_PRFIX_TABLE . '_woo_history_user_commission.user_id')->where('user_parent', $userId)->where('status', 1);
+
+
         if (isset($request['search'])) {
             $listUserChild = $listUserChild->where('user_login', 'like', '%' . $request['search'] . '%');
         }
@@ -276,6 +278,7 @@ class StoreController extends Controller
             $listUserChild = $listUserChild->orderBy('ID', $request['order']);
         }
         $listUserChild = $listUserChild->get();
+
         foreach ($listUserChild as $key => $user) {
             $listUserChild[$key]->tong_hoa_hong =$user->commission;
             $listUserChild[$key]->tong_doanh_thu =$user->total_order;

@@ -25,6 +25,66 @@ class GatewaveController extends Controller
         }
         return $randomString."_".$time."@gmail.com";
     }
+    public function checkFollow(Request $request){
+        try {
+            //code...
+            $validator = Validator::make($request->all(), [
+                'store' => 'required',
+                'appid' => 'required',
+            ],[
+                'store.required' => "Vui lòng nhập store",
+                'appid.required' => "Vui lòng nhập appid",
+            ]);
+            if ($validator->fails()) {
+                return $this->returnError(new \stdClass,$validator->errors()->first());
+            }else{
+                $store = DB::table('website')->where('db_name',$request['store'])->select('*')->first();
+                $databaseStore = $request['store'];
+                $this->connectDb($databaseStore);
+                $prefixTable = $this->getPrefixTableFirst();
+                $this->_PRFIX_TABLE = $prefixTable;
+                $listFollow = $this->getOptionsMeta('follow');
+                $arr = [];
+                if($listFollow){
+                    $listFollow = json_decode($listFollow);
+                    if(in_array($request['appid'],$listFollow)){
+                        return $this->returnSuccess([
+                            'follow'=> true
+                        ]);
+                    }else{
+                        $listFollow[]=$request['appid'];
+                        $option = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_options')->updateOrInsert(
+                            array(
+                                'option_name' => 'follow'
+                            ),
+                            array(
+                                'option_value' => json_encode($listFollow),
+                            )
+                        );
+                        return $this->returnSuccess([
+                            'follow'=> false
+                        ]);
+                    }
+                }else{
+                    $arr[]= $request['appid'];
+                    $option = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_options')->updateOrInsert(
+                        array(
+                            'option_name' => 'follow'
+                        ),
+                        array(
+                            'option_value' => json_encode($arr),
+                        )
+                    );
+                    return $this->returnSuccess([
+                        'follow'=> false
+                    ]);
+                }
+                
+            }
+        } catch (\Throwable $th) {
+            //throw $th;
+        }
+    }
     public function index(Request $request)
     {
         try {

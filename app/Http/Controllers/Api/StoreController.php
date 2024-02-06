@@ -216,6 +216,7 @@ class StoreController extends Controller
         $user->point = $this->getPointUser($user->history);
         $is_affliate = $this->getUserMeta($user->ID, 'is_affliate');
         $user->is_affliate = $is_affliate;
+        $user->store = $store->store;
 
 
 

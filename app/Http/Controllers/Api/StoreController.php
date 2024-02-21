@@ -329,13 +329,17 @@ class StoreController extends Controller
             return $this->returnError(new \stdClass, $validator->errors()->first());
         } else {
             $userId = $store->user_id;
-            DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_share_link')->insertGetId(
-                array(
-                    'user_id' => $userId,
-                    'user_parent' => $data['user_parent'],
-                    'product' => $data['product'],
-                )
-            );
+            $userParent = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_users')->where('user_login', $data['user_parent'])->first();
+            if($data){
+                DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_share_link')->insertGetId(
+                    array(
+                        'user_id' => $userId,
+                        'user_parent' => $userParent->ID,
+                        'product' => $data['product'],
+                    )
+                );
+            }
+            
             return $this->returnSuccess($userId, 'Cập nhật thành công');
         }
     }

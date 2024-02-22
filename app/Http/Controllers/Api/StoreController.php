@@ -320,10 +320,8 @@ class StoreController extends Controller
         $this->_PRFIX_TABLE = $store->prefixTable;
         $validator = Validator::make($request->all(), [
             'user_parent' => 'required',
-            'product' => 'required',
         ], [
             'user_parent.required' => "Vui lòng nhập user_parent",
-            'product.required' => "Vui lòng nhập product",
         ]);
         if ($validator->fails()) {
             return $this->returnError(new \stdClass, $validator->errors()->first());
@@ -335,11 +333,11 @@ class StoreController extends Controller
                     array(
                         'user_id' => $userId,
                         'user_parent' => $userParent->ID,
-                        'product' => $data['product'],
+                        'product' => (isset($data['product']))?$data['product']: NULL,
                     )
                 );
             }
-            
+
             return $this->returnSuccess($userId, 'Cập nhật thành công');
         }
     }

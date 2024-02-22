@@ -222,11 +222,11 @@ class StoreController extends Controller
 
         $user->cho_doi_soat = $this->choDoiSoat($user->ID);
         $user->thuc_nhan = $this->thucNhan($user->ID);
-        $user->tong_hoa_hong = $this->tongHoaHong([$user->ID],[]);
+        $user->tong_hoa_hong = $this->tongHoaHong([$user->ID], []);
         $user->hoa_hong = $user->tong_hoa_hong - $user->thuc_nhan - $user->cho_doi_soat;
         $user->hoa_hong_da_rut = $user->thuc_nhan;
-        $user->tong_doanh_thu = $this->tongDoanhThu([$user->ID],[]);
-        $user->tong_don_hang = $this->tongDonHang([$user->ID],[]);
+        $user->tong_doanh_thu = $this->tongDoanhThu([$user->ID], []);
+        $user->tong_don_hang = $this->tongDonHang([$user->ID], []);
 
         $getWeek = $this->getWeek();
         $arr[0]['label'] = 'Tổng hoa hồng';
@@ -269,7 +269,7 @@ class StoreController extends Controller
         $this->_PRFIX_TABLE = $store->prefixTable;
         $userId = $store->user_id;
 
-        $listUserChild = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->select($this->_PRFIX_TABLE . '_users.*',$this->_PRFIX_TABLE . '_users.user_login as mobile',$this->_PRFIX_TABLE . '_woo_history_user_commission.commission',$this->_PRFIX_TABLE . '_woo_history_user_commission.total_order')->join($this->_PRFIX_TABLE . '_users',$this->_PRFIX_TABLE . '_users.ID',$this->_PRFIX_TABLE . '_woo_history_user_commission.user_id')->where('user_parent', $userId)->where('status', 1);
+        $listUserChild = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->select($this->_PRFIX_TABLE . '_users.*', $this->_PRFIX_TABLE . '_users.user_login as mobile', $this->_PRFIX_TABLE . '_woo_history_user_commission.commission', $this->_PRFIX_TABLE . '_woo_history_user_commission.total_order')->join($this->_PRFIX_TABLE . '_users', $this->_PRFIX_TABLE . '_users.ID', $this->_PRFIX_TABLE . '_woo_history_user_commission.user_id')->where('user_parent', $userId)->where('status', 1);
 
 
         if (isset($request['search'])) {
@@ -281,8 +281,8 @@ class StoreController extends Controller
         $listUserChild = $listUserChild->get();
 
         foreach ($listUserChild as $key => $user) {
-            $listUserChild[$key]->tong_hoa_hong =$user->commission;
-            $listUserChild[$key]->tong_doanh_thu =$user->total_order;
+            $listUserChild[$key]->tong_hoa_hong = $user->commission;
+            $listUserChild[$key]->tong_doanh_thu = $user->total_order;
             $listUserChild[$key]->level = "Cấp 1";
         }
         return $this->returnSuccess($listUserChild);
@@ -328,12 +328,12 @@ class StoreController extends Controller
         } else {
             $userId = $store->user_id;
             $userParent = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_users')->where('user_login', $data['user_parent'])->first();
-            if($data){
+            if ($data) {
                 DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_share_link')->insertGetId(
                     array(
                         'user_id' => $userId,
                         'user_parent' => $userParent->ID,
-                        'product' => (isset($data['product']))?$data['product']: NULL,
+                        'product' => (isset($data['product'])) ? $data['product'] : NULL,
                     )
                 );
             }
@@ -490,5 +490,77 @@ class StoreController extends Controller
             $banner[$key]->image = $this->getImage($value->image, $store);
         }
         return $this->returnSuccess($banner);
+    }
+    public function city(Request $request)
+    {
+        $city = file_get_contents('public/data/tinh_tp.json');
+        $city = json_decode($city);
+        $listCity = [];
+        foreach ($city as $id => $val) {
+            $json['id'] = $id;
+            $json['name'] = $val->name_with_type;
+            $listCity[] = $json;
+        }
+        return $this->returnSuccess($listCity);
+    }
+    public function quan(Request $request)
+    {
+        try {
+            $data = $request->all();
+            $validator = Validator::make($request->all(), [
+                'parent' => 'required',
+            ], [
+                'parent.required' => "Vui lòng chọn thành phố ",
+            ]);
+            if ($validator->fails()) {
+                return $this->returnError(new \stdClass, $validator->errors()->first());
+            } else {
+                $param = $data['parent'];
+                $quan = file_get_contents("public/data/quan-huyen/$param.json");
+                $quan = json_decode($quan);
+                $listQuan = [];
+                foreach ($quan as $id => $val) {
+                    $json['id'] = $id;
+                    $json['name'] = $val->name_with_type;
+                    $listQuan[] = $json;
+                }
+                return $this->returnSuccess($listQuan);
+            }
+        } catch (\Throwable $th) {
+            //throw $th;
+            $this->woo_logs('quan', $th->getMessage());
+
+            return $this->returnError([], "Lỗi hệ thống");
+        }
+    }
+    public function phuong(Request $request)
+    {
+        try {
+            $data = $request->all();
+            $validator = Validator::make($request->all(), [
+                'parent' => 'required',
+            ], [
+                'parent.required' => "Vui lòng chọn thành phố ",
+            ]);
+            if ($validator->fails()) {
+                return $this->returnError(new \stdClass, $validator->errors()->first());
+            } else {
+                $param = $data['parent'];
+                $phuong = file_get_contents("public/data/xa-phuong/$param.json");
+                $phuong = json_decode($phuong);
+                $listPhuong = [];
+                foreach ($phuong as $id => $val) {
+                    $json['id'] = $id;
+                    $json['name'] = $val->name_with_type;
+                    $listPhuong[] = $json;
+                }
+                return $this->returnSuccess($listPhuong);
+            }
+        } catch (\Throwable $th) {
+            //throw $th;
+            $this->woo_logs('phuong', $th->getMessage());
+
+            return $this->returnError([], "Lỗi hệ thống");
+        }
     }
 }

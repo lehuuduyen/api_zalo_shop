@@ -19,10 +19,15 @@ use Illuminate\Support\Facades\Route;
 // });
 Route::post('gatewave', 'App\Http\Controllers\Api\GatewaveController@index')->middleware('CorsApi');
 Route::get('checkFollow', 'App\Http\Controllers\Api\GatewaveController@checkFollow')->middleware('CorsApi');
+Route::get('city', 'App\Http\Controllers\Api\StoreController@city')->middleware('CorsApi');
+Route::get('quan', 'App\Http\Controllers\Api\StoreController@quan')->middleware('CorsApi');
+Route::get('phuong', 'App\Http\Controllers\Api\StoreController@phuong')->middleware('CorsApi');
 
 Route::group([  'middleware' => ['CorsApi','CheckStore']], function()
 {
     Route::post('log', 'App\Http\Controllers\Api\StoreController@log');
+
+
 
     Route::get('products', 'App\Http\Controllers\Api\ProductController@index');
     Route::post('check_coupon', 'App\Http\Controllers\Api\ProductController@checkCoupon');

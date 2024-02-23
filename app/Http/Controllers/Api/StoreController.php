@@ -170,14 +170,32 @@ class StoreController extends Controller
                     )
                 );
             }
-            if (isset($data['company'])) {
+            if (isset($data['city'])) {
                 $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
                     array(
-                        'user_id' => $userId, 'meta_key' => 'company'
+                        'user_id' => $userId, 'meta_key' => 'city'
                     ),
-                    array('meta_value' => $data['company'])
+                    array('meta_value' => $data['city'])
+                );
+
+            }
+            if (isset($data['quan'])) {
+                $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
+                    array(
+                        'user_id' => $userId, 'meta_key' => 'quan'
+                    ),
+                    array('meta_value' => $data['quan'])
                 );
             }
+            if (isset($data['phuong'])) {
+                $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
+                    array(
+                        'user_id' => $userId, 'meta_key' => 'phuong'
+                    ),
+                    array('meta_value' => $data['phuong'])
+                );
+            }
+
             if (isset($data['email'])) {
                 $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_users')->where('user_login', $store->sdt)->update(
                     array(
@@ -207,9 +225,15 @@ class StoreController extends Controller
 
         $address = $this->getUserMeta($user->ID, 'shipping_address_1');
         $company = $this->getUserMeta($user->ID, 'company');
+        $city = $this->getUserMeta($user->ID, 'city');
+        $quan = $this->getUserMeta($user->ID, 'quan');
+        $phuong = $this->getUserMeta($user->ID, 'phuong');
         $user->address = $address;
         $user->user_parent = $this->getUserMeta($user->ID, 'user_parent');
         $user->company = $company;
+        $user->city = $city;
+        $user->quan = $quan;
+        $user->phuong = $phuong;
         $paymentMethod = $this->getUserMeta($user->ID, 'payment_method');
         $user->payment_method = ($paymentMethod) ? json_decode($paymentMethod) : "";
         $user->history = $this->getHistoryUser($user->ID);

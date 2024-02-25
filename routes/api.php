@@ -22,6 +22,7 @@ Route::get('checkFollow', 'App\Http\Controllers\Api\GatewaveController@checkFoll
 Route::get('city', 'App\Http\Controllers\Api\StoreController@city')->middleware('CorsApi');
 Route::get('quan', 'App\Http\Controllers\Api\StoreController@quan')->middleware('CorsApi');
 Route::get('phuong', 'App\Http\Controllers\Api\StoreController@phuong')->middleware('CorsApi');
+Route::get('getFee', 'App\Http\Controllers\Api\StoreController@getFee')->middleware('CorsApi');
 
 Route::group([  'middleware' => ['CorsApi','CheckStore']], function()
 {

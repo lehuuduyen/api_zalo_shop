@@ -587,4 +587,28 @@ class StoreController extends Controller
             return $this->returnError([], "Lỗi hệ thống");
         }
     }
+    public function getFee(Request $request){
+        try {
+            $data = $request->all();
+            $validator = Validator::make($request->all(), [
+                'quan' => 'required',
+                'phuong' => 'required',
+            ], [
+                'quan.required' => "Vui lòng chọn quận ",
+                'phuong.required' => "Vui lòng chọn phường xã ",
+            ]);
+            if ($validator->fails()) {
+                return $this->returnError(new \stdClass, $validator->errors()->first());
+            } else {
+                
+                $fee = $this->calFee($data['quan'],$data['phuong']);
+                
+                return $this->returnSuccess($fee);
+            }
+        } catch (\Throwable $th) {
+            //throw $th;
+
+            return $this->returnError([], $th->getMessage());
+        }
+    }
 }

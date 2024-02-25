@@ -663,6 +663,7 @@ class Controller extends BaseController
                     }
                 }
                 
+                $city = $this->getUserMeta($user['id'], 'city');
                 $quan = $this->getUserMeta($user['id'], 'quan');
                 
                 $phuong = $this->getUserMeta($user['id'], 'phuong');
@@ -872,6 +873,21 @@ class Controller extends BaseController
                     ),
                     array(
                         'post_id' => $postId,
+                        'meta_key' => '_billing_address_2',
+                        'meta_value' =>$phuong,
+                    ),
+                    array(
+                        'post_id' => $postId,
+                        'meta_key' => '_billing_city',
+                        'meta_value' => $quan,
+                    ),
+                    array(
+                        'post_id' => $postId,
+                        'meta_key' => '_billing_state',
+                        'meta_value' => $city,
+                    ),
+                    array(
+                        'post_id' => $postId,
                         'meta_key' => '_billing_email',
                         'meta_value' => $user['email'],
                     ),
@@ -903,7 +919,7 @@ class Controller extends BaseController
                     array(
                         'post_id' => $postId,
                         'meta_key' => '_order_shipping',
-                        'meta_value' => 0,
+                        'meta_value' => $fee,
                     ),
                     array(
                         'post_id' => $postId,
@@ -939,6 +955,21 @@ class Controller extends BaseController
                         'post_id' => $postId,
                         'meta_key' => '_shipping_country',
                         'meta_value' => 'VN',
+                    ),
+                    array(
+                        'post_id' => $postId,
+                        'meta_key' => '_shipping_city',
+                        'meta_value' => $quan,
+                    ),
+                    array(
+                        'post_id' => $postId,
+                        'meta_key' => '_shipping_state',
+                        'meta_value' => $city,
+                    ),
+                    array(
+                        'post_id' => $postId,
+                        'meta_key' => '_shipping_address_2',
+                        'meta_value' => $phuong,
                     ),
                 )
             );

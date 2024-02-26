@@ -664,11 +664,7 @@ class Controller extends BaseController
                     }
                 }
 
-                $city = $this->getUserMeta($user['id'], 'city');
-                $quan = $this->getUserMeta($user['id'], 'quan');
-
-                $phuong = $this->getUserMeta($user['id'], 'phuong');
-                $fee = $this->calFee($quan,$phuong);
+                
 
                 //wp_woocommerce_order_items
                 $orderItemId = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woocommerce_order_items')->insertGetId(
@@ -679,54 +675,6 @@ class Controller extends BaseController
                     )
                 );
                 
-                if($fee > 0){
-                    $motahang = '';
-                    foreach($data['order'] as $order){
-                        $motahang = $order['name'].' &times; '.$order['qty'] .',';
-                    }
-                    $orderItemShipId = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woocommerce_order_items')->insertGetId(
-                        array(
-                            'order_id' => $postId,
-                            'order_item_type' => 'shipping',
-                            'order_item_name' => 'Giao Hàng Nhanh (Chuyển phát thương mại điện tử)',
-                        )
-                    );
-                    DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woocommerce_order_itemmeta')->insert(
-                        array(
-                            array(
-                                'order_item_id' => $orderItemShipId,
-                                'meta_key' => 'method_id',
-                                'meta_value' =>'giao_hang_nhanh',
-                            ),
-                            array(
-                                'order_item_id' => $orderItemShipId,
-                                'meta_key' => 'instance_id',
-                                'meta_value' => '2',
-                            ),
-                            array(
-                                'order_item_id' => $orderItemShipId,
-                                'meta_key' => 'cost',
-                                'meta_value' => $fee,
-                            ),
-                            array(
-                                'order_item_id' => $orderItemShipId,
-                                'meta_key' => 'total_tax',
-                                'meta_value' => 0,
-                            ),
-                            array(
-                                'order_item_id' => $orderItemShipId,
-                                'meta_key' => 'taxes',
-                                'meta_value' => 'a:1:{s:5:"total";a:0:{}}',
-                            ),
-                            array(
-                                'order_item_id' => $orderItemShipId,
-                                'meta_key' => 'Mặt hàng',
-                                'meta_value' =>  $motahang,
-                            ),
-    
-                        )
-                    );
-                }
 
                 DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woocommerce_order_itemmeta')->insert(
                     array(
@@ -801,7 +749,59 @@ class Controller extends BaseController
                     )
                 );
             }
+            $city = $this->getUserMeta($user['id'], 'city');
+            $quan = $this->getUserMeta($user['id'], 'quan');
 
+            $phuong = $this->getUserMeta($user['id'], 'phuong');
+            $fee = $this->calFee($quan,$phuong);
+            if($fee > 0){
+                $motahang = '';
+                foreach($data['order'] as $order){
+                    $motahang = $order['name'].' &times; '.$order['qty'] .',';
+                }
+                $orderItemShipId = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woocommerce_order_items')->insertGetId(
+                    array(
+                        'order_id' => $postId,
+                        'order_item_type' => 'shipping',
+                        'order_item_name' => 'Giao Hàng Nhanh (Chuyển phát thương mại điện tử)',
+                    )
+                );
+                DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woocommerce_order_itemmeta')->insert(
+                    array(
+                        array(
+                            'order_item_id' => $orderItemShipId,
+                            'meta_key' => 'method_id',
+                            'meta_value' =>'giao_hang_nhanh',
+                        ),
+                        array(
+                            'order_item_id' => $orderItemShipId,
+                            'meta_key' => 'instance_id',
+                            'meta_value' => '2',
+                        ),
+                        array(
+                            'order_item_id' => $orderItemShipId,
+                            'meta_key' => 'cost',
+                            'meta_value' => $fee,
+                        ),
+                        array(
+                            'order_item_id' => $orderItemShipId,
+                            'meta_key' => 'total_tax',
+                            'meta_value' => 0,
+                        ),
+                        array(
+                            'order_item_id' => $orderItemShipId,
+                            'meta_key' => 'taxes',
+                            'meta_value' => 'a:1:{s:5:"total";a:0:{}}',
+                        ),
+                        array(
+                            'order_item_id' => $orderItemShipId,
+                            'meta_key' => 'Mặt hàng',
+                            'meta_value' =>  $motahang,
+                        ),
+
+                    )
+                );
+            }
             if (array_key_exists('point_use', $data)) {
                 $history = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_point')->where('user_id', $user['id'])->orderBy('id', 'DESC')->get();
                 $setting = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_setting')->where('id', 1)->first();

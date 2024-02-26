@@ -757,7 +757,7 @@ class Controller extends BaseController
             if($fee > 0){
                 $motahang = '';
                 foreach($data['order'] as $order){
-                    $motahang = $order['name'].' &times; '.$order['qty'] .',';
+                    $motahang .= $order['name'].' &times; '.$order['qty'] .',';
                 }
                 $orderItemShipId = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woocommerce_order_items')->insertGetId(
                     array(

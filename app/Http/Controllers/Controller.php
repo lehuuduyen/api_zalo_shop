@@ -926,21 +926,21 @@ class Controller extends BaseController
                         'meta_key' => '_billing_address_1',
                         'meta_value' => $user['address'],
                     ),
-                    array(
-                        'post_id' => $postId,
-                        'meta_key' => '_billing_address_2',
-                        'meta_value' =>$phuong,
-                    ),
-                    array(
-                        'post_id' => $postId,
-                        'meta_key' => '_billing_city',
-                        'meta_value' => $quan,
-                    ),
-                    array(
-                        'post_id' => $postId,
-                        'meta_key' => '_billing_state',
-                        'meta_value' => $city,
-                    ),
+                    // array(
+                    //     'post_id' => $postId,
+                    //     'meta_key' => '_billing_address_2',
+                    //     'meta_value' =>$phuong,
+                    // ),
+                    // array(
+                    //     'post_id' => $postId,
+                    //     'meta_key' => '_billing_city',
+                    //     'meta_value' => $quan,
+                    // ),
+                    // array(
+                    //     'post_id' => $postId,
+                    //     'meta_key' => '_billing_state',
+                    //     'meta_value' => $city,
+                    // ),
                     array(
                         'post_id' => $postId,
                         'meta_key' => '_billing_email',

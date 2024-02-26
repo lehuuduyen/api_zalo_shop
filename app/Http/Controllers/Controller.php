@@ -1419,7 +1419,7 @@ class Controller extends BaseController
         // Open the file using the HTTP headers set above
         // DOCS: https://www.php.net/manual/en/function.file-get-contents.php
         for($i=0;$i<=5;$i++){
-            $file = file_get_contents("https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee?service_id=5332$i&service_type_id=2&insurance_value=0&to_district_id=$quan&to_ward_code=$phuong&weight=1000&width=10&height=10&length=10&coupon", false, $context);
+            $file = @file_get_contents("https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee?service_id=5332$i&service_type_id=2&insurance_value=0&to_district_id=$quan&to_ward_code=$phuong&weight=1000&width=10&height=10&length=10&coupon", false, $context);
             if($file){
                 break;
             }

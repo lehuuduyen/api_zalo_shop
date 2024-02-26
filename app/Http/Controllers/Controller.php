@@ -662,13 +662,13 @@ class Controller extends BaseController
                         $tongGiaGiam = $tongGiaGiam + $giagiam * $totalPriceDetails['quantity'][$key];
                     }
                 }
-                
+
                 $city = $this->getUserMeta($user['id'], 'city');
                 $quan = $this->getUserMeta($user['id'], 'quan');
-                
+
                 $phuong = $this->getUserMeta($user['id'], 'phuong');
                 $fee = $this->calFee($quan,$phuong);
-                
+
                 //wp_woocommerce_order_items
                 $orderItemId = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woocommerce_order_items')->insertGetId(
                     array(
@@ -1412,19 +1412,23 @@ class Controller extends BaseController
         $listCity = $this->convertCity();
         $quan = $listCity['districts'][$quan];
         $phuong = $listCity['wards'][$phuong];
-        
-        
+
+
         // DOCS: https://www.php.net/manual/en/function.stream-context-create.php
         $context = stream_context_create($opts);
-        
         // Open the file using the HTTP headers set above
         // DOCS: https://www.php.net/manual/en/function.file-get-contents.php
-        $file = file_get_contents("https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee?service_id=53320&service_type_id=2&insurance_value=0&to_district_id=$quan&to_ward_code=$phuong&weight=1000&width=10&height=10&length=10&coupon", false, $context);
+        for($i=0;$i<=5;$i++){
+            $file = file_get_contents("https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee?service_id=5332$i&service_type_id=2&insurance_value=0&to_district_id=$quan&to_ward_code=$phuong&weight=1000&width=10&height=10&length=10&coupon", false, $context);
+            if($file){
+                break;
+            }
+        }
         $fee  = 0;
         if($file){
             $file = json_decode($file);
             $fee = $file->data->total;
-        
+
         }
         return $fee;
     }
@@ -1432,7 +1436,7 @@ class Controller extends BaseController
 
     public function convertCity(){
         return array (
-          'provinces' => 
+          'provinces' =>
           array (
             '01' => '201',
             '02' => '227',
@@ -1498,7 +1502,7 @@ class Controller extends BaseController
             95 => '253',
             96 => '252',
           ),
-          'districts' => 
+          'districts' =>
           array (
             '001' => '1484',
             '002' => '1489',
@@ -2206,7 +2210,7 @@ class Controller extends BaseController
             972 => '1883',
             973 => '2186',
           ),
-          'wards' => 
+          'wards' =>
           array (
             '00001' => '1A0110',
             '00004' => '1A0113',

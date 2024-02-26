@@ -640,7 +640,8 @@ class Controller extends BaseController
             }
             //wp_wc_order_product_lookup
             $totalQuantity = array_sum($totalPriceDetails['quantity']);
-
+            
+            
             foreach ($totalPriceDetails['products_id'] as $key  => $productId) {
                 $products = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->where('ID', $productId)->select('post_title')->first();
                 if (!$products) {
@@ -677,6 +678,55 @@ class Controller extends BaseController
                         'order_item_name' => $products->post_title,
                     )
                 );
+                
+                if($fee > 0){
+                    $motahang = '';
+                    foreach($data['order'] as $order){
+                        $motahang = $order['name'].' &times; '.$order['qty'] .',';
+                    }
+                    $orderItemShipId = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woocommerce_order_items')->insertGetId(
+                        array(
+                            'order_id' => $postId,
+                            'order_item_type' => 'shipping',
+                            'order_item_name' => 'Giao Hàng Nhanh (Chuyển phát thương mại điện tử)',
+                        )
+                    );
+                    DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woocommerce_order_itemmeta')->insert(
+                        array(
+                            array(
+                                'order_item_id' => $orderItemShipId,
+                                'meta_key' => 'method_id',
+                                'meta_value' =>'giao_hang_nhanh',
+                            ),
+                            array(
+                                'order_item_id' => $orderItemShipId,
+                                'meta_key' => 'instance_id',
+                                'meta_value' => '2',
+                            ),
+                            array(
+                                'order_item_id' => $orderItemShipId,
+                                'meta_key' => 'cost',
+                                'meta_value' => $fee,
+                            ),
+                            array(
+                                'order_item_id' => $orderItemShipId,
+                                'meta_key' => 'total_tax',
+                                'meta_value' => 0,
+                            ),
+                            array(
+                                'order_item_id' => $orderItemShipId,
+                                'meta_key' => 'taxes',
+                                'meta_value' => 'a:1:{s:5:"total";a:0:{}}',
+                            ),
+                            array(
+                                'order_item_id' => $orderItemShipId,
+                                'meta_key' => 'Mặt hàng',
+                                'meta_value' =>  $motahang,
+                            ),
+    
+                        )
+                    );
+                }
 
                 DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woocommerce_order_itemmeta')->insert(
                     array(
@@ -864,6 +914,11 @@ class Controller extends BaseController
                     array(
                         'post_id' => $postId,
                         'meta_key' => '_billing_last_name',
+                        'meta_value' => $user['name'],
+                    ),
+                    array(
+                        'post_id' => $postId,
+                        'meta_key' => '_shipping_first_name',
                         'meta_value' => $user['name'],
                     ),
                     array(

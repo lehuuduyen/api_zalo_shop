@@ -34,6 +34,9 @@ class OrdersController extends Controller
             $orders[$key]->name = $user->name;
             $orders[$key]->id = $order->order_id;
             $orders[$key]->phone = $user->mobile;
+            $feeShipping = $this->getPostMeta($order->order_id,'_order_shipping');
+            $orders[$key]->fee_shipping = ($feeShipping)?$feeShipping:0;
+
             $orders[$key]->address = $this->getPostMeta($order->order_id,'_shipping_address_index');
 
             $orders[$key]->total_amount = $order->total_sales;

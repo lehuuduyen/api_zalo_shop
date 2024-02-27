@@ -640,8 +640,8 @@ class Controller extends BaseController
             }
             //wp_wc_order_product_lookup
             $totalQuantity = array_sum($totalPriceDetails['quantity']);
-            
-            
+
+
             foreach ($totalPriceDetails['products_id'] as $key  => $productId) {
                 $products = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->where('ID', $productId)->select('post_title')->first();
                 if (!$products) {
@@ -664,7 +664,7 @@ class Controller extends BaseController
                     }
                 }
 
-                
+
 
                 //wp_woocommerce_order_items
                 $orderItemId = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woocommerce_order_items')->insertGetId(
@@ -674,7 +674,7 @@ class Controller extends BaseController
                         'order_item_name' => $products->post_title,
                     )
                 );
-                
+
 
                 DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woocommerce_order_itemmeta')->insert(
                     array(
@@ -1206,6 +1206,9 @@ class Controller extends BaseController
         $_sale_price_dates_to = $this->getPostMeta($postId, '_sale_price_dates_to');
         if ($price && $time >= $_sale_price_dates_from && $time <= $_sale_price_dates_to) {
             $price = $price;
+        }else if( $price && (!$_sale_price_dates_from ||  !$_sale_price_dates_from)){
+            $price = $price;
+
         } else {
             $price = $priceGoc;
         }
@@ -1227,7 +1230,10 @@ class Controller extends BaseController
             $_sale_price_dates_to = $this->getPostMeta($item['id'], '_sale_price_dates_to');
             if ($price && $time >= $_sale_price_dates_from && $time <= $_sale_price_dates_to) {
                 $price = $price;
-            } else {
+            } else if( $price && (!$_sale_price_dates_from ||  !$_sale_price_dates_from)){
+                $price = $price;
+
+            }else {
                 $price = $priceGoc;
             }
 

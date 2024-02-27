@@ -22,9 +22,13 @@ class CouponsController extends Controller
         $listCoupons =[];
         $i =0;
         foreach($coupons as $key => $val){
+            $status = $this->getPostMeta($val->ID,'status');
+            if($status == 0){
+                continue;
+            }
             $discount_type = $this->getPostMeta($val->ID,'discount_type');
             $customer_user = $this->getPostMeta($val->ID,'customer_user');
-            
+
             if($discount_type == "percent"){
                 $discount_type = 'percentage';
             }
@@ -33,7 +37,7 @@ class CouponsController extends Controller
             $usage_limit = $this->getPostMeta($val->ID,'usage_limit');
             $usage_count = $this->getPostMeta($val->ID,'usage_count');
             if($usage_limit <= $usage_count){
-                continue;            
+                continue;
             }
             if($customer_user){
                if($store->user_id == $customer_user){
@@ -57,9 +61,9 @@ class CouponsController extends Controller
                 $listCoupons[$i] = $coupons[$key];
                 $i++;
             }
-           
 
-            
+
+
         }
 
 

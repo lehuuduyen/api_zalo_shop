@@ -18,6 +18,8 @@ class CheckStore extends Controller
     public function handle(Request $request, Closure $next)
     {
         try {
+            return $next($request);
+
             $token = request()->bearerToken();
             $dataToken = $this->decodeData($token);
             $data = json_decode($dataToken);

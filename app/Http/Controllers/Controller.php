@@ -40,7 +40,7 @@ class Controller extends BaseController
     }
     public function woo_logs($api,$message = "Lấy dữ liệu thất bại",$level=2)
     {
-        $log = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woocommerce_log')->insertGetId(
+        $log = DB::table($this->_PRFIX_TABLE . '_woocommerce_log')->insertGetId(
             array(
                 'timestamp' => date('Y-m-d H:i:s'),
                 'level' => $level,
@@ -105,12 +105,12 @@ class Controller extends BaseController
 
         $image = "";
         if (!$checkTerm) {
-            $postMeta = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_postmeta')->where('meta_key', '_thumbnail_id')->where('post_id', $id)->first();
+            $postMeta = DB::table($this->_PRFIX_TABLE . '_postmeta')->where('meta_key', '_thumbnail_id')->where('post_id', $id)->first();
             if ($postMeta) {
-                $image = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_postmeta')->where('meta_key', '_wp_attached_file')->where('post_id', $postMeta->meta_value)->first();
+                $image = DB::table($this->_PRFIX_TABLE . '_postmeta')->where('meta_key', '_wp_attached_file')->where('post_id', $postMeta->meta_value)->first();
             }
         } else {
-            $image = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_postmeta')->where('meta_key', '_wp_attached_file')->where('post_id', $id)->first();
+            $image = DB::table($this->_PRFIX_TABLE . '_postmeta')->where('meta_key', '_wp_attached_file')->where('post_id', $id)->first();
         }
 
 
@@ -127,7 +127,7 @@ class Controller extends BaseController
         $listImg = $this->getPostMeta($id, '_product_image_gallery');
         $arr = explode(",", $listImg);
         if (count($arr) > 0) {
-            $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->whereIn('ID', $arr)->get();
+            $data = DB::table($this->_PRFIX_TABLE . '_posts')->whereIn('ID', $arr)->get();
             if ($data) {
                 foreach ($data as $key => $value) {
                     $response[$key]['path'] =  "https://" . $store->domain . "/wp-content/uploads/" . $this->getPostMeta($value->ID, '_wp_attached_file');
@@ -143,7 +143,7 @@ class Controller extends BaseController
     {
         $languare = env('DEFAULT_LANGUARE') ? env('DEFAULT_LANGUARE') : "vi";
         $string = "";
-        $category = DB::connection('mysql_external')->table('blog_categories')->select('title')->find($id);
+        $category = DB::table('blog_categories')->select('title')->find($id);
         if ($category) {
             $category = json_decode($category->title);
             if (isset($category->$languare)) {
@@ -155,7 +155,7 @@ class Controller extends BaseController
     public function getCountry($id)
     {
         $string = "";
-        $data = DB::connection('mysql_external')->table('countries')->select('name')->find($id);
+        $data = DB::table('countries')->select('name')->find($id);
         if ($data) {
             $string = $data->name;
         }
@@ -164,7 +164,7 @@ class Controller extends BaseController
     public function getState($id)
     {
         $string = "";
-        $data = DB::connection('mysql_external')->table('states')->select('name')->find($id);
+        $data = DB::table('states')->select('name')->find($id);
         if ($data) {
             $string = $data->name;
         }
@@ -173,7 +173,7 @@ class Controller extends BaseController
     public function getBrand($id, $store)
     {
         $response = new \stdClass();
-        $data = DB::connection('mysql_external')->table('brands')->find($id);
+        $data = DB::table('brands')->find($id);
         if ($data) {
             $data->image = $this->getImage($data->image, $store);
             $response = $data;
@@ -183,7 +183,7 @@ class Controller extends BaseController
     public function getBadge($id, $store)
     {
         $response = new \stdClass();
-        $data = DB::connection('mysql_external')->table('badges')->find($id);
+        $data = DB::table('badges')->find($id);
         if ($data) {
             $data->name = $this->getTextByLanguare($data->name);
             $data->image =  $this->getImage($data->image, $store);
@@ -202,10 +202,10 @@ class Controller extends BaseController
     }
     public function getProductByCampaign($id, $store)
     {
-        $data = DB::connection('mysql_external')->table('campaign_products')->join('products', 'products.id', 'campaign_products.product_id')->where('products.status_id', 1)->where('campaign_products.campaign_id', $id)->select('campaign_products.*')->get();
+        $data = DB::table('campaign_products')->join('products', 'products.id', 'campaign_products.product_id')->where('products.status_id', 1)->where('campaign_products.campaign_id', $id)->select('campaign_products.*')->get();
         if ($data) {
             foreach ($data as $key => $value) {
-                $product = DB::connection('mysql_external')->table('products')->find($value->product_id);
+                $product = DB::table('products')->find($value->product_id);
                 if ($product) {
                     $data[$key]->product = $product;
                     $data[$key]->product->image_id = $this->getImage($product->image_id, $store);
@@ -231,7 +231,7 @@ class Controller extends BaseController
     public function getCategoryByProduct($id, $store)
     {
         $response = new \stdClass();
-        $cate = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_term_relationships')->where('object_id', $id)->get();
+        $cate = DB::table($this->_PRFIX_TABLE . '_term_relationships')->where('object_id', $id)->get();
         $term = [];
         foreach ($cate as $key => $value) {
             $term[] = $value->term_taxonomy_id;
@@ -239,18 +239,18 @@ class Controller extends BaseController
 
 
         if (count($term) > 0) {
-            $listTerm = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_term_taxonomy')->whereIn('term_id', $term)->where('taxonomy', 'product_cat')->get();
+            $listTerm = DB::table($this->_PRFIX_TABLE . '_term_taxonomy')->whereIn('term_id', $term)->where('taxonomy', 'product_cat')->get();
             $term = [];
             foreach ($listTerm as $val) {
                 $term[] = $val->term_id;
             }
             if (count($term) > 0) {
-                $listTerm = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_terms')->whereIn('term_id', $term)->first();
+                $listTerm = DB::table($this->_PRFIX_TABLE . '_terms')->whereIn('term_id', $term)->first();
                 if ($listTerm) {
                     $response->category_id =  $listTerm->term_id;
                     $response->name =  $listTerm->name;
                     $response->slug =  $listTerm->slug;
-                    $thumbnail = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_termmeta')->where('term_id', $listTerm->term_id)->where('meta_key', 'thumbnail_id')->first();
+                    $thumbnail = DB::table($this->_PRFIX_TABLE . '_termmeta')->where('term_id', $listTerm->term_id)->where('meta_key', 'thumbnail_id')->first();
                     $response->image =  ($thumbnail) ? $thumbnail->meta_value : "";
                     $response->sub_category = [];
                 }
@@ -262,7 +262,7 @@ class Controller extends BaseController
     public function getSubCategoryByProduct($id, $store)
     {
         $response = new \stdClass();
-        $data = DB::connection('mysql_external')->table('product_sub_categories')->join('sub_categories', 'sub_categories.id', 'product_sub_categories.sub_category_id')->where('product_sub_categories.product_id', $id)->first();
+        $data = DB::table('product_sub_categories')->join('sub_categories', 'sub_categories.id', 'product_sub_categories.sub_category_id')->where('product_sub_categories.product_id', $id)->first();
         if ($data) {
             $data->name =  $this->getTextByLanguare($data->name);
             $data->description =  $this->getTextByLanguare($data->description);
@@ -275,7 +275,7 @@ class Controller extends BaseController
     public function getChildCategoryByProduct($id, $store)
     {
         $response = new \stdClass();
-        $data = DB::connection('mysql_external')->table('product_child_categories')->join('child_categories', 'child_categories.id', 'product_child_categories.child_category_id')->where('product_child_categories.product_id', $id)->get();
+        $data = DB::table('product_child_categories')->join('child_categories', 'child_categories.id', 'product_child_categories.child_category_id')->where('product_child_categories.product_id', $id)->get();
         if ($data) {
             foreach ($data as $key => $value) {
                 $data[$key]->name =  $this->getTextByLanguare($value->name);
@@ -313,7 +313,7 @@ class Controller extends BaseController
     }
     public function getAuthor($authroId)
     {
-        $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_users')->where('ID', $authroId)->first();
+        $data = DB::table($this->_PRFIX_TABLE . '_users')->where('ID', $authroId)->first();
         $name = ($data) ? $data->display_name : "";
         return $name;
     }
@@ -393,7 +393,7 @@ class Controller extends BaseController
     public function getColor($id)
     {
         $response = new \stdClass();
-        $data = DB::connection('mysql_external')->table('colors')->find($id);
+        $data = DB::table('colors')->find($id);
         if ($data) {
             $data->name = $this->getTextByLanguare($data->name);
             $response = $data;
@@ -403,7 +403,7 @@ class Controller extends BaseController
     public function getAttributeProduct($id)
     {
         $response = [];
-        $data = DB::connection('mysql_external')->table('product_inventory_detail_attributes')->where('inventory_details_id', $id)->get();
+        $data = DB::table('product_inventory_detail_attributes')->where('inventory_details_id', $id)->get();
         if ($data) {
             foreach ($data as $key => $value) {
                 $response[$value->attribute_name][] = $value->attribute_value;
@@ -414,7 +414,7 @@ class Controller extends BaseController
     public function getSize($id)
     {
         $response = new \stdClass();
-        $data = DB::connection('mysql_external')->table('sizes')->find($id);
+        $data = DB::table('sizes')->find($id);
         if ($data) {
             $data->name = $this->getTextByLanguare($data->name);
             $response = $data;
@@ -424,7 +424,7 @@ class Controller extends BaseController
     public function getProductDeliveryOption($id)
     {
         $response = [];
-        $data = DB::connection('mysql_external')->table('product_delivery_options')->join('delivery_options', 'delivery_options.id', 'product_delivery_options.delivery_option_id')->where('product_delivery_options.product_id', $id)->get();
+        $data = DB::table('product_delivery_options')->join('delivery_options', 'delivery_options.id', 'product_delivery_options.delivery_option_id')->where('product_delivery_options.product_id', $id)->get();
         if ($data) {
             foreach ($data as $key => $value) {
                 $data[$key]->title = $this->getTextByLanguare($value->title);
@@ -436,12 +436,12 @@ class Controller extends BaseController
     }
     public function getUnit($id)
     {
-        $response = DB::connection('mysql_external')->table('product_uom')->join('units', 'units.id', 'product_uom.unit_id')->select('product_uom.*', 'units.name')->where('product_uom.product_id', $id)->first();
+        $response = DB::table('product_uom')->join('units', 'units.id', 'product_uom.unit_id')->select('product_uom.*', 'units.name')->where('product_uom.product_id', $id)->first();
         return $response;
     }
     public function getPolicy($id)
     {
-        $response = DB::connection('mysql_external')->table('product_shipping_return_policies')->where('product_shipping_return_policies.product_id', $id)->first();
+        $response = DB::table('product_shipping_return_policies')->where('product_shipping_return_policies.product_id', $id)->first();
         if ($response) {
             $response->shipping_return_description = $this->getTextByLanguare($response->shipping_return_description);
         }
@@ -449,7 +449,7 @@ class Controller extends BaseController
     }
     public function getTagName($id)
     {
-        $response = DB::connection('mysql_external')->table('product_tags')->where('product_tags.product_id', $id)->first();
+        $response = DB::table('product_tags')->where('product_tags.product_id', $id)->first();
         return $response;
     }
     public function getreview($id)
@@ -463,7 +463,7 @@ class Controller extends BaseController
         // updated_at: string | null;
         // name: string;
         $data = [];
-        $response = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_comments')->join($this->_PRFIX_TABLE . '_commentmeta', $this->_PRFIX_TABLE . '_commentmeta.comment_id', $this->_PRFIX_TABLE . '_comments.comment_ID')->where($this->_PRFIX_TABLE . '_comments.comment_post_ID', $id)->where($this->_PRFIX_TABLE . '_comments.comment_type', 'review')->where($this->_PRFIX_TABLE . '_commentmeta.meta_key', 'rating')->select($this->_PRFIX_TABLE . '_comments.*', $this->_PRFIX_TABLE . '_commentmeta.meta_value')->get();
+        $response = DB::table($this->_PRFIX_TABLE . '_comments')->join($this->_PRFIX_TABLE . '_commentmeta', $this->_PRFIX_TABLE . '_commentmeta.comment_id', $this->_PRFIX_TABLE . '_comments.comment_ID')->where($this->_PRFIX_TABLE . '_comments.comment_post_ID', $id)->where($this->_PRFIX_TABLE . '_comments.comment_type', 'review')->where($this->_PRFIX_TABLE . '_commentmeta.meta_key', 'rating')->select($this->_PRFIX_TABLE . '_comments.*', $this->_PRFIX_TABLE . '_commentmeta.meta_value')->get();
 
         foreach ($response as $key => $value) {
             $data[$key]['id'] = $value->comment_ID;
@@ -479,7 +479,7 @@ class Controller extends BaseController
     {
         $discount_total = 0;
         $paramCoupon = $data['coupon'];
-        $coupon = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->where('post_title', $paramCoupon)->where('post_status', 'publish')->where('post_type', 'shop_coupon')->first();
+        $coupon = DB::table($this->_PRFIX_TABLE . '_posts')->where('post_title', $paramCoupon)->where('post_status', 'publish')->where('post_type', 'shop_coupon')->first();
 
 
 
@@ -518,7 +518,7 @@ class Controller extends BaseController
             $discount_total = $data['subtotal'];
         }
         if (!$isCheckApiCoupon) {
-            DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_postmeta')->where('post_id', $coupon->ID)->where('meta_key', 'usage_count')->update(
+            DB::table($this->_PRFIX_TABLE . '_postmeta')->where('post_id', $coupon->ID)->where('meta_key', 'usage_count')->update(
                 array(
                     'meta_value' => $usage_count + 1
                 )
@@ -541,11 +541,11 @@ class Controller extends BaseController
 
 
         $timeNow = date('Y/m/d H:i:s');
-        DB::connection('mysql_external')->beginTransaction();
+        DB::beginTransaction();
 
         try {
             // them wp_posts
-            $postId = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->insertGetId(
+            $postId = DB::table($this->_PRFIX_TABLE . '_posts')->insertGetId(
                 array(
                     'post_date' => $timeNow,
                     'post_date_gmt' => $timeNow,
@@ -565,7 +565,7 @@ class Controller extends BaseController
             );
             // $data['message'] wp_comments
             if ($data['message']) {
-                DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_comments')->insert(
+                DB::table($this->_PRFIX_TABLE . '_comments')->insert(
                     array(
                         'comment_post_ID' => $postId,
                         'comment_author' => $user['name'],
@@ -597,11 +597,11 @@ class Controller extends BaseController
 
             //them wp_wc_order_coupon_lookup && wp_woocommerce_order_items
             if ($finalDetails['coupon_discounted'] && $finalDetails['coupon_discounted'] > 0) {
-                $coupon = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->where('post_title', $data['used_coupon'])->where('post_status', 'publish')->where('post_type', 'shop_coupon')->first();
+                $coupon = DB::table($this->_PRFIX_TABLE . '_posts')->where('post_title', $data['used_coupon'])->where('post_status', 'publish')->where('post_type', 'shop_coupon')->first();
                 $coupon_amount = $this->getPostMeta($coupon->ID, 'coupon_amount');
                 $coupon_type = $this->getPostMeta($coupon->ID, 'discount_type');
 
-                DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_wc_order_coupon_lookup')->insertGetId(
+                DB::table($this->_PRFIX_TABLE . '_wc_order_coupon_lookup')->insertGetId(
                     array(
                         'order_id' => $postId,
                         'coupon_id' => $coupon->ID,
@@ -609,7 +609,7 @@ class Controller extends BaseController
                         'discount_amount' => $finalDetails['coupon_discounted'],
                     )
                 );
-                $orderItemIdCoupon = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woocommerce_order_items')->insertGetId(
+                $orderItemIdCoupon = DB::table($this->_PRFIX_TABLE . '_woocommerce_order_items')->insertGetId(
                     array(
                         'order_id' => $postId,
                         'order_item_type' => 'coupon',
@@ -618,7 +618,7 @@ class Controller extends BaseController
                 );
 
 
-                DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woocommerce_order_itemmeta')->insert(
+                DB::table($this->_PRFIX_TABLE . '_woocommerce_order_itemmeta')->insert(
                     array(
                         array(
                             'order_item_id' => $orderItemIdCoupon,
@@ -643,7 +643,7 @@ class Controller extends BaseController
 
 
             foreach ($totalPriceDetails['products_id'] as $key  => $productId) {
-                $products = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->where('ID', $productId)->select('post_title')->first();
+                $products = DB::table($this->_PRFIX_TABLE . '_posts')->where('ID', $productId)->select('post_title')->first();
                 if (!$products) {
                     throw new \Exception('Sản phẩm không tồn tại');
                 }
@@ -667,7 +667,7 @@ class Controller extends BaseController
 
 
                 //wp_woocommerce_order_items
-                $orderItemId = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woocommerce_order_items')->insertGetId(
+                $orderItemId = DB::table($this->_PRFIX_TABLE . '_woocommerce_order_items')->insertGetId(
                     array(
                         'order_id' => $postId,
                         'order_item_type' => 'line_item',
@@ -676,7 +676,7 @@ class Controller extends BaseController
                 );
 
 
-                DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woocommerce_order_itemmeta')->insert(
+                DB::table($this->_PRFIX_TABLE . '_woocommerce_order_itemmeta')->insert(
                     array(
                         array(
                             'order_item_id' => $orderItemId,
@@ -732,7 +732,7 @@ class Controller extends BaseController
                     )
                 );
                 // wp_wc_order_product_lookup
-                DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_wc_order_product_lookup')->insert(
+                DB::table($this->_PRFIX_TABLE . '_wc_order_product_lookup')->insert(
                     array(
                         'order_item_id' => $orderItemId,
                         'order_id' => $postId,
@@ -759,14 +759,14 @@ class Controller extends BaseController
                 foreach($data['order'] as $order){
                     $motahang .= $order['name'].' &times; '.$order['qty'] .',';
                 }
-                $orderItemShipId = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woocommerce_order_items')->insertGetId(
+                $orderItemShipId = DB::table($this->_PRFIX_TABLE . '_woocommerce_order_items')->insertGetId(
                     array(
                         'order_id' => $postId,
                         'order_item_type' => 'shipping',
                         'order_item_name' => 'Giao Hàng Nhanh (Chuyển phát thương mại điện tử)',
                     )
                 );
-                DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woocommerce_order_itemmeta')->insert(
+                DB::table($this->_PRFIX_TABLE . '_woocommerce_order_itemmeta')->insert(
                     array(
                         array(
                             'order_item_id' => $orderItemShipId,
@@ -803,8 +803,8 @@ class Controller extends BaseController
                 );
             }
             if (array_key_exists('point_use', $data)) {
-                $history = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_point')->where('user_id', $user['id'])->orderBy('id', 'DESC')->get();
-                $setting = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_setting')->where('id', 1)->first();
+                $history = DB::table($this->_PRFIX_TABLE . '_woo_history_user_point')->where('user_id', $user['id'])->orderBy('id', 'DESC')->get();
+                $setting = DB::table($this->_PRFIX_TABLE . '_woo_setting')->where('id', 1)->first();
                 $money_converted_to_point = 0;
                 $points_converted_to_money = 0;
                 if ($setting) {
@@ -831,7 +831,7 @@ class Controller extends BaseController
                 }
                 if ($data['point_use'] && $totalDoiThuong > 0 && $totalDoiThuong >= $data['point_use']) {
                     $finalDetails['total'] = $finalDetails['total'] - $tienDoiThuong;
-                    DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_point')->insertGetId(
+                    DB::table($this->_PRFIX_TABLE . '_woo_history_user_point')->insertGetId(
                         array(
                             'order_id' => $postId,
                             'total_order' => $finalDetails['total'],
@@ -847,7 +847,7 @@ class Controller extends BaseController
                     throw new \Exception('Vượt quá số điểm hiện có');
                 }
                 $convertMoneyToPoint = ($money_converted_to_point) > 0 ? floor($finalDetails['total'] / $money_converted_to_point) : 0;
-                DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_point')->insertGetId(
+                DB::table($this->_PRFIX_TABLE . '_woo_history_user_point')->insertGetId(
                     array(
                         'order_id' => $postId,
                         'total_order' => $finalDetails['total'],
@@ -864,7 +864,7 @@ class Controller extends BaseController
             $configAff = $this->getOptionsMeta('woo_aff_setting');
             if ($getUserParent && $configAff) {
                 $commissions = $finalDetails['total'] * $configAff / 100;
-                DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->insertGetId(
+                DB::table($this->_PRFIX_TABLE . '_woo_history_user_commission')->insertGetId(
                     array(
                         'order_id' => $postId,
                         'total_order' => $finalDetails['total'],
@@ -889,7 +889,7 @@ class Controller extends BaseController
 
             }
             // them wp_postmeta
-            $postMeta = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_postmeta')->insert(
+            $postMeta = DB::table($this->_PRFIX_TABLE . '_postmeta')->insert(
                 array(
                     array(
                         'post_id' => $postId,
@@ -1031,7 +1031,7 @@ class Controller extends BaseController
             //them order wp_wc_order_stats
 
             try {
-                DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_wc_order_stats')->insertGetId(
+                DB::table($this->_PRFIX_TABLE . '_wc_order_stats')->insertGetId(
                     array(
                         'order_id' => $postId,
                         'date_created' => $timeNow,
@@ -1048,7 +1048,7 @@ class Controller extends BaseController
                     )
                 );
             } catch (\Throwable $th) {
-                DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_wc_order_stats')->insertGetId(
+                DB::table($this->_PRFIX_TABLE . '_wc_order_stats')->insertGetId(
                     array(
                         'order_id' => $postId,
                         'date_created' => $timeNow,
@@ -1066,7 +1066,7 @@ class Controller extends BaseController
 
             //tính hoa hồng
 
-            DB::connection('mysql_external')->commit();
+            DB::commit();
 
 
 
@@ -1075,7 +1075,7 @@ class Controller extends BaseController
             //throw $th;
 
 
-            DB::connection('mysql_external')->rollBack();
+            DB::rollBack();
             throw new \Exception($th->getMessage());
         }
     }
@@ -1188,12 +1188,12 @@ class Controller extends BaseController
     }
     public function getCampaignByProduct($productId)
     {
-        $campaigns = DB::connection('mysql_external')->table('campaigns')->join('campaign_products', 'campaign_products.campaign_id', 'campaigns.id')->where('campaign_products.product_id', $productId)->where('campaigns.status', 'publish')->whereDate('campaigns.start_date', '<', Carbon::now())->whereDate('campaigns.end_date', '>=', Carbon::now())->select('campaigns.id', 'campaign_products.units_for_sale')->first();
+        $campaigns = DB::table('campaigns')->join('campaign_products', 'campaign_products.campaign_id', 'campaigns.id')->where('campaign_products.product_id', $productId)->where('campaigns.status', 'publish')->whereDate('campaigns.start_date', '<', Carbon::now())->whereDate('campaigns.end_date', '>=', Carbon::now())->select('campaigns.id', 'campaign_products.units_for_sale')->first();
         return $campaigns;
     }
     public function checkProductInventory($productId)
     {
-        $productInventory = DB::connection('mysql_external')->table('product_inventories')->join('products', 'products.id', 'product_inventories.product_id')->where('product_inventories.product_id', $productId)->select('product_inventories.*', 'products.name')->first();
+        $productInventory = DB::table('product_inventories')->join('products', 'products.id', 'product_inventories.product_id')->where('product_inventories.product_id', $productId)->select('product_inventories.*', 'products.name')->first();
         $productInventory->name = $this->getTextByLanguare($productInventory->name);
         return $productInventory;
     }
@@ -1255,12 +1255,12 @@ class Controller extends BaseController
 
 
             // trừ số lượng kho
-            DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_postmeta')->where('post_id', $productId)->where('meta_key', 'total_sales')->update(
+            DB::table($this->_PRFIX_TABLE . '_postmeta')->where('post_id', $productId)->where('meta_key', 'total_sales')->update(
                 array(
                     'meta_value' => $sold_count + $item['qty']
                 )
             );
-            DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_postmeta')->where('post_id', $productId)->where('meta_key', '_stock')->update(
+            DB::table($this->_PRFIX_TABLE . '_postmeta')->where('post_id', $productId)->where('meta_key', '_stock')->update(
                 array(
                     'meta_value' => $stock_count - $item['qty']
                 )
@@ -1283,7 +1283,7 @@ class Controller extends BaseController
     }
     public function getHistoryUser($userId)
     {
-        $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_point')->where('user_id', $userId)->orderBy('id', 'DESC')->get();
+        $data = DB::table($this->_PRFIX_TABLE . '_woo_history_user_point')->where('user_id', $userId)->orderBy('id', 'DESC')->get();
         return $data;
     }
 
@@ -1302,12 +1302,12 @@ class Controller extends BaseController
                 $totalDoiThuong = $totalDoiThuong - $value->point;
             }
         }
-        $checkRank = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_rank')->where('minimum_spending', '<=', $totalOrder)->orderBy('minimum_spending', 'DESC')->first();
-        $checkRankNext = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_rank')->where('minimum_spending', '>', $totalOrder)->orderBy('minimum_spending', 'ASC')->first();
+        $checkRank = DB::table($this->_PRFIX_TABLE . '_woo_rank')->where('minimum_spending', '<=', $totalOrder)->orderBy('minimum_spending', 'DESC')->first();
+        $checkRankNext = DB::table($this->_PRFIX_TABLE . '_woo_rank')->where('minimum_spending', '>', $totalOrder)->orderBy('minimum_spending', 'ASC')->first();
         $pointNext = 0;
         if ($checkRankNext) {
             $minium = $checkRankNext->minimum_spending;
-            $pointPriceSetiing = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_setting')->where('id', 1)->first();
+            $pointPriceSetiing = DB::table($this->_PRFIX_TABLE . '_woo_setting')->where('id', 1)->first();
             if ($pointPriceSetiing) {
 
 
@@ -1326,17 +1326,17 @@ class Controller extends BaseController
     }
     public function getPostByCategoryId($id)
     {
-        $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')
+        $data = DB::table($this->_PRFIX_TABLE . '_posts')
             ->join($this->_PRFIX_TABLE . '_term_relationships',  $this->_PRFIX_TABLE . '_term_relationships.object_id',  $this->_PRFIX_TABLE . '_posts.ID')
             ->where('term_taxonomy_id', $id)->where('post_status', 'publish')->select($this->_PRFIX_TABLE . '_posts.*')->orderBy('post_modified', 'DESC')->get();
         return $data;
     }
     public function getPostByCategory($nameCate)
     {
-        $cate = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_terms')->where('slug', $nameCate)->first();
+        $cate = DB::table($this->_PRFIX_TABLE . '_terms')->where('slug', $nameCate)->first();
         $data = [];
         if ($cate) {
-            $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')
+            $data = DB::table($this->_PRFIX_TABLE . '_posts')
                 ->join($this->_PRFIX_TABLE . '_term_relationships',  $this->_PRFIX_TABLE . '_term_relationships.object_id',  $this->_PRFIX_TABLE . '_posts.ID')
                 ->where('term_taxonomy_id', $cate->term_id)->where('post_status', 'publish')->orderBy('post_modified', 'DESC')->get();
         }
@@ -1355,7 +1355,7 @@ class Controller extends BaseController
     }
     public function getPostMeta($postId, $meta)
     {
-        $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_postmeta')->where('post_id', $postId)->where('meta_key', $meta)->first();
+        $data = DB::table($this->_PRFIX_TABLE . '_postmeta')->where('post_id', $postId)->where('meta_key', $meta)->first();
         if ($data) {
             return $data->meta_value;
         }
@@ -1363,7 +1363,7 @@ class Controller extends BaseController
     }
     public function getUserMeta($userId, $meta)
     {
-        $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->where('user_id', $userId)->where('meta_key', $meta)->first();
+        $data = DB::table($this->_PRFIX_TABLE . '_usermeta')->where('user_id', $userId)->where('meta_key', $meta)->first();
         if ($data) {
             return $data->meta_value;
         }
@@ -1371,7 +1371,7 @@ class Controller extends BaseController
     }
     public function getOptionsMeta($meta)
     {
-        $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_options')->where('option_name', $meta)->first();
+        $data = DB::table($this->_PRFIX_TABLE . '_options')->where('option_name', $meta)->first();
         if ($data) {
             return $data->option_value;
         }
@@ -1379,7 +1379,7 @@ class Controller extends BaseController
     }
     public function getOrderMeta($orderId, $meta)
     {
-        $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woocommerce_order_itemmeta')->where('order_item_id', $orderId)->where('meta_key', $meta)->first();
+        $data = DB::table($this->_PRFIX_TABLE . '_woocommerce_order_itemmeta')->where('order_item_id', $orderId)->where('meta_key', $meta)->first();
         if ($data) {
             return $data->meta_value;
         }
@@ -1387,7 +1387,7 @@ class Controller extends BaseController
     }
     public function getPrefixTable()
     {
-        $tables = DB::connection('mysql_external')->select('SHOW TABLES')[0];
+        $tables = DB::select('SHOW TABLES')[0];
         $array = get_object_vars($tables);
         $value = array_values($array)[0];
 
@@ -1395,7 +1395,7 @@ class Controller extends BaseController
     }
     public function getPrefixTableFirst()
     {
-        $tables = DB::connection('mysql_external')->select('SHOW TABLES')[0];
+        $tables = DB::select('SHOW TABLES')[0];
         $array = get_object_vars($tables);
         $value = array_values($array)[0];
 
@@ -1403,13 +1403,13 @@ class Controller extends BaseController
     }
     public function getUserParentLastes($userChild)
     {
-        $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_share_link')->where('user_id', $userChild)->where('status', 1)->latest('id')->first();
+        $data = DB::table($this->_PRFIX_TABLE . '_woo_history_share_link')->where('user_id', $userChild)->where('status', 1)->latest('id')->first();
 
         return $data;
     }
     public function getUserChild($userParent)
     {
-        $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->where('user_parent', $userParent)->where('status', 1)->pluck('user_id')->toArray();
+        $data = DB::table($this->_PRFIX_TABLE . '_woo_history_user_commission')->where('user_parent', $userParent)->where('status', 1)->pluck('user_id')->toArray();
         return $data;
 
     }
@@ -1419,25 +1419,25 @@ class Controller extends BaseController
     }
     public function choDoiSoat($userParent)
     {
-        $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->where('user_id', $userParent)->where('status', 4)->sum('commission');
+        $data = DB::table($this->_PRFIX_TABLE . '_woo_history_user_commission')->where('user_id', $userParent)->where('status', 4)->sum('commission');
         return $data;
     }
     public function thucNhan($userParent, $date = null, $month = null, $year = null)
     {
         if ($date && $month && $year) {
-            $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->where('user_id', $userParent)->where('status', 2)->where('date', $date)->where('month', $month)->where('year', $year)->sum('commission');
+            $data = DB::table($this->_PRFIX_TABLE . '_woo_history_user_commission')->where('user_id', $userParent)->where('status', 2)->where('date', $date)->where('month', $month)->where('year', $year)->sum('commission');
         } else {
-            $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->where('user_id', $userParent)->where('status', 2)->sum('commission');
+            $data = DB::table($this->_PRFIX_TABLE . '_woo_history_user_commission')->where('user_id', $userParent)->where('status', 2)->sum('commission');
         }
         return $data;
     }
     public function tongHoaHong($userParent, $userChild2, $date = null, $month = null, $year = null)
     {
         if ($date && $month && $year) {
-            $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->whereIn('user_parent', $userParent)->where('status', 1)->where('date', $date)->where('month', $month)->where('year', $year)->sum('commission');
+            $data = DB::table($this->_PRFIX_TABLE . '_woo_history_user_commission')->whereIn('user_parent', $userParent)->where('status', 1)->where('date', $date)->where('month', $month)->where('year', $year)->sum('commission');
             $total = $data;
         } else {
-            $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->whereIn('user_parent', $userParent)->where('status', 1)->sum('commission');
+            $data = DB::table($this->_PRFIX_TABLE . '_woo_history_user_commission')->whereIn('user_parent', $userParent)->where('status', 1)->sum('commission');
             $total = $data;
         }
         return $total;
@@ -1445,9 +1445,9 @@ class Controller extends BaseController
     public function tongDoanhThu($userParent, $userChild2, $date = null, $month = null, $year = null)
     {
         if ($date && $month && $year) {
-            $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->whereIn('user_parent', $userParent)->where('status', 1)->where('date', $date)->where('month', $month)->where('year', $year)->sum('total_order');
+            $data = DB::table($this->_PRFIX_TABLE . '_woo_history_user_commission')->whereIn('user_parent', $userParent)->where('status', 1)->where('date', $date)->where('month', $month)->where('year', $year)->sum('total_order');
         } else {
-            $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->whereIn('user_parent', $userParent)->where('status', 1)->sum('total_order');
+            $data = DB::table($this->_PRFIX_TABLE . '_woo_history_user_commission')->whereIn('user_parent', $userParent)->where('status', 1)->sum('total_order');
         }
         return $data;
     }
@@ -1455,9 +1455,9 @@ class Controller extends BaseController
     public function tongDonHang($userParent, $userChild2, $date = null, $month = null, $year = null)
     {
         if ($date && $month && $year) {
-            $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->whereIn('user_parent', $userParent)->where('status', 1)->where('date', $date)->where('month', $month)->where('year', $year)->get()->count();
+            $data = DB::table($this->_PRFIX_TABLE . '_woo_history_user_commission')->whereIn('user_parent', $userParent)->where('status', 1)->where('date', $date)->where('month', $month)->where('year', $year)->get()->count();
         } else {
-            $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->whereIn('user_parent', $userParent)->where('status', 1)->get()->count();
+            $data = DB::table($this->_PRFIX_TABLE . '_woo_history_user_commission')->whereIn('user_parent', $userParent)->where('status', 1)->get()->count();
         }
         return $data;
     }

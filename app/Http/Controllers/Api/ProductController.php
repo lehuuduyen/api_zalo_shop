@@ -43,6 +43,7 @@ class ProductController extends Controller
                 foreach($listTap as $key => $tap){
                     $listTap[$key]->link_movie = $this->getPostMeta($tap->ID,'_film_episode');
                     $listTap[$key]->price = $this->getPostMeta($tap->ID,'_price');
+                    $listTap[$key]->is_buy = 0;
                 }
                 $phim->episode =$listTap;
                 $phim->is_hot = $hot;

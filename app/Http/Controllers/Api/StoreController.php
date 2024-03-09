@@ -143,14 +143,14 @@ class StoreController extends Controller
             $data = $request->all();
             
             if (isset($data['name'])) {
-                $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_users')->where('user_login', $data['sdt'])->update(
+                $user = DB::table($this->_PRFIX_TABLE . '_users')->where('user_login', $data['sdt'])->update(
                     array(
                         'user_nicename' => $data['name'],
                     )
                 );
             }
             if (isset($data['email'])) {
-                $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_users')->where('user_login', $data['sdt'])->update(
+                $user = DB::table($this->_PRFIX_TABLE . '_users')->where('user_login', $data['sdt'])->update(
                     array(
                         'user_email' => $data['email'],
                     )
@@ -160,7 +160,7 @@ class StoreController extends Controller
             return $this->returnSuccess(new stdClass(), 'Cập nhật thành công');
         } catch (\Throwable $th) {
             $this->woo_logs('update', $th->getMessage());
-            return $this->returnError([], "Lỗi hệ thống");
+            return $this->returnError([], $th->getMessage());
         }
     }
     public function storeImage(Request $request)

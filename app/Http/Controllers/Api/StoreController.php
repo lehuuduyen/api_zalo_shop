@@ -230,12 +230,12 @@ class StoreController extends Controller
         if ($validator->fails()) {
             return $this->returnError(new \stdClass,$validator->errors()->first());
         }else{
-                $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE.'_users')->where('user_login', $request['sdt'])->first();
+                $user = DB::table($this->_PRFIX_TABLE.'_users')->where('user_login', $request['sdt'])->first();
                 // wp_wc_customer_lookup
 
                 if (!$user) {
                     $email = $this->randomEmail();
-                    $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE.'_users')->insert(
+                    $user = DB::table($this->_PRFIX_TABLE.'_users')->insert(
                         array(
                             'user_login'     =>   $request['sdt'],
                             'user_pass'     =>   "appid",
@@ -246,7 +246,7 @@ class StoreController extends Controller
                             'ID'   =>   $request['user_id']
                         )
                     );
-                    $insertMetaUser = DB::connection('mysql_external')->table($this->_PRFIX_TABLE.'_usermeta')->insert(
+                    $insertMetaUser = DB::table($this->_PRFIX_TABLE.'_usermeta')->insert(
                         array(
                             'meta_key'     =>   "last_name",
                             'meta_value'     =>  $request['name'],
@@ -258,9 +258,9 @@ class StoreController extends Controller
                 }else{
                     $email = $user->user_email;
                 }
-                $customer = DB::connection('mysql_external')->table($this->_PRFIX_TABLE.'_wc_customer_lookup')->where('user_id', $request['user_id'])->first();
+                $customer = DB::table($this->_PRFIX_TABLE.'_wc_customer_lookup')->where('user_id', $request['user_id'])->first();
                 if(!$customer){
-                    $insertCus = DB::connection('mysql_external')->table($this->_PRFIX_TABLE.'_wc_customer_lookup')->insert(
+                    $insertCus = DB::table($this->_PRFIX_TABLE.'_wc_customer_lookup')->insert(
                         array(
                             'customer_id'     =>   $request['user_id'],
                             'username'     =>   $request['sdt'],

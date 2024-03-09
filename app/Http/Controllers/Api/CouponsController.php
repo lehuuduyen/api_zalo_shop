@@ -20,10 +20,7 @@ class CouponsController extends Controller
         $listCoupons =[];
         $i =0;
         foreach($coupons as $key => $val){
-            $status = $this->getPostMeta($val->ID,'status');
-            if($status == 0){
-                continue;
-            }
+           
             $discount_type = $this->getPostMeta($val->ID,'discount_type');
             $customer_user = $this->getPostMeta($val->ID,'customer_user');
 

@@ -44,6 +44,7 @@ class ProductController extends Controller
                     $listTap[$key]->link_movie = $this->getPostMeta($tap->ID,'_film_episode');
                     $listTap[$key]->price = $this->getPostMeta($tap->ID,'_price');
                     $listTap[$key]->is_buy = 0;
+                    $listTap[$key]->film_length = $this->getPostMeta($tap->ID,'_film_length');
                 }
                 $phim->episode =$listTap;
                 $phim->is_hot = $hot;

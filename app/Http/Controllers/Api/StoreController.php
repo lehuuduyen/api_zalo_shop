@@ -235,7 +235,7 @@ class StoreController extends Controller
 
                 if (!$user) {
                     $email = $this->randomEmail();
-                    $user = DB::table($this->_PRFIX_TABLE.'_users')->create(
+                    $userid = DB::table($this->_PRFIX_TABLE.'_users')->insertGetId(
                         array(
                             'user_login'     =>   $request['sdt'],
                             'user_pass'     =>   "appid",
@@ -254,6 +254,7 @@ class StoreController extends Controller
 
                         )
                     );
+                    $user = DB::table($this->_PRFIX_TABLE.'_users')->find($userId);
 
                 }else{
                     $email = $user->user_email;

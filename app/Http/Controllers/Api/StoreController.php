@@ -235,7 +235,7 @@ class StoreController extends Controller
 
                 if (!$user) {
                     $email = $this->randomEmail();
-                    $user = DB::table($this->_PRFIX_TABLE.'_users')->insert(
+                    $user = DB::table($this->_PRFIX_TABLE.'_users')->create(
                         array(
                             'user_login'     =>   $request['sdt'],
                             'user_pass'     =>   "appid",
@@ -283,10 +283,25 @@ class StoreController extends Controller
             return $this->returnSuccess($user);
                 
         }
-    } catch (\Throwable $th) {
-        $this->woo_logs('info', $th->getMessage());
+    } catch (\Throwable $e) {
+        if ($e instanceof QueryException) {
+            if ($e->errorInfo[1] == 1062) {
+                // Handle the duplicate entry error here
+                // For example, you can log the error or display a message to the user
+                $mess ="Error: Duplicate entry found.";
+            } else {
+                // Handle other query exceptions
+                // For example, you can log the error or display a generic error message
+                $mess ="Error: Database error occurred.";
+            }
+        } else {
+            // Handle other types of errors or exceptions
+            // For example, you can log the error or display a generic error message
+            $mess =  $e->getMessage();
+        }
+        $this->woo_logs('info', $e->getMessage());
 
-        return $this->returnError(new \stdClass,$th->getMessage());
+        return $this->returnError(new \stdClass,$mess );
     }
        
     }

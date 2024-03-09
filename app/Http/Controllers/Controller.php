@@ -50,7 +50,16 @@ class Controller extends BaseController
             )
         );
     }
-
+    public function randomEmail($length = 5){
+        $time = time();
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $charactersLength = strlen($characters);
+        $randomString = '';
+        for ($i = 0; $i < $length; $i++) {
+            $randomString .= $characters[random_int(0, $charactersLength - 1)];
+        }
+        return $randomString."_".$time."@gmail.com";
+    }
     public function connectDb($databaseStore)
     {
         Config::set("database.connections.mysql_external", [

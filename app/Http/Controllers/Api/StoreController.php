@@ -157,7 +157,7 @@ class StoreController extends Controller
                 );
             }
 
-            return $this->returnSuccess(new stdClass(), 'Cập nhật thành công');
+            return $this->returnSuccess(new stdClass, 'Cập nhật thành công');
         } catch (\Throwable $th) {
             $this->woo_logs('update', $th->getMessage());
             return $this->returnError([], $th->getMessage());

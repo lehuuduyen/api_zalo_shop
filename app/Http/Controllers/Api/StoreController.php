@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
-
+use Illuminate\Database\QueryException;
 class StoreController extends Controller
 {
     /**
@@ -284,8 +284,7 @@ class StoreController extends Controller
             return $this->returnSuccess($user);
                 
         }
-    } catch (\Throwable $e) {
-        if ($e instanceof QueryException) {
+    }  catch (QueryException $e) {
             if ($e->errorInfo[1] == 1062) {
                 // Handle the duplicate entry error here
                 // For example, you can log the error or display a message to the user
@@ -293,17 +292,13 @@ class StoreController extends Controller
             } else {
                 // Handle other query exceptions
                 // For example, you can log the error or display a generic error message
-                $mess ="Error: Database error occurred.";
+                $mess =  $e->getMessage();
             }
-        } else {
-            // Handle other types of errors or exceptions
-            // For example, you can log the error or display a generic error message
-            $mess =  $e->getMessage();
-        }
-        $this->woo_logs('info', $e->getMessage());
+            $this->woo_logs('info', $e->getMessage());
 
-        return $this->returnError(new \stdClass,$mess );
-    }
+            return $this->returnError(new \stdClass,$mess );
+        } 
+       
        
     }
     public function userChild(Request $request)

@@ -217,75 +217,78 @@ class StoreController extends Controller
         return $this->returnSuccess('/storage/app/' . $path, 'Cập nhật thành công');
     }
     public function info(Request $request)
-    {
-        $store = $request['data_reponse'];
-        $this->_PRFIX_TABLE = $store->prefixTable;
-        $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_users')->where('user_login', $store->sdt)->select('ID', 'display_name as name', 'user_email as email', 'user_login as mobile')
-            ->first();
+    {try {
+        $validator = Validator::make($request->all(), [
+            'sdt' => 'required',
+            'user_id' => 'required',
+            'name' => 'required'
+        ],[
+            'sdt.required' => "Vui lòng nhập sdt",
+            'user_id.required' => "Vui lòng nhập id",
+            'name.required' => "Vui lòng nhập name"
+        ]);
+        if ($validator->fails()) {
+            return $this->returnError(new \stdClass,$validator->errors()->first());
+        }else{
+                $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE.'_users')->where('user_login', $request['sdt'])->first();
+                // wp_wc_customer_lookup
 
-        $address = $this->getUserMeta($user->ID, 'shipping_address_1');
-        $company = $this->getUserMeta($user->ID, 'company');
-        $city = $this->getUserMeta($user->ID, 'city');
-        $quan = $this->getUserMeta($user->ID, 'quan');
-        $phuong = $this->getUserMeta($user->ID, 'phuong');
-        $user->address = $address;
-        $user->user_parent = $this->getUserMeta($user->ID, 'user_parent');
-        $user->company = $company;
-        $user->city = $city;
-        $user->quan = $quan;
-        $user->phuong = $phuong;
-        $paymentMethod = $this->getUserMeta($user->ID, 'payment_method');
-        $user->payment_method = ($paymentMethod) ? json_decode($paymentMethod) : "";
-        $user->history = $this->getHistoryUser($user->ID);
-        $user->point = $this->getPointUser($user->history);
-        $is_affliate = $this->getUserMeta($user->ID, 'is_affliate');
-        $user->is_affliate = $is_affliate;
-        $user->store = $store->store;
+                if (!$user) {
+                    $email = $this->randomEmail();
+                    $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE.'_users')->insert(
+                        array(
+                            'user_login'     =>   $request['sdt'],
+                            'user_pass'     =>   "appid",
+                            'user_email'     =>   $email,
+                            'user_nicename'     =>   $request['name'],
+                            'display_name'     =>   $request['name'],
+                            'user_registered'     =>   date('Y-m-d H:i:s'),
+                            'ID'   =>   $request['user_id']
+                        )
+                    );
+                    $insertMetaUser = DB::connection('mysql_external')->table($this->_PRFIX_TABLE.'_usermeta')->insert(
+                        array(
+                            'meta_key'     =>   "last_name",
+                            'meta_value'     =>  $request['name'],
+                            'user_id'     =>   $request['user_id'],
+
+                        )
+                    );
+
+                }else{
+                    $email = $user->user_email;
+                }
+                $customer = DB::connection('mysql_external')->table($this->_PRFIX_TABLE.'_wc_customer_lookup')->where('user_id', $request['user_id'])->first();
+                if(!$customer){
+                    $insertCus = DB::connection('mysql_external')->table($this->_PRFIX_TABLE.'_wc_customer_lookup')->insert(
+                        array(
+                            'customer_id'     =>   $request['user_id'],
+                            'username'     =>   $request['sdt'],
+                            'first_name'     =>  '',
+                            'last_name'     =>  $request['name'],
+                            'user_id'     =>   $request['user_id'],
+                            'email'     =>   $email,
 
 
-
-        $user->cho_doi_soat = $this->choDoiSoat($user->ID);
-        $user->thuc_nhan = $this->thucNhan($user->ID);
-        $user->tong_hoa_hong = $this->tongHoaHong([$user->ID], []);
-        $user->hoa_hong = $user->tong_hoa_hong - $user->thuc_nhan - $user->cho_doi_soat;
-        $user->hoa_hong_da_rut = $user->thuc_nhan;
-        $user->tong_doanh_thu = $this->tongDoanhThu([$user->ID], []);
-        $user->tong_don_hang = $this->tongDonHang([$user->ID], []);
-
-        $getWeek = $this->getWeek();
-        $arr[0]['label'] = 'Tổng hoa hồng';
-        $arr[1]['label'] = 'Tổng doanh thu';
-        $arr[2]['label'] = 'Tổng hoa hồng đã rút';
-        $arr[3]['label'] = 'Tổng đơn';
-        $listTongHoaHong = [];
-        $listTongDoanhThu = [];
-        $listTongHoaHongDaRut = [];
-        $listTongDon = [];
-        foreach ($getWeek as $day) {
-            $arrDay = explode('-', $day);
-            $date = $arrDay[2];
-            $month = $arrDay[1];
-            $year = $arrDay[0];
-            $tongHoaHong = $this->tongHoaHong([$user->ID], [], $date, $month, $year);
-            $tongDoanhThu = $this->tongDoanhThu([$user->ID], [], $date, $month, $year);
-            $tongHoaHongDaRut = $this->thucNhan([$user->ID], $date, $month, $year);
-            $tongDon =  $this->tongDonHang([$user->ID], [], $date, $month, $year);
-            $listTongHoaHong[] = $tongHoaHong;
-            $listTongDoanhThu[] = $tongDoanhThu;
-            $listTongHoaHongDaRut[] = $tongHoaHongDaRut;
-            $listTongDon[] = $tongDon;
+                        )
+                    );
+                }
+                
+    
+            // $paymentMethod = $this->getUserMeta($user->ID, 'payment_method');
+            // $user->payment_method = ($paymentMethod) ? json_decode($paymentMethod) : "";
+    
+    
+    
+            return $this->returnSuccess($user);
+                
         }
-        $arr[0]['data'] = $listTongHoaHong;
-        $arr[1]['data'] = $listTongDoanhThu;
-        $arr[2]['data'] = $listTongHoaHongDaRut;
-        $arr[3]['data'] = $listTongDon;
+    } catch (\Throwable $th) {
+        $this->woo_logs('info', $th->getMessage());
 
-        $arr[0]['backgroundColor'] = '#F57C00';
-        $arr[1]['backgroundColor'] = '#00E572';
-        $arr[2]['backgroundColor'] = '#EB00F0';
-        $arr[3]['backgroundColor'] = '#3D3BC2';
-        $user->bieu_do = $arr;
-        return $this->returnSuccess($user);
+        return $this->returnError(new \stdClass,$th->getMessage());
+    }
+       
     }
     public function userChild(Request $request)
     {

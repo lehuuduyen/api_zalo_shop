@@ -19,8 +19,8 @@ class CorsApi extends Controller
     {
         try {
             $allowedReferers = [
-                'https://h5.zdn.vn/zapps/3709056269145890941',
-                'zbrowser://h5.zdn.vn/zapps/3709056269145890941'
+                'https://h5.zdn.vn/zapps/3084390329101439946',
+                'zbrowser://h5.zdn.vn/zapps/3084390329101439946'
               ];
               $referer = $request->header('referer');
               $origin = $request->header('origin');

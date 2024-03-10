@@ -30,7 +30,7 @@ class ProductController extends Controller
 
 
         $time = time();
-        $hot= rand(0,1);
+        $hot= 1;
         foreach ($phims as $key => $phim) {
             $phim->episode =[];
             $listTap =[];

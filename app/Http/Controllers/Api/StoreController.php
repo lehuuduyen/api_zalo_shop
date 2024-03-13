@@ -312,6 +312,7 @@ class StoreController extends Controller
         $listUserChild = $listUserChild
         ->groupBy($this->_PRFIX_TABLE . '_users.ID',$this->_PRFIX_TABLE . '_users.user_login',$this->_PRFIX_TABLE . '_woo_history_user_commission.create_at')
         ->get();
+        
 
 
 
@@ -333,7 +334,12 @@ class StoreController extends Controller
         }
 
 
-        $listUserClick = $listUserClick->groupBy($this->_PRFIX_TABLE . '_users.ID',$this->_PRFIX_TABLE . '_users.user_login',$this->_PRFIX_TABLE . '_woo_history_share_link.create_at')->get();
+        $listUserClick = $listUserClick->groupBy($this->_PRFIX_TABLE . '_users.ID',$this->_PRFIX_TABLE . '_users.user_login',$this->_PRFIX_TABLE . '_woo_history_share_link.create_at')->toSql();
+        echo '<pre>';
+        print_r($listUserClick);
+        echo '</pre>';
+        die;
+        
         $tempClick =[];
         $listUserClickNew =[];
         foreach($listUserClick as $val){

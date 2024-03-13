@@ -312,20 +312,18 @@ class StoreController extends Controller
         $listUserChild = $listUserChild
         ->groupBy($this->_PRFIX_TABLE . '_users.ID',$this->_PRFIX_TABLE . '_users.user_login',$this->_PRFIX_TABLE . '_woo_history_user_commission.create_at')
         ->get();
-        echo '<pre>';
-        print_r($listUserChild);
-        die;
 
 
-        $temp =[];
+
+        $tempIds =[];
         foreach($listUserChild as $key => $child){
-        $temp= $child;
+        $tempIds[]= $child->ID;
         }
         $listUserClick = DB::connection('mysql_external')->
         table($this->_PRFIX_TABLE . '_woo_history_share_link')->
         select($this->_PRFIX_TABLE . '_users.*', $this->_PRFIX_TABLE . '_users.user_login as mobile', $this->_PRFIX_TABLE . '_woo_history_share_link.create_at')->
         join($this->_PRFIX_TABLE . '_users', $this->_PRFIX_TABLE . '_users.ID', $this->_PRFIX_TABLE . '_woo_history_share_link.user_id')->
-        where('user_parent', $userId)->where('user_id','!=', $userId)->where('status','!=', 2);
+        where('user_parent', $userId)->where('user_id','!=', $userId)->where('status','!=', 2)->whereNotIn('user_parent', $tempIds);
 
         if (isset($request['search'])) {
             $listUserClick = $listUserClick->where('user_login', 'like', '%' . $request['search'] . '%');
@@ -335,7 +333,11 @@ class StoreController extends Controller
         }
 
 
-        $listUserClick = $listUserClick->get();
+        $listUserClick = $listUserClick->groupBy($this->_PRFIX_TABLE . '_users.ID',$this->_PRFIX_TABLE . '_users.user_login',$this->_PRFIX_TABLE . '_woo_history_user_commission.create_at')->get();
+        echo '<pre>';
+        print_r($listUserClick);
+        die;
+
         $mergedData = $listUserChild->merge($listUserClick);
         $sortedData = $mergedData->sortByDesc('create_at');
 

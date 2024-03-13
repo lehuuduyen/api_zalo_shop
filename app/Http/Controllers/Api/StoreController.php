@@ -304,6 +304,30 @@ class StoreController extends Controller
         }
         $listUserChild = $listUserChild->get();
 
+        $listUserClick = DB::connection('mysql_external')->
+        table($this->_PRFIX_TABLE . '_woo_history_share_link')->
+        select($this->_PRFIX_TABLE . '_users.*', $this->_PRFIX_TABLE . '_users.user_login as mobile')->
+        join($this->_PRFIX_TABLE . '_users', $this->_PRFIX_TABLE . '_users.ID', $this->_PRFIX_TABLE . '_woo_history_share_link.user_id')->
+        where('user_parent', $userId)->where('user_id','!=', $userId)->where('status','!=', 2);
+
+        if (isset($request['search'])) {
+            $listUserClick = $listUserClick->where('user_login', 'like', '%' . $request['search'] . '%');
+        }
+        if (isset($request['order'])) {
+            $listUserClick = $listUserClick->orderBy('ID', $request['order']);
+        }
+
+
+        $listUserClick = $listUserClick->get();
+        $mergedData = $listUserChild->merge($listUserClick);
+        $sortedData = $mergedData->sortByDesc('created');
+
+        echo '<pre>';
+        print_r($sortedData);
+        die;
+
+
+
         foreach ($listUserChild as $key => $user) {
             $listUserChild[$key]->tong_hoa_hong = $user->commission;
             $listUserChild[$key]->tong_doanh_thu = $user->total_order;
@@ -600,9 +624,9 @@ class StoreController extends Controller
             if ($validator->fails()) {
                 return $this->returnError(new \stdClass, $validator->errors()->first());
             } else {
-                
+
                 $fee = $this->calFee($data['quan'],$data['phuong']);
-                
+
                 return $this->returnSuccess($fee);
             }
         } catch (\Throwable $th) {

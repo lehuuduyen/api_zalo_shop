@@ -321,6 +321,9 @@ class StoreController extends Controller
         $listUserClick = $listUserClick->get();
         $mergedData = $listUserChild->merge($listUserClick);
         $sortedData = $mergedData->sortByDesc('create_at');
+        echo '<pre>';
+        print_r($sortedData);
+        die;
 
         foreach ($sortedData as $key => $user) {
             $listUserChild[$key]->tong_hoa_hong = (isset($user->commission))?$user->commission:0;

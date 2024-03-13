@@ -293,8 +293,9 @@ class StoreController extends Controller
         $this->_PRFIX_TABLE = $store->prefixTable;
         $userId = $store->user_id;
 
-        $listUserChild = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->select($this->_PRFIX_TABLE . '_users.*', $this->_PRFIX_TABLE . '_users.user_login as mobile', DB::raw("SUM($this->_PRFIX_TABLE . '_woo_history_user_commission.commission') as total_commission") , DB::raw("SUM($this->_PRFIX_TABLE . '_woo_history_user_commission.total_order') as total_order") ,$this->_PRFIX_TABLE . '_woo_history_user_commission.create_at')->join($this->_PRFIX_TABLE . '_users', $this->_PRFIX_TABLE . '_users.ID', $this->_PRFIX_TABLE . '_woo_history_user_commission.user_id')
-        ->groupBy($this->_PRFIX_TABLE . '_woo_history_user_commission.user_id')
+        $listUserChild = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->
+        select($this->_PRFIX_TABLE . '_users.*', $this->_PRFIX_TABLE . '_users.user_login as mobile', DB::raw("SUM($this->_PRFIX_TABLE . '_woo_history_user_commission.commission') as total_commission") , DB::raw("SUM($this->_PRFIX_TABLE . '_woo_history_user_commission.total_order') as total_order") ,$this->_PRFIX_TABLE . '_woo_history_user_commission.create_at')
+        ->join($this->_PRFIX_TABLE . '_users', $this->_PRFIX_TABLE . '_users.ID', $this->_PRFIX_TABLE . '_woo_history_user_commission.user_id')
         ->where('user_parent', $userId)->where('status', 1);
 
 
@@ -304,7 +305,9 @@ class StoreController extends Controller
         if (isset($request['order'])) {
             $listUserChild = $listUserChild->orderBy('ID', $request['order']);
         }
-        $listUserChild = $listUserChild->get();
+        $listUserChild = $listUserChild
+        ->groupBy($this->_PRFIX_TABLE . '_woo_history_user_commission.user_id')
+        ->get();
         echo '<pre>';
         print_r($listUserChild);
         die;

@@ -333,13 +333,17 @@ class StoreController extends Controller
         }
 
 
-        $listUserClick = $listUserClick->groupBy($this->_PRFIX_TABLE . '_users.ID',$this->_PRFIX_TABLE . '_users.user_login')->get();
-        echo '<pre>';
-        print_r($listUserClick);
-        die;
+        $listUserClick = $listUserClick->groupBy($this->_PRFIX_TABLE . '_users.ID',$this->_PRFIX_TABLE . '_users.user_login',$this->_PRFIX_TABLE . '_woo_history_share_link.create_at')->get();
+        $tempClick =[];
+        $listUserClickNew =[];
+        foreach($listUserClick as $val){
+            if(!in_array($val->ID,$tempClick)){
+                $tempClick[]=$val->ID;
+                $listUserClickNew[$val];
+            }
+        }
 
-
-        $mergedData = $listUserChild->merge($listUserClick);
+        $mergedData = $listUserChild->merge($listUserClickNew);
         $sortedData = $mergedData->sortByDesc('create_at');
 
         $stt=0;

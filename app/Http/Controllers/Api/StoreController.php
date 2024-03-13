@@ -311,8 +311,13 @@ class StoreController extends Controller
         }
         $listUserChild = $listUserChild
         ->groupBy($this->_PRFIX_TABLE . '_users.ID',$this->_PRFIX_TABLE . '_users.user_login',$this->_PRFIX_TABLE . '_woo_history_user_commission.create_at')
-        ->get();
-
+        ->toSql();
+        
+        echo '<pre>';
+        print_r($listUserChild);
+        echo '</pre>';
+        die;
+        
 
 
         $tempIds =[];

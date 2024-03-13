@@ -294,7 +294,7 @@ class StoreController extends Controller
         $userId = $store->user_id;
 
         $listUserChild = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->
-        select($this->_PRFIX_TABLE . '_users.*',
+        select($this->_PRFIX_TABLE . '_users.ID',
          $this->_PRFIX_TABLE . '_users.user_login as mobile',
          DB::raw("SUM(".$this->_PRFIX_TABLE."_woo_history_user_commission.commission) as total_commission") ,
          DB::raw("SUM(".$this->_PRFIX_TABLE."_woo_history_user_commission.total_order) as total_order") ,
@@ -312,9 +312,7 @@ class StoreController extends Controller
         $listUserChild = $listUserChild
         ->groupBy($this->_PRFIX_TABLE . '_users.ID',$this->_PRFIX_TABLE . '_users.user_login')
         ->get();
-        echo '<pre>';
-        print_r($listUserChild);
-        die;
+
 
         $temp =[];
         foreach($listUserChild as $key => $child){

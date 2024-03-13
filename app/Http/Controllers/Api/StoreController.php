@@ -323,7 +323,7 @@ class StoreController extends Controller
         table($this->_PRFIX_TABLE . '_woo_history_share_link')->
         select($this->_PRFIX_TABLE . '_users.ID', $this->_PRFIX_TABLE . '_users.user_login as mobile', $this->_PRFIX_TABLE . '_woo_history_share_link.create_at')->
         join($this->_PRFIX_TABLE . '_users', $this->_PRFIX_TABLE . '_users.ID', $this->_PRFIX_TABLE . '_woo_history_share_link.user_id')->
-        where('user_parent', $userId)->where('user_id','!=', $userId)->where('status','!=', 2)->whereNotIn('user_parent', $tempIds);
+        where('user_parent', $userId)->where('user_id','!=', $userId)->where('status','!=', 2)->whereNotIn('user_id', $tempIds);
 
         if (isset($request['search'])) {
             $listUserClick = $listUserClick->where('user_login', 'like', '%' . $request['search'] . '%');

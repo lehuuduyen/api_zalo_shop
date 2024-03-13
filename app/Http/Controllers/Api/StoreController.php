@@ -293,7 +293,9 @@ class StoreController extends Controller
         $this->_PRFIX_TABLE = $store->prefixTable;
         $userId = $store->user_id;
 
-        $listUserChild = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->select($this->_PRFIX_TABLE . '_users.*', $this->_PRFIX_TABLE . '_users.user_login as mobile', $this->_PRFIX_TABLE . '_woo_history_user_commission.commission',  $this->_PRFIX_TABLE . '_woo_history_user_commission.create_at',$this->_PRFIX_TABLE . '_woo_history_user_commission.total_order')->join($this->_PRFIX_TABLE . '_users', $this->_PRFIX_TABLE . '_users.ID', $this->_PRFIX_TABLE . '_woo_history_user_commission.user_id')->where('user_parent', $userId)->where('status', 1);
+        $listUserChild = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->select($this->_PRFIX_TABLE . '_users.*', $this->_PRFIX_TABLE . '_users.user_login as mobile', DB::raw("SUM($this->_PRFIX_TABLE . '_woo_history_user_commission.commission') as total_commission") , DB::raw("SUM($this->_PRFIX_TABLE . '_woo_history_user_commission.total_order') as total_order") ,$this->_PRFIX_TABLE . '_woo_history_user_commission.create_at')->join($this->_PRFIX_TABLE . '_users', $this->_PRFIX_TABLE . '_users.ID', $this->_PRFIX_TABLE . '_woo_history_user_commission.user_id')
+        ->groupBy($this->_PRFIX_TABLE . '_woo_history_user_commission.user_id')
+        ->where('user_parent', $userId)->where('status', 1);
 
 
         if (isset($request['search'])) {
@@ -303,10 +305,17 @@ class StoreController extends Controller
             $listUserChild = $listUserChild->orderBy('ID', $request['order']);
         }
         $listUserChild = $listUserChild->get();
+        echo '<pre>';
+        print_r($listUserChild);
+        die;
 
+        $temp =[];
+        foreach($listUserChild as $key => $child){
+        $temp= $child;
+        }
         $listUserClick = DB::connection('mysql_external')->
         table($this->_PRFIX_TABLE . '_woo_history_share_link')->
-        select($this->_PRFIX_TABLE . '_users.*', $this->_PRFIX_TABLE . '_users.user_login as mobile', $this->_PRFIX_TABLE . '_woo_history_share_link.create_at',)->
+        select($this->_PRFIX_TABLE . '_users.*', $this->_PRFIX_TABLE . '_users.user_login as mobile', $this->_PRFIX_TABLE . '_woo_history_share_link.create_at')->
         join($this->_PRFIX_TABLE . '_users', $this->_PRFIX_TABLE . '_users.ID', $this->_PRFIX_TABLE . '_woo_history_share_link.user_id')->
         where('user_parent', $userId)->where('user_id','!=', $userId)->where('status','!=', 2);
 

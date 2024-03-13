@@ -339,7 +339,7 @@ class StoreController extends Controller
         foreach($listUserClick as $val){
             if(!in_array($val->ID,$tempClick)){
                 $tempClick[]=$val->ID;
-                $listUserClickNew[$val];
+                $listUserClickNew[]=$val;
             }
         }
 

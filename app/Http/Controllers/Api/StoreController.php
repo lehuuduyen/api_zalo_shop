@@ -322,14 +322,15 @@ class StoreController extends Controller
         $mergedData = $listUserChild->merge($listUserClick);
         $sortedData = $mergedData->sortByDesc('create_at');
 
-
+        $stt=0;
+        $result =[];
         foreach ($sortedData as $key => $user) {
-
-            $sortedData[$key]->tong_hoa_hong = (isset($user->commission))?$user->commission:0;
-            $sortedData[$key]->tong_doanh_thu = (isset($user->total_order))?$user->total_order:0;
-            $sortedData[$key]->level = "Cấp 1";
+            $result[$stt]=$user;
+            $result[$stt]->tong_hoa_hong = (isset($user->commission))?$user->commission:0;
+            $result[$stt]->tong_doanh_thu = (isset($user->total_order))?$user->total_order:0;
+            $result[$stt]->level = "Cấp 1";
         }
-        return $this->returnSuccess($sortedData);
+        return $this->returnSuccess($result);
     }
     public function historyWithdraw(Request $request)
     {

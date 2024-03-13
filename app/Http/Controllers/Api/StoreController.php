@@ -322,15 +322,9 @@ class StoreController extends Controller
         $mergedData = $listUserChild->merge($listUserClick);
         $sortedData = $mergedData->sortByDesc('create_at');
 
-        echo '<pre>';
-        print_r($sortedData);
-        die;
-
-
-
-        foreach ($listUserChild as $key => $user) {
-            $listUserChild[$key]->tong_hoa_hong = $user->commission;
-            $listUserChild[$key]->tong_doanh_thu = $user->total_order;
+        foreach ($sortedData as $key => $user) {
+            $listUserChild[$key]->tong_hoa_hong = (isset($user->commission))?$user->commission:0;
+            $listUserChild[$key]->tong_doanh_thu = (isset($user->total_order))?$user->total_order:0;
             $listUserChild[$key]->level = "Cấp 1";
         }
         return $this->returnSuccess($listUserChild);

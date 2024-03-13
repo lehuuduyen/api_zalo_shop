@@ -293,7 +293,7 @@ class StoreController extends Controller
         $this->_PRFIX_TABLE = $store->prefixTable;
         $userId = $store->user_id;
 
-        $listUserChild = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->select($this->_PRFIX_TABLE . '_users.*', $this->_PRFIX_TABLE . '_users.user_login as mobile', $this->_PRFIX_TABLE . '_woo_history_user_commission.commission', $this->_PRFIX_TABLE . '_woo_history_user_commission.total_order')->join($this->_PRFIX_TABLE . '_users', $this->_PRFIX_TABLE . '_users.ID', $this->_PRFIX_TABLE . '_woo_history_user_commission.user_id')->where('user_parent', $userId)->where('status', 1);
+        $listUserChild = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->select($this->_PRFIX_TABLE . '_users.*', $this->_PRFIX_TABLE . '_users.user_login as mobile', $this->_PRFIX_TABLE . '_woo_history_user_commission.commission',  $this->_PRFIX_TABLE . '_woo_history_user_commission.create_at',$this->_PRFIX_TABLE . '_woo_history_user_commission.total_order')->join($this->_PRFIX_TABLE . '_users', $this->_PRFIX_TABLE . '_users.ID', $this->_PRFIX_TABLE . '_woo_history_user_commission.user_id')->where('user_parent', $userId)->where('status', 1);
 
 
         if (isset($request['search'])) {
@@ -306,7 +306,7 @@ class StoreController extends Controller
 
         $listUserClick = DB::connection('mysql_external')->
         table($this->_PRFIX_TABLE . '_woo_history_share_link')->
-        select($this->_PRFIX_TABLE . '_users.*', $this->_PRFIX_TABLE . '_users.user_login as mobile')->
+        select($this->_PRFIX_TABLE . '_users.*', $this->_PRFIX_TABLE . '_users.user_login as mobile', $this->_PRFIX_TABLE . '_woo_history_share_link.create_at',)->
         join($this->_PRFIX_TABLE . '_users', $this->_PRFIX_TABLE . '_users.ID', $this->_PRFIX_TABLE . '_woo_history_share_link.user_id')->
         where('user_parent', $userId)->where('user_id','!=', $userId)->where('status','!=', 2);
 
@@ -320,7 +320,7 @@ class StoreController extends Controller
 
         $listUserClick = $listUserClick->get();
         $mergedData = $listUserChild->merge($listUserClick);
-        $sortedData = $mergedData->sortByDesc('created');
+        $sortedData = $mergedData->sortByDesc('create_at');
 
         echo '<pre>';
         print_r($sortedData);

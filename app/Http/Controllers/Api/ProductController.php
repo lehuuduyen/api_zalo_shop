@@ -77,7 +77,7 @@ class ProductController extends Controller
     public function getFavorite(Request $request){
 
     }
-    public function postFavorite(Request $request){
+    public function addFavorite(Request $request){
         $data  = $request->all();
         if(isset($data['user']) && isset($data['tap']) ){
             $listFavorite = $this->getUserMeta($user->ID, 'favorite');

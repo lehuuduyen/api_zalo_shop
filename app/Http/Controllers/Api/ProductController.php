@@ -90,17 +90,17 @@ class ProductController extends Controller
     }
     public function addFavorite(Request $request){
         $data  = $request->all();
-        if(isset($data['user']) && isset($data['tap']) ){
+        if(isset($data['user']) && isset($data['phim']) ){
             $user = $data['user'];
 
             $listFavorite = $this->getUserMeta($user->ID, 'favorite');
             
             if($listFavorite){
                 $favorite = json_decode($listFavorite);
-                if(in_array($data['tap'],$favorite)){
-                    $favorite = array_diff($favorite, [$data['tap']]);
+                if(in_array($data['phim'],$favorite)){
+                    $favorite = array_diff($favorite, [$data['phim']]);
                 }else{
-                    $favorite[]=$data['tap'];
+                    $favorite[]=$data['phim'];
                 }
                 $result =DB::table($this->_PRFIX_TABLE . '_usermeta')->where('user_id', $user->ID)->where('meta_key', 'favorite')->update(
                     array(
@@ -112,7 +112,7 @@ class ProductController extends Controller
                     array(
                         'user_id'     =>   $user->ID,
                         'meta_key'     =>   'favorite',
-                        'meta_value'     =>   json_encode([$data['tap']])
+                        'meta_value'     =>   json_encode([$data['phim']])
                     )
                 );
             }

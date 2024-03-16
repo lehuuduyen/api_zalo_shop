@@ -85,6 +85,7 @@ class ProductController extends Controller
             if($listWatched){
                 $data = json_decode($listWatched, true);
 
+                return $this->returnSuccess($data);
                 
                 // Flatten the data and include "phim" ID for each "tap"
                 $flattenedData = [];

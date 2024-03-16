@@ -149,13 +149,18 @@ class ProductController extends Controller
 
                 // Output the sorted data
                 $output = [];
+                $i = 0;
                 foreach ($flattenedData as $tap) {
+                    if($i == 10){
+                        break;
+                    }
                     $output[] = [
                         'id' => $tap->id,
                         'time_watch' => $tap->time_watch,
                         'time' => $tap->time,
                         'phim' => $tap->phim
                     ];
+                    $i++;
                 }
 
                 return $this->returnSuccess($output);

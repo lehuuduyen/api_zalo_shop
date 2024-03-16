@@ -83,9 +83,8 @@ class ProductController extends Controller
             $user = $data['user'];
             $listWatched = $this->getUserMeta($user->ID, 'watched');
             if($listWatched){
-                $data = json_decode($listWatched, true);
+                $data = json_decode($listWatched);
 
-                return $this->returnSuccess($data->phim);
                 
                 // Flatten the data and include "phim" ID for each "tap"
                 $flattenedData = [];

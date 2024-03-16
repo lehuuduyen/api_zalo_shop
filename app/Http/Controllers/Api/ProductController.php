@@ -74,14 +74,36 @@ class ProductController extends Controller
 
         return $this->returnSuccess($results);
     }
+    function sortByTime($a, $b) {
+        return $a->time - $b->time;
+    }
     public function getWatched(Request $request)
     {
 
         $data  = $request->all();
         if(isset($data['user'])){
             $user = $data['user'];
+            $listWatched = $this->getUserMeta($user->ID, 'watched');
+            if($listWatched){
+                $data = json_decode($listWatched, true);
 
-            return $this->returnSuccess($results);
+                // Define a comparison function for usort
+                
+                // Iterate over "phim" array and sort each "tap" array
+                foreach ($data->phim as &$phim) {
+                    usort($phim->tap, 'sortByTime');
+                }
+                
+                // Sort the "phim" array based on the first tap's time
+                usort($data->phim, function($a, $b) {
+                    return $a->tap[0]->time - $b->tap[0]->time;
+                });
+                
+                // Output the sorted JSON
+                echo json_encode($data, JSON_PRETTY_PRINT);
+                return $this->returnSuccess($data);
+            }
+            
         
         }
 

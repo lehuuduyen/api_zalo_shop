@@ -166,10 +166,20 @@ class StoreController extends Controller
     public function notify(Request $request)
     {
         $this->woo_logs('notify', json_encode($request->all()));
+        $dataSuccess = [
+            'returnCode' =>1,
+            'returnMessage' =>'Notify zalo handle successsfully',
+        ];
+        return response()->json($dataSuccess);
     }
     public function notifyPost(Request $request)
     {
-        $this->woo_logs('notify_post', json_encode($request->all()));
+        $this->woo_logs('notify', json_encode($request->all()));
+        $dataSuccess = [
+            'returnCode' =>1,
+            'returnMessage' =>'Notify zalo handle successsfully',
+        ];
+        return response()->json($dataSuccess);    
     }
     public function storeImage(Request $request)
     {

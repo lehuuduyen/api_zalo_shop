@@ -91,13 +91,13 @@ class ProductController extends Controller
                 }else{
                     $favorite[]=$data['tap'];
                 }
-                DB::table($this->_PRFIX_TABLE . '_usermeta')->where('user_id', $user->ID)->where('meta_key', 'favorite')->update(
+                $result =DB::table($this->_PRFIX_TABLE . '_usermeta')->where('user_id', $user->ID)->where('meta_key', 'favorite')->update(
                     array(
                         'meta_value' => json_encode($favorite)
                     )
                 );
             }else{
-                $insertId = DB::table($this->_PRFIX_TABLE . '_usermeta')->insertGetId(
+                $result = DB::table($this->_PRFIX_TABLE . '_usermeta')->insertGetId(
                     array(
                         'user_id'     =>   $user->ID,
                         'meta_key'     =>   'favorite',
@@ -105,7 +105,7 @@ class ProductController extends Controller
                     )
                 );
             }
-            return $this->returnSuccess($insertId);
+            return $this->returnSuccess($result);
             
         }
         return $this->returnSuccess([]);

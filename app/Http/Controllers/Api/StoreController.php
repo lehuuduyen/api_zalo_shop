@@ -163,6 +163,14 @@ class StoreController extends Controller
             return $this->returnError([], $th->getMessage());
         }
     }
+    public function notify(Request $request)
+    {
+        $this->woo_logs('notify', $request->all());
+    }
+    public function notifyPost(Request $request)
+    {
+        $this->woo_logs('notify_post', $request->all());
+    }
     public function storeImage(Request $request)
     {
         $path = $request->file('photo')->store('');

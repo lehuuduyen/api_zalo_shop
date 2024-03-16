@@ -30,6 +30,8 @@ Route::group([  'middleware' => ['CorsApi','CheckStore']], function()
 
 
 
+    Route::get('notify', 'App\Http\Controllers\Api\StoreController@notify');
+    Route::post('notify', 'App\Http\Controllers\Api\StoreController@notifyPost');
     Route::get('products', 'App\Http\Controllers\Api\ProductController@index');
     Route::post('check_coupon', 'App\Http\Controllers\Api\ProductController@checkCoupon');
     Route::post('product/review', 'App\Http\Controllers\Api\ProductController@review');

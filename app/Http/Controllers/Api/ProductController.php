@@ -81,8 +81,8 @@ class ProductController extends Controller
             $listWatched = $this->getUserMeta($user->ID, 'watched');
             if(!$listWatched)
             {
-                $object = new stdClass();
-                $objectWatch = new stdClass();
+                $object = new \stdClass();
+                $objectWatch = new \stdClass();
                 $objectWatch->id = $data['tap'];
                 $objectWatch->time_watch = $data['time_watch'];
                 $object->phim  = [$objectWatch]; 
@@ -96,7 +96,7 @@ class ProductController extends Controller
             }
             return $this->returnSuccess($data);
         }
-        return $this->returnError([], "Cần truyên sdt");
+        return $this->returnSuccess([]);
 
     }
 

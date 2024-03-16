@@ -51,6 +51,7 @@ class CheckStore extends Controller
 
         } catch (\Throwable $th) {
             //throw $th;
+            return $this->returnError(new \stdClass, $th->getMessage());
 
         }
         return $this->returnError(new \stdClass, "Token không đúng hoặc hết hạn");

@@ -118,7 +118,7 @@ class ProductController extends Controller
         
         }
 
-        return $this->returnSuccess($listWatched);
+        return $this->returnSuccess($data);
     }
     public function addWatched(Request $request){
         $data  = $request->all();

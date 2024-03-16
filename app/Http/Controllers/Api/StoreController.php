@@ -165,11 +165,11 @@ class StoreController extends Controller
     }
     public function notify(Request $request)
     {
-        $this->woo_logs('notify', $request->all());
+        $this->woo_logs('notify', json_encode($request->all()));
     }
     public function notifyPost(Request $request)
     {
-        $this->woo_logs('notify_post', $request->all());
+        $this->woo_logs('notify_post', json_encode($request->all()));
     }
     public function storeImage(Request $request)
     {

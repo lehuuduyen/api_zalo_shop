@@ -93,6 +93,10 @@ class ProductController extends Controller
                         'meta_value'     =>   json_encode($object)
                     )
                 );
+            }else{
+                $listWatch = json_decode($listWatched);
+                return $this->returnSuccess($listWatch);
+
             }
             return $this->returnSuccess($data);
         }

@@ -79,17 +79,33 @@ class ProductController extends Controller
     }
     public function postFavorite(Request $request){
         $data  = $request->all();
-        if(isset($data['user'])){
+        if(isset($data['user']) && isset($data['tap']) ){
             $listFavorite = $this->getUserMeta($user->ID, 'favorite');
-            if($listFavorite)
-            $insertId = DB::table($this->_PRFIX_TABLE . '_usermeta')->insertGetId(
-                array(
-                    'user_id'     =>   $user->ID,
-                    'meta_key'     =>   'watched',
-                    'meta_value'     =>   json_encode($object)
-                )
-            );
+            if($listFavorite){
+                $favorite = json_decode($listFavorite);
+                if(in_array($data['tap'],$favorite)){
+                    $favorite = array_diff($favorite, [$data['tap']]);
+                }else{
+                    $favorite[]=$data['tap'];
+                }
+                DB::table($this->_PRFIX_TABLE . '_usermeta')->where('user_id', $user->ID)->where('meta_key', 'favorite')->update(
+                    array(
+                        'meta_value' => json_encode($favorite)
+                    )
+                );
+            }else{
+                $insertId = DB::table($this->_PRFIX_TABLE . '_usermeta')->insertGetId(
+                    array(
+                        'user_id'     =>   $user->ID,
+                        'meta_key'     =>   'favorite',
+                        'meta_value'     =>   json_encode([$data['tap']])
+                    )
+                );
+            }
+            return $this->returnSuccess($insertId);
+            
         }
+        return $this->returnSuccess([]);
         
     }
     public function getWatched(Request $request)

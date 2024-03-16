@@ -119,7 +119,7 @@ class ProductController extends Controller
             return $this->returnSuccess($result);
             
         }
-        return $this->returnSuccess([]);
+        return $this->returnSuccess($data);
         
     }
     public function getWatched(Request $request)

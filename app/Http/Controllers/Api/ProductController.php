@@ -74,6 +74,19 @@ class ProductController extends Controller
 
         return $this->returnSuccess($results);
     }
+    public function getWatched(Request $request)
+    {
+
+        $data  = $request->all();
+        if(isset($data['user'])){
+            $user = $data['user'];
+
+            return $this->returnSuccess($results);
+        
+        }
+
+        return $this->returnSuccess([]);
+    }
     public function addWatched(Request $request){
         $data  = $request->all();
         if(isset($data['user']) && isset($data['tap']) && isset($data['phim']) && isset($data['time_watch']) ){
@@ -82,6 +95,7 @@ class ProductController extends Controller
             $objectWatch = new \stdClass();
             $objectWatch->id = $data['tap'];
             $objectWatch->time_watch = $data['time_watch'];
+            $objectWatch->time = time();
             if(!$listWatched)
             {
                 $object = new \stdClass();

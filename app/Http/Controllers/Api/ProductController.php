@@ -95,6 +95,32 @@ class ProductController extends Controller
                 );
             }else{
                 $listWatch = json_decode($listWatched);
+                // check watch ay da co 
+                $issetPhim = false;
+                $issetTap = false;
+                foreach($listWatch['phim'] as $keyPhim => $phim ){
+                    if($phim->id == $data['phim']){
+                        $issetPhim  = true;
+                        foreach($phim->tap as $keyTap => $tap){
+                            if($tap->id == $data['tap']){
+                                $issetTap = true;
+                                $listWatch['phim'][$keyPhim]->tap[$keyTap]->time_watch = $data['time_watch'];
+                            }
+                        }
+                    }
+                }
+                if($issetPhim && $issetTap){
+                    DB::table($this->_PRFIX_TABLE . '_usermeta')->where('user_id', $user->ID)->where('meta_key', 'watched')->update(
+                        array(
+                            'meta_value' => json_encode($listWatch)
+                        )
+                    );
+                }
+
+                // check watch ay chua co
+
+
+
                 return $this->returnSuccess($listWatch);
 
             }

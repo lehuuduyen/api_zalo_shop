@@ -74,7 +74,24 @@ class ProductController extends Controller
 
         return $this->returnSuccess($results);
     }
-   
+    public function getFavorite(Request $request){
+
+    }
+    public function postFavorite(Request $request){
+        $data  = $request->all();
+        if(isset($data['user'])){
+            $listFavorite = $this->getUserMeta($user->ID, 'favorite');
+            if($listFavorite)
+            $insertId = DB::table($this->_PRFIX_TABLE . '_usermeta')->insertGetId(
+                array(
+                    'user_id'     =>   $user->ID,
+                    'meta_key'     =>   'watched',
+                    'meta_value'     =>   json_encode($object)
+                )
+            );
+        }
+        
+    }
     public function getWatched(Request $request)
     {
 
@@ -111,7 +128,6 @@ class ProductController extends Controller
                     ];
                 }
 
-                echo json_encode($output, JSON_PRETTY_PRINT);
                 return $this->returnSuccess($output);
             }
             

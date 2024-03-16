@@ -33,7 +33,7 @@ Route::group([  'middleware' => ['CorsApi','CheckStore']], function()
     Route::get('categories', 'App\Http\Controllers\Api\ProductController@getCategories');
 
     Route::get('favorite', 'App\Http\Controllers\Api\ProductController@getFavorite');
-    Route::post('favorite', 'App\Http\Controllers\Api\ProductController@getFavorite');
+    Route::post('favorite', 'App\Http\Controllers\Api\ProductController@postFavorite');
 
     Route::get('watch', 'App\Http\Controllers\Api\ProductController@getWatched');
     Route::post('watch', 'App\Http\Controllers\Api\ProductController@addWatched');

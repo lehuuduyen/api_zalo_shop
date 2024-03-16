@@ -80,7 +80,10 @@ class ProductController extends Controller
     public function addFavorite(Request $request){
         $data  = $request->all();
         if(isset($data['user']) && isset($data['tap']) ){
+            $user = $data['user'];
+
             $listFavorite = $this->getUserMeta($user->ID, 'favorite');
+            
             if($listFavorite){
                 $favorite = json_decode($listFavorite);
                 if(in_array($data['tap'],$favorite)){

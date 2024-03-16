@@ -112,13 +112,13 @@ class ProductController extends Controller
                 }
 
                 echo json_encode($output, JSON_PRETTY_PRINT);
-                return $this->returnSuccess($data);
+                return $this->returnSuccess($output);
             }
             
         
         }
 
-        return $this->returnSuccess([]);
+        return $this->returnSuccess($listWatched);
     }
     public function addWatched(Request $request){
         $data  = $request->all();

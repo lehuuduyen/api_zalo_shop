@@ -76,7 +76,24 @@ class ProductController extends Controller
     }
     public function addWatched(Request $request){
         $data  = $request->all();
-        if(isset($data['user'])){
+        if(isset($data['user']) && isset($data['tap']) && isset($data['phim']) && isset($data['time_watch']) ){
+            $user = $data['user'];
+            $listWatched = $this->getUserMeta($user->ID, 'watched');
+            if(!$listWatched)
+            {
+                $object = new stdClass();
+                $objectWatch = new stdClass();
+                $objectWatch->id = $data['tap'];
+                $objectWatch->time_watch = $data['time_watch'];
+                $object->phim  = [$objectWatch]; 
+                $insertId = DB::table($this->_PRFIX_TABLE . '_usermeta')->insertGetId(
+                    array(
+                        'user_id'     =>   $user->ID,
+                        'meta_key'     =>   'watched',
+                        'meta_value'     =>   json_encode($object)
+                    )
+                );
+            }
             return $this->returnSuccess($data);
         }
         return $this->returnError([], "Cần truyên sdt");

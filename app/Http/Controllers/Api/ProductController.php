@@ -79,12 +79,13 @@ class ProductController extends Controller
         if(isset($data['user']) && isset($data['tap']) && isset($data['phim']) && isset($data['time_watch']) ){
             $user = $data['user'];
             $listWatched = $this->getUserMeta($user->ID, 'watched');
+            $objectWatch = new \stdClass();
+            $objectWatch->id = $data['tap'];
+            $objectWatch->time_watch = $data['time_watch'];
             if(!$listWatched)
             {
                 $object = new \stdClass();
-                $objectWatch = new \stdClass();
-                $objectWatch->id = $data['tap'];
-                $objectWatch->time_watch = $data['time_watch'];
+               
                 $object->phim[]  =['id'=>$data['phim'],'tap'=>[$objectWatch]] ; 
                 $insertId = DB::table($this->_PRFIX_TABLE . '_usermeta')->insertGetId(
                     array(
@@ -108,12 +109,14 @@ class ProductController extends Controller
                             }
                         }
                         if(!$issetTap){
-                            $objectWatch = new \stdClass();
-                            $objectWatch->id = $data['tap'];
-                            $objectWatch->time_watch = $data['time_watch'];
+                            
                             $listWatch->phim[$keyPhim]->tap[]= $objectWatch;
                         }
                     }
+                }
+                if(!$issetPhim){
+                    
+                    $listWatch->phim[]=['id'=>$data['phim'],'tap'=>[$objectWatch]];
                 }
                 DB::table($this->_PRFIX_TABLE . '_usermeta')->where('user_id', $user->ID)->where('meta_key', 'watched')->update(
                     array(

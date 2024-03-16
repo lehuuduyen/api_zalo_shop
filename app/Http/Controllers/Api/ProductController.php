@@ -74,9 +74,7 @@ class ProductController extends Controller
 
         return $this->returnSuccess($results);
     }
-    function sortByTime($a, $b) {
-        return $a->time - $b->time;
-    }
+   
     public function getWatched(Request $request)
     {
 
@@ -87,20 +85,33 @@ class ProductController extends Controller
             if($listWatched){
                 $data = json_decode($listWatched, true);
 
-                // Define a comparison function for usort
                 
-                // Iterate over "phim" array and sort each "tap" array
-                foreach ($data->phim as &$phim) {
-                    usort($phim->tap, 'sortByTime');
+                // Flatten the data and include "phim" ID for each "tap"
+                $flattenedData = [];
+                foreach ($data->phim as $phim) {
+                    foreach ($phim->tap as $tap) {
+                        $tap->phim = $phim->id;
+                        $flattenedData[] = $tap;
+                    }
                 }
-                
-                // Sort the "phim" array based on the first tap's time
-                usort($data->phim, function($a, $b) {
-                    return $a->tap[0]->time - $b->tap[0]->time;
+
+                // Sort the flattened data by time in descending order
+                usort($flattenedData, function($a, $b) {
+                    return $b->time - $a->time;
                 });
-                
-                // Output the sorted JSON
-                echo json_encode($data, JSON_PRETTY_PRINT);
+
+                // Output the sorted data
+                $output = [];
+                foreach ($flattenedData as $tap) {
+                    $output[] = [
+                        'id' => $tap->id,
+                        'time_watch' => $tap->time_watch,
+                        'time' => $tap->time,
+                        'phim' => $tap->phim
+                    ];
+                }
+
+                echo json_encode($output, JSON_PRETTY_PRINT);
                 return $this->returnSuccess($data);
             }
             

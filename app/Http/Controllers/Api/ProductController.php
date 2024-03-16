@@ -85,7 +85,7 @@ class ProductController extends Controller
                 $objectWatch = new \stdClass();
                 $objectWatch->id = $data['tap'];
                 $objectWatch->time_watch = $data['time_watch'];
-                $object->$data['phim']  = [$objectWatch]; 
+                $object->phim  = ['id'=>$data['phim'],'tap'=>$objectWatch]; 
                 $insertId = DB::table($this->_PRFIX_TABLE . '_usermeta')->insertGetId(
                     array(
                         'user_id'     =>   $user->ID,

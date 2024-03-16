@@ -27,12 +27,19 @@ Route::get('getFee', 'App\Http\Controllers\Api\StoreController@getFee')->middlew
 Route::group([  'middleware' => ['CorsApi','CheckStore']], function()
 {
     Route::post('log', 'App\Http\Controllers\Api\StoreController@log');
-
-
-
     Route::get('notify', 'App\Http\Controllers\Api\StoreController@notify');
     Route::post('notify', 'App\Http\Controllers\Api\StoreController@notifyPost');
     Route::get('products', 'App\Http\Controllers\Api\ProductController@index');
+    Route::get('categories', 'App\Http\Controllers\Api\ProductController@getCategories');
+
+    Route::get('favorite', 'App\Http\Controllers\Api\ProductController@getFavorite');
+    Route::post('favorite', 'App\Http\Controllers\Api\ProductController@getFavorite');
+
+    Route::get('watch', 'App\Http\Controllers\Api\ProductController@getWatched');
+    Route::post('watch', 'App\Http\Controllers\Api\ProductController@addWatched');
+    Route::delete('watch', 'App\Http\Controllers\Api\ProductController@deleteWatched');
+
+
     Route::post('check_coupon', 'App\Http\Controllers\Api\ProductController@checkCoupon');
     Route::post('product/review', 'App\Http\Controllers\Api\ProductController@review');
     Route::get('brands', 'App\Http\Controllers\Api\BrandsController@index');
@@ -41,7 +48,6 @@ Route::group([  'middleware' => ['CorsApi','CheckStore']], function()
     Route::get('blogs', 'App\Http\Controllers\Api\BlogController@index');
     Route::get('orders', 'App\Http\Controllers\Api\OrdersController@index');
     Route::get('campaigns', 'App\Http\Controllers\Api\FlashSaleController@index');
-    Route::get('categories', 'App\Http\Controllers\Api\ProductController@getCategories');
     Route::post('order', 'App\Http\Controllers\Api\OrdersController@store');
     Route::put('update_payment_method', 'App\Http\Controllers\Api\StoreController@update_payment_method');
     Route::post('withdraw', 'App\Http\Controllers\Api\StoreController@withdraw');
@@ -60,11 +66,7 @@ Route::group([  'middleware' => ['CorsApi','CheckStore']], function()
     Route::put('register_aff', 'App\Http\Controllers\Api\StoreController@register_aff');
     Route::post('history_share_link', 'App\Http\Controllers\Api\StoreController@history_share_link');
 
-    Route::prefix('booking')->group(function () {
-        Route::get('categories', 'App\Http\Controllers\Api\ProductController@getCategories');
-        Route::get('banner', 'App\Http\Controllers\Api\StoreController@banner');
-        Route::get('products', 'App\Http\Controllers\Api\ProductController@index');
-    });
+   
 
 });
 

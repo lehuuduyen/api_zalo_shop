@@ -74,6 +74,14 @@ class ProductController extends Controller
 
         return $this->returnSuccess($results);
     }
+    public function addWatched(Request $request){
+        $data  = $request->all();
+        if(isset($data['user'])){
+            return $this->returnSuccess($data);
+        }
+        return $this->returnError([], "Cần truyên sdt");
+
+    }
 
     /**
      * Store a newly created resource in storage.

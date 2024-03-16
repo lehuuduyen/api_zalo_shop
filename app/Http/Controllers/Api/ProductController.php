@@ -75,6 +75,17 @@ class ProductController extends Controller
         return $this->returnSuccess($results);
     }
     public function getFavorite(Request $request){
+        $data  = $request->all();
+        $result = [];
+        if(isset($data['user'])  ){
+            $user = $data['user'];
+            $listFavorite = $this->getUserMeta($user->ID, 'favorite');
+            if($listFavorite ){
+                $result = json_decode($listFavorite );
+            }
+
+        }
+        return $this->returnSuccess($result);
 
     }
     public function addFavorite(Request $request){

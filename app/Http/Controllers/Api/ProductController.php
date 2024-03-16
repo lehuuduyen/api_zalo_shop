@@ -120,16 +120,15 @@ class ProductController extends Controller
                             if($tap->id == $data['tap']){
                                 $issetTap = true;
                                 $listWatch->phim[$keyPhim]->tap[$keyTap]->time_watch = $data['time_watch'];
+                                $listWatch->phim[$keyPhim]->tap[$keyTap]->time = time();
                             }
                         }
                         if(!$issetTap){
-                            
                             $listWatch->phim[$keyPhim]->tap[]= $objectWatch;
                         }
                     }
                 }
                 if(!$issetPhim){
-                    
                     $listWatch->phim[]=['id'=>$data['phim'],'tap'=>[$objectWatch]];
                 }
                 DB::table($this->_PRFIX_TABLE . '_usermeta')->where('user_id', $user->ID)->where('meta_key', 'watched')->update(

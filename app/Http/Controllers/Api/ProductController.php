@@ -22,16 +22,13 @@ class ProductController extends Controller
 
         $phims = DB::table($this->_PRFIX_TABLE . '_films');
 
-
-        if (isset($request['category_id'])) {
-            $phims = $phims->where('category_id',$request['category_id']);
-        }
         $phims = $phims->orderBy('create_at', 'DESC')->get();
 
 
         $time = time();
         $hot= 1;
         foreach ($phims as $key => $phim) {
+            $phim->category_ids = json_decode($phim->category_ids);
             $phim->episode =[];
             $listTap =[];
             $listTap = DB::table($this->_PRFIX_TABLE . '_postmeta')->

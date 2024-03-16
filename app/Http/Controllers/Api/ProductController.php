@@ -107,15 +107,19 @@ class ProductController extends Controller
                                 $listWatch->phim[$keyPhim]->tap[$keyTap]->time_watch = $data['time_watch'];
                             }
                         }
+                        if(!$issetTap){
+                            $objectWatch = new \stdClass();
+                            $objectWatch->id = $data['tap'];
+                            $objectWatch->time_watch = $data['time_watch'];
+                            $listWatch->phim[$keyPhim]->tap[]= $objectWatch;
+                        }
                     }
                 }
-                if($issetPhim && $issetTap){
-                    DB::table($this->_PRFIX_TABLE . '_usermeta')->where('user_id', $user->ID)->where('meta_key', 'watched')->update(
-                        array(
-                            'meta_value' => json_encode($listWatch)
-                        )
-                    );
-                }
+                DB::table($this->_PRFIX_TABLE . '_usermeta')->where('user_id', $user->ID)->where('meta_key', 'watched')->update(
+                    array(
+                        'meta_value' => json_encode($listWatch)
+                    )
+                );
 
                 // check watch ay chua co
 

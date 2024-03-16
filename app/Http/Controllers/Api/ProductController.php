@@ -98,13 +98,13 @@ class ProductController extends Controller
                 // check watch ay da co 
                 $issetPhim = false;
                 $issetTap = false;
-                foreach($listWatch['phim'] as $keyPhim => $phim ){
+                foreach($listWatch->phim as $keyPhim => $phim ){
                     if($phim->id == $data['phim']){
                         $issetPhim  = true;
                         foreach($phim->tap as $keyTap => $tap){
                             if($tap->id == $data['tap']){
                                 $issetTap = true;
-                                $listWatch['phim'][$keyPhim]->tap[$keyTap]->time_watch = $data['time_watch'];
+                                $listWatch->phim[$keyPhim]->tap[$keyTap]->time_watch = $data['time_watch'];
                             }
                         }
                     }

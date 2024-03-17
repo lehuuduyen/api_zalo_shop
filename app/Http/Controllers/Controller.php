@@ -847,38 +847,38 @@ class Controller extends BaseController
 
             //them order wp_wc_order_stats
 
-            try {
-                DB::table($this->_PRFIX_TABLE . '_wc_order_stats')->insertGetId(
-                    array(
-                        'order_id' => $postId,
-                        'date_created' => $timeNow,
-                        'date_completed' => $timeNow,
-                        'date_created_gmt' => $timeNow,
-                        'date_paid' => $timeNow,
-                        'shipping_total' => $fee,
-                        'num_items_sold' => array_sum($totalPriceDetails['quantity']),
-                        'net_total' => $totalOrderBanDau,
-                        'total_sales' => $finalDetails['total'] + $fee,
-                        'returning_customer' => 1,
-                        'customer_id' => $user['id'],
-                        'status' => 'wc-pending',
-                    )
-                );
-            } catch (\Throwable $th) {
-                DB::table($this->_PRFIX_TABLE . '_wc_order_stats')->insertGetId(
-                    array(
-                        'order_id' => $postId,
-                        'date_created' => $timeNow,
-                        'date_created_gmt' => $timeNow,
-                        'num_items_sold' => array_sum($totalPriceDetails['quantity']),
-                        'net_total' => $totalOrderBanDau,
-                        'total_sales' => $finalDetails['total'],
-                        'returning_customer' => 1,
-                        'customer_id' => $user['id'],
-                        'status' => 'wc-pending',
-                    )
-                );
-            }
+            // try {
+            //     DB::table($this->_PRFIX_TABLE . '_wc_order_stats')->insertGetId(
+            //         array(
+            //             'order_id' => $postId,
+            //             'date_created' => $timeNow,
+            //             'date_completed' => $timeNow,
+            //             'date_created_gmt' => $timeNow,
+            //             'date_paid' => $timeNow,
+            //             'shipping_total' => $fee,
+            //             'num_items_sold' => array_sum($totalPriceDetails['quantity']),
+            //             'net_total' => $totalOrderBanDau,
+            //             'total_sales' => $finalDetails['total'] + $fee,
+            //             'returning_customer' => 1,
+            //             'customer_id' => $user['id'],
+            //             'status' => 'wc-pending',
+            //         )
+            //     );
+            // } catch (\Throwable $th) {
+            //     DB::table($this->_PRFIX_TABLE . '_wc_order_stats')->insertGetId(
+            //         array(
+            //             'order_id' => $postId,
+            //             'date_created' => $timeNow,
+            //             'date_created_gmt' => $timeNow,
+            //             'num_items_sold' => array_sum($totalPriceDetails['quantity']),
+            //             'net_total' => $totalOrderBanDau,
+            //             'total_sales' => $finalDetails['total'],
+            //             'returning_customer' => 1,
+            //             'customer_id' => $user['id'],
+            //             'status' => 'wc-pending',
+            //         )
+            //     );
+            // }
 
 
             //tính hoa hồng

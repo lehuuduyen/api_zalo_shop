@@ -846,7 +846,6 @@ class Controller extends BaseController
             );
 
             //them order wp_wc_order_stats
-            print_r($totalQuantity);die;
 
             try {
                 DB::table($this->_PRFIX_TABLE . '_wc_order_stats')->insertGetId(

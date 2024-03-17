@@ -130,6 +130,7 @@ class OrdersController extends Controller
                 return $this->returnError(new \stdClass, $validator->errors()->first());
             } else {
                 $data = $request->all();
+                print_r($data);die;
                 $user = $data['user'];
                 $data['phone'] = $data['sdt'];
                 $data['country'] =1;

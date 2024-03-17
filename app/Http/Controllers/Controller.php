@@ -990,7 +990,6 @@ class Controller extends BaseController
 
 
 
-        $data = $this->get_product_shipping_tax(['country' => $country, 'state' => $state, 'shipping_method' => (int)$shipping_method]);
         $coupon['subtotal'] = $price['total'];
         $discounted_price = $this->calculateCoupon($coupon, []);
 
@@ -999,12 +998,9 @@ class Controller extends BaseController
 
         $price['total'] -= $discounted_price;
 
-        $product_tax = $data['product_tax'];
-        $shipping_cost = $data['shipping_cost'];
 
-        $taxed_price = ($price['total'] * $product_tax) / 100;
         $subtotal = $price['total'] + $discounted_price;
-        $total['total'] = $price['total'] + $taxed_price + $shipping_cost;
+        $total['total'] = $price['total'] ;
 
         // $total['payment_meta'] = $this->payment_meta(compact('product_tax', 'shipping_cost', 'subtotal', 'total'));
         $total['coupon_discounted'] = $discounted_price;

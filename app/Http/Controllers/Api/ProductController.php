@@ -318,7 +318,7 @@ class ProductController extends Controller
         } catch (\Throwable $th) {
             //throw $th;
             $this->woo_logs('checkCoupon', $th->getMessage());
-            return $this->returnError(0, 'Mã khuyễn mãi không đúng');
+            return $this->returnError(0, $th->getMessage());
         }
     }
     /**

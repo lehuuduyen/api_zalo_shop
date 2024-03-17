@@ -98,7 +98,7 @@ class ProductController extends Controller
             if($listFavorite){
                 $favorite = json_decode($listFavorite);
                 if(in_array($data['phim'],$favorite)){
-                    $favorite = array_diff($favorite, [$data['phim']]);
+                    $favorite = array_values(array_diff($favorite, [$data['phim']]));
                 }else{
                     $favorite[]=$data['phim'];
                 }

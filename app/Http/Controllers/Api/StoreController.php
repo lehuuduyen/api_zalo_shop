@@ -19,7 +19,7 @@ class StoreController extends Controller
     {
         $store = $request['data_reponse'];
         $this->_PRFIX_TABLE = $store->prefixTable;
-        $infor = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->where('post_name', 'lien-he')->where('post_status', 'publish')->where('post_type', 'page')->first();
+        $infor = DB::table($this->_PRFIX_TABLE . '_posts')->where('post_name', 'lien-he')->where('post_status', 'publish')->where('post_type', 'page')->first();
 
 
 
@@ -66,14 +66,14 @@ class StoreController extends Controller
     public function country(Request $request)
     {
 
-        $country = DB::connection('mysql_external')->table('countries')->where('status', 'publish')->get();
+        $country = DB::table('countries')->where('status', 'publish')->get();
         return $this->returnSuccess($country);
     }
     public function log(Request $request)
     {
         $store = $request['data_reponse'];
         $this->_PRFIX_TABLE = $store->prefixTable;
-        $log = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woocommerce_log')->insertGetId(
+        $log = DB::table($this->_PRFIX_TABLE . '_woocommerce_log')->insertGetId(
             array(
                 'timestamp' => date('Y-m-d H:i:s'),
                 'level' => 1,
@@ -87,23 +87,22 @@ class StoreController extends Controller
     public function getPaymentMethod(Request $request)
     {
         //check Cod
-        $store = $request['data_reponse'];
-        $this->_PRFIX_TABLE = $store->prefixTable;
+    
         $result = [];
-        $cod = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_options')->where('option_name', 'woocommerce_cod_settings')->first();
+        $cod = DB::table($this->_PRFIX_TABLE . '_options')->where('option_name', 'woocommerce_cod_settings')->first();
         if ($cod) {
             $cod = unserialize($cod->option_value);
             if ($cod['enabled'] == 'yes') {
                 $result['cod'] = $cod;
             }
         }
-        $payment = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_options')->where('option_name', 'woocommerce_bacs_settings')->first();
+        $payment = DB::table($this->_PRFIX_TABLE . '_options')->where('option_name', 'woocommerce_bacs_settings')->first();
         if ($payment) {
             $payment = unserialize($payment->option_value);
             if ($payment['enabled'] == 'yes') {
                 $payment['account'] = [];
 
-                $paymentAccount = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_options')->where('option_name', 'woocommerce_bacs_accounts')->first();
+                $paymentAccount = DB::table($this->_PRFIX_TABLE . '_options')->where('option_name', 'woocommerce_bacs_accounts')->first();
                 if ($paymentAccount) {
                     $paymentAccount = unserialize($paymentAccount->option_value);
                     $payment['account'] = $paymentAccount;
@@ -123,7 +122,7 @@ class StoreController extends Controller
     {
         try {
             //code...
-            $state = DB::connection('mysql_external')->table('states')->where('status', 'publish')->where('country_id', $request['country_id'])->get();
+            $state = DB::table('states')->where('status', 'publish')->where('country_id', $request['country_id'])->get();
 
             return $this->returnSuccess($state);
         } catch (\Throwable $th) {
@@ -278,7 +277,7 @@ class StoreController extends Controller
         $this->_PRFIX_TABLE = $store->prefixTable;
         $userId = $store->user_id;
 
-        $listUserChild = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->select($this->_PRFIX_TABLE . '_users.*', $this->_PRFIX_TABLE . '_users.user_login as mobile', $this->_PRFIX_TABLE . '_woo_history_user_commission.commission', $this->_PRFIX_TABLE . '_woo_history_user_commission.total_order')->join($this->_PRFIX_TABLE . '_users', $this->_PRFIX_TABLE . '_users.ID', $this->_PRFIX_TABLE . '_woo_history_user_commission.user_id')->where('user_parent', $userId)->where('status', 1);
+        $listUserChild = DB::table($this->_PRFIX_TABLE . '_woo_history_user_commission')->select($this->_PRFIX_TABLE . '_users.*', $this->_PRFIX_TABLE . '_users.user_login as mobile', $this->_PRFIX_TABLE . '_woo_history_user_commission.commission', $this->_PRFIX_TABLE . '_woo_history_user_commission.total_order')->join($this->_PRFIX_TABLE . '_users', $this->_PRFIX_TABLE . '_users.ID', $this->_PRFIX_TABLE . '_woo_history_user_commission.user_id')->where('user_parent', $userId)->where('status', 1);
 
 
         if (isset($request['search'])) {
@@ -301,7 +300,7 @@ class StoreController extends Controller
         $store = $request['data_reponse'];
         $this->_PRFIX_TABLE = $store->prefixTable;
         $userId = $store->user_id;
-        $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->where('user_id', $userId)->whereIn('status', [2, 4, 5])->get();
+        $data = DB::table($this->_PRFIX_TABLE . '_woo_history_user_commission')->where('user_id', $userId)->whereIn('status', [2, 4, 5])->get();
 
         return $this->returnSuccess($data);
     }
@@ -312,7 +311,7 @@ class StoreController extends Controller
         $this->_PRFIX_TABLE = $store->prefixTable;
         $userId = $store->user_id;
 
-        $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
+        $user = DB::table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
             array(
                 'user_id' => $userId, 'meta_key' => 'is_affliate'
             ),
@@ -336,9 +335,9 @@ class StoreController extends Controller
             return $this->returnError(new \stdClass, $validator->errors()->first());
         } else {
             $userId = $store->user_id;
-            $userParent = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_users')->where('user_login', $data['user_parent'])->first();
+            $userParent = DB::table($this->_PRFIX_TABLE . '_users')->where('user_login', $data['user_parent'])->first();
             if ($data) {
-                DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_share_link')->insertGetId(
+                DB::table($this->_PRFIX_TABLE . '_woo_history_share_link')->insertGetId(
                     array(
                         'user_id' => $userId,
                         'user_parent' => $userParent->ID,
@@ -370,7 +369,7 @@ class StoreController extends Controller
                 return $this->returnError(new \stdClass, $validator->errors()->first());
             } else {
                 $userId = $store->user_id;
-                $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
+                $user = DB::table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
                     array(
                         'user_id' => $userId, 'meta_key' => 'payment_method'
                     ),
@@ -422,7 +421,7 @@ class StoreController extends Controller
                     return $this->returnError(new \stdClass, "Tiền hoa hồng chỉ còn " . $hoa_hong);
                 }
                 $paymentMethod = json_encode(['name' => $data['name'], 'stk' => $data['stk'], 'bankname' => $data['bankname']]);
-                DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->insertGetId(
+                DB::table($this->_PRFIX_TABLE . '_woo_history_user_commission')->insertGetId(
                     array(
                         'user_id' => $userId,
                         'total_order' => 0,
@@ -492,7 +491,7 @@ class StoreController extends Controller
     public function banner(Request $request)
     {
         $store = $request['data_reponse'];
-        $banner = DB::connection('mysql_external')->table('badges')->where('status', 'active')
+        $banner = DB::table('badges')->where('status', 'active')
             ->get();
         foreach ($banner as $key =>   $value) {
             $banner[$key]->name = $this->getTextByLanguare($value->name);

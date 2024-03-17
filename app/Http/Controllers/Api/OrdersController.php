@@ -113,6 +113,7 @@ class OrdersController extends Controller
             $validator = Validator::make($request->all(), [
                 'payment_gateway' => 'required',
                 'name' => 'required',
+                'user_id' => 'required',
                 'sdt' => 'required',
                 'address' => 'required',
                 'order' => 'required',
@@ -121,6 +122,7 @@ class OrdersController extends Controller
             ], [
                 'payment_gateway.required' => "Vui lòng nhập phương thức thanh toán",
                 'name.required' => "Vui lòng nhập Họ và tên",
+                'user_id' => 'user_id required',
                 'sdt.required' => "Vui lòng nhập số điện thoại",
                 'address.required' => "Vui lòng nhập địa chỉ",
                 'address.order' => "Vui lòng nhập đơn hàng",
@@ -130,7 +132,6 @@ class OrdersController extends Controller
                 return $this->returnError(new \stdClass, $validator->errors()->first());
             } else {
                 $data = $request->all();
-                print_r($data);die;
                 $user = $data['user'];
                 $data['phone'] = $data['sdt'];
                 $data['country'] =1;

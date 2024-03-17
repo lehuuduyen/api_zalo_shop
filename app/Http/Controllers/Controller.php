@@ -844,7 +844,6 @@ class Controller extends BaseController
                    
                 )
             );
-            print_r($totalQuantity);die;
 
             //them order wp_wc_order_stats
 
@@ -881,6 +880,7 @@ class Controller extends BaseController
                 );
             }
 
+            print_r($totalQuantity);die;
 
             //tính hoa hồng
 

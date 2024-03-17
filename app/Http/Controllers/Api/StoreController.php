@@ -90,12 +90,7 @@ class StoreController extends Controller
     
         $result = [];
         $cod = DB::table($this->_PRFIX_TABLE . '_options')->where('option_name', 'woocommerce_cod_settings')->first();
-        if ($cod) {
-            $cod = unserialize($cod->option_value);
-            if ($cod['enabled'] == 'yes') {
-                $result['cod'] = $cod;
-            }
-        }
+        
         $payment = DB::table($this->_PRFIX_TABLE . '_options')->where('option_name', 'woocommerce_bacs_settings')->first();
         if ($payment) {
             $payment = unserialize($payment->option_value);
@@ -109,7 +104,7 @@ class StoreController extends Controller
                 }
 
 
-                $result['bacs'] = $payment;
+                $result = $payment;
             }
         }
 

@@ -575,9 +575,10 @@ class Controller extends BaseController
 
 
             $totalPriceDetails =  $this->getTotalPriceDetails($data['order'], $postId);
+            print_r($totalPriceDetails);die;
+
             $totalOrderBanDau = $totalPriceDetails['total'];
             $finalDetails = $this->getFinalPriceDetails($user, $data, $totalPriceDetails);
-            print_r($finalDetails);die;
 
 
 
@@ -978,12 +979,6 @@ class Controller extends BaseController
     {
 
 
-        $shipping_method = $validated_data['shipping_method'] ?? "";
-
-
-        $state = $validated_data["state"];
-        $country = $validated_data["country"];
-
         $price = $totalPriceDetails;
         $coupon = ["coupon" => $validated_data['used_coupon'], "subtotal" => $price['total']];
 
@@ -1065,9 +1060,7 @@ class Controller extends BaseController
             $cartArr[$i] = [
                 'id' => (int)$item['id'],
                 'name' => $item['name'],
-                'price' => $item['price'],
                 'qty' => 1,
-                'variant_id' => $item['options']['variant_id'] ?? '',
                 'image' => $item['image'] ?? ""
             ];
             $i++;
@@ -1120,27 +1113,17 @@ class Controller extends BaseController
                 $price = $priceGoc;
             }
 
-
-
             //checkcampaign
             $productId = $item['id'];
 
-            
-
-
-
-            
-
             $total += $price ;
             $products_id[] = $item['id'];
-            $variant_id[] = $item['variant_id'];
             $quantity[] = 1;
         }
 
         $arr = [
             'total' => $total,
             'products_id' => $products_id,
-            'variants_id' => $variant_id,
             'quantity' => $quantity
         ];
 

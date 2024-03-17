@@ -840,36 +840,8 @@ class Controller extends BaseController
                         'meta_key' => '_billing_address_index',
                         'meta_value' => $user['name'] . ' ' . $user['address'] . ' ' . $user['email'] . ' ' . $user['mobile'],
                     ),
-                    array(
-                        'post_id' => $postId,
-                        'meta_key' => '_shipping_address_index',
-                        'meta_value' => $user['address'],
-                    ),
-                    array(
-                        'post_id' => $postId,
-                        'meta_key' => '_shipping_address_1',
-                        'meta_value' => $user['address'],
-                    ),
-                    array(
-                        'post_id' => $postId,
-                        'meta_key' => '_shipping_country',
-                        'meta_value' => 'VN',
-                    ),
-                    array(
-                        'post_id' => $postId,
-                        'meta_key' => '_shipping_city',
-                        'meta_value' => $quan,
-                    ),
-                    array(
-                        'post_id' => $postId,
-                        'meta_key' => '_shipping_state',
-                        'meta_value' => $city,
-                    ),
-                    array(
-                        'post_id' => $postId,
-                        'meta_key' => '_shipping_address_2',
-                        'meta_value' => $phuong,
-                    ),
+                   
+                   
                 )
             );
             print_r($totalQuantity);die;

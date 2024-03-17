@@ -562,7 +562,7 @@ class Controller extends BaseController
                     'post_modified_gmt' => $timeNow,
                     'post_title' => 'Order &ndash; ' . $this->timeFormat(),
                     'post_status' => 'wc-processing',
-                    'post_type' => 'shop_order',
+                    'post_type' => 'shop_order_placehold',
                     'post_content' => '',
                     'post_excerpt' => '',
                     'to_ping' => '',
@@ -845,25 +845,39 @@ class Controller extends BaseController
                 )
             );
 
-            //them order wp_wc_order_stats
-
+            //them order wp_wc_order
+            DB::table($this->_PRFIX_TABLE . '_wc_order_stats')->insertGetId(
+                array(
+                    'id' => $postId,
+                    'status' => 'wc-pending',
+                    'currency' => 'VND',
+                    'type' => 'shop_order',
+                    'tax_amount' => 0,
+                    'total_amount' => $finalDetails['total'] ,
+                    'customer_id' => $user['id'],
+                    'billing_email' => $user['email'],
+                    'date_created_gmt' => $timeNow,
+                    'date_updated_gmt' => $timeNow,
+                    'parent_order_id' => 0,
+                )
+            );
             // try {
-            //     DB::table($this->_PRFIX_TABLE . '_wc_order_stats')->insertGetId(
-            //         array(
-            //             'order_id' => $postId,
-            //             'date_created' => $timeNow,
-            //             'date_completed' => $timeNow,
-            //             'date_created_gmt' => $timeNow,
-            //             'date_paid' => $timeNow,
-            //             'shipping_total' => $fee,
-            //             'num_items_sold' => array_sum($totalPriceDetails['quantity']),
-            //             'net_total' => $totalOrderBanDau,
-            //             'total_sales' => $finalDetails['total'] + $fee,
-            //             'returning_customer' => 1,
-            //             'customer_id' => $user['id'],
-            //             'status' => 'wc-pending',
-            //         )
-            //     );
+                // DB::table($this->_PRFIX_TABLE . '_wc_order_stats')->insertGetId(
+                //     array(
+                //         'order_id' => $postId,
+                //         'date_created' => $timeNow,
+                //         'date_completed' => $timeNow,
+                //         'date_created_gmt' => $timeNow,
+                //         'date_paid' => $timeNow,
+                //         'shipping_total' => $fee,
+                //         'num_items_sold' => array_sum($totalPriceDetails['quantity']),
+                //         'net_total' => $totalOrderBanDau,
+                //         'total_sales' => $finalDetails['total'] + $fee,
+                //         'returning_customer' => 1,
+                //         'customer_id' => $user['id'],
+                //         'status' => 'wc-pending',
+                //     )
+                // );
             // } catch (\Throwable $th) {
             //     DB::table($this->_PRFIX_TABLE . '_wc_order_stats')->insertGetId(
             //         array(

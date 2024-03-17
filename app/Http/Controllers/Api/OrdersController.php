@@ -16,7 +16,7 @@ class OrdersController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function info($id){
-        $user = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_users')->where('ID', $id)->select('ID','display_name as name','user_email as email','user_login as mobile')
+        $user = DB::table( $this->_PRFIX_TABLE .'_users')->where('ID', $id)->select('ID','display_name as name','user_email as email','user_login as mobile')
         ->first();
         return $user;
     }
@@ -27,7 +27,7 @@ class OrdersController extends Controller
 
         $store = $request['data_reponse'];
         $this->_PRFIX_TABLE = $store->prefixTable;
-        $orders = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_wc_order_stats')->join( $this->_PRFIX_TABLE .'_posts', $this->_PRFIX_TABLE .'_posts.ID', $this->_PRFIX_TABLE .'_wc_order_stats.order_id')->where( $this->_PRFIX_TABLE .'_wc_order_stats.customer_id', $store->user_id)->where( $this->_PRFIX_TABLE .'_posts.post_status','!=', 'trash')->orderBy( $this->_PRFIX_TABLE .'_wc_order_stats.date_created', 'DESC')->get();
+        $orders = DB::table( $this->_PRFIX_TABLE .'_wc_order_stats')->join( $this->_PRFIX_TABLE .'_posts', $this->_PRFIX_TABLE .'_posts.ID', $this->_PRFIX_TABLE .'_wc_order_stats.order_id')->where( $this->_PRFIX_TABLE .'_wc_order_stats.customer_id', $store->user_id)->where( $this->_PRFIX_TABLE .'_posts.post_status','!=', 'trash')->orderBy( $this->_PRFIX_TABLE .'_wc_order_stats.date_created', 'DESC')->get();
 
         foreach ($orders as $key => $order) {
             $user = $this->info($order->customer_id);
@@ -40,7 +40,7 @@ class OrdersController extends Controller
             $orders[$key]->address = $this->getPostMeta($order->order_id,'_shipping_address_index');
 
             $orders[$key]->total_amount = $order->total_sales;
-            $ghichu = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_comments')->where('comment_post_ID',$order->order_id)->where('comment_type','order_note')->where('comment_author','!=','WooCommerce')->first();
+            $ghichu = DB::table( $this->_PRFIX_TABLE .'_comments')->where('comment_post_ID',$order->order_id)->where('comment_type','order_note')->where('comment_author','!=','WooCommerce')->first();
             if($ghichu){
                 $ghichu = $ghichu->comment_content;
             }
@@ -48,7 +48,7 @@ class OrdersController extends Controller
             $orders[$key]->discount = 0;
             $orders[$key]->total_price = $order->total_sales;
 
-            $coupon = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_wc_order_coupon_lookup')->where('order_id',$order->order_id)->first();
+            $coupon = DB::table( $this->_PRFIX_TABLE .'_wc_order_coupon_lookup')->where('order_id',$order->order_id)->first();
             if($coupon){
                 $orders[$key]->discount = $coupon->discount_amount;
                 $orders[$key]->total_price = $order->total_sales + $coupon->discount_amount;
@@ -59,7 +59,7 @@ class OrdersController extends Controller
             $temp = new stdClass;
             $temp->shipping_cost = 0;
             $orders[$key]->payment_meta = $temp;
-            $history_user_point = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_woo_history_user_point')->where( 'order_id', $order->order_id)->where( 'user_id',$order->customer_id)->get();
+            $history_user_point = DB::table( $this->_PRFIX_TABLE .'_woo_history_user_point')->where( 'order_id', $order->order_id)->where( 'user_id',$order->customer_id)->get();
             $pointUse =  0;
             $pointReceive =  0;
             $pointUseMoney =  0;
@@ -86,7 +86,7 @@ class OrdersController extends Controller
     }
     public function detailOrder($orderId, $store)
     {
-        $ordersDetail = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_wc_order_product_lookup')->join( $this->_PRFIX_TABLE .'_posts', $this->_PRFIX_TABLE .'_posts.ID', $this->_PRFIX_TABLE .'_wc_order_product_lookup.product_id')->where( $this->_PRFIX_TABLE .'_wc_order_product_lookup.order_id', $orderId)->select( $this->_PRFIX_TABLE .'_wc_order_product_lookup.*', $this->_PRFIX_TABLE .'_posts.post_title')->get();
+        $ordersDetail = DB::table( $this->_PRFIX_TABLE .'_wc_order_product_lookup')->join( $this->_PRFIX_TABLE .'_posts', $this->_PRFIX_TABLE .'_posts.ID', $this->_PRFIX_TABLE .'_wc_order_product_lookup.product_id')->where( $this->_PRFIX_TABLE .'_wc_order_product_lookup.order_id', $orderId)->select( $this->_PRFIX_TABLE .'_wc_order_product_lookup.*', $this->_PRFIX_TABLE .'_posts.post_title')->get();
         $products = [];
         foreach ($ordersDetail as $key => $value) {
             $product[$key]['name']=$value->post_title;
@@ -109,8 +109,6 @@ class OrdersController extends Controller
      */
     public function store(Request $request)
     {
-        $store = $request['data_reponse'];
-        $this->_PRFIX_TABLE = $store->prefixTable;
         try {
             $validator = Validator::make($request->all(), [
                 'payment_gateway' => 'required',
@@ -134,7 +132,7 @@ class OrdersController extends Controller
                 $data = $request->all();
                 $store = $request['data_reponse'];
                 $data['sdt'] = $store->sdt;
-                $user = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_users')->where('user_login', $data['sdt'])->first();
+                $user = DB::table( $this->_PRFIX_TABLE .'_users')->where('user_login', $data['sdt'])->first();
                 if (!$user) {
                     return $this->returnError([], "Số điện thoại chưa được đăng ký");
                 }

@@ -309,6 +309,7 @@ class ProductController extends Controller
             }
             $products = DB::table($this->_PRFIX_TABLE . '_posts')->whereIn('id', $listProductId)->get();
             $coupon_amount_total = $this->calculateCoupon($data, $products, true);
+            print_r($coupon_amount_total);die;
             if ($coupon_amount_total > 0) {
                 return $this->returnSuccess($coupon_amount_total);
             } else {

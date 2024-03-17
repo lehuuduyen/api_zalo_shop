@@ -823,16 +823,8 @@ class Controller extends BaseController
                         'meta_key' => '_cart_discount_tax',
                         'meta_value' => 0,
                     ),
-                    array(
-                        'post_id' => $postId,
-                        'meta_key' => '_order_shipping',
-                        'meta_value' => $fee,
-                    ),
-                    array(
-                        'post_id' => $postId,
-                        'meta_key' => '_order_shipping_tax',
-                        'meta_value' => 0,
-                    ),
+                   
+                   
                     array(
                         'post_id' => $postId,
                         'meta_key' => '_order_tax',
@@ -841,7 +833,7 @@ class Controller extends BaseController
                     array(
                         'post_id' => $postId,
                         'meta_key' => '_order_total',
-                        'meta_value' => $finalDetails['total'] + $fee,
+                        'meta_value' => $finalDetails['total'] ,
                     ),
                     array(
                         'post_id' => $postId,

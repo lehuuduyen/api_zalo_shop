@@ -719,7 +719,6 @@ class Controller extends BaseController
                     )
 
                 );
-            print_r($totalQuantity);die;
                 
                 // wp_wc_order_product_lookup
                 DB::table($this->_PRFIX_TABLE . '_wc_order_product_lookup')->insert(
@@ -739,49 +738,11 @@ class Controller extends BaseController
                     )
                 );
             }
-            $city = $this->getUserMeta($user['id'], 'city');
-            $quan = $this->getUserMeta($user['id'], 'quan');
-
-            $phuong = $this->getUserMeta($user['id'], 'phuong');
-            $fee = $this->calFee($quan,$phuong);
-            if($fee > 0){
-                $motahang = '';
-                foreach($data['order'] as $order){
-                    $motahang .= $order['name'].' &times; 1,';
-                }
+            
+               
                 
-                DB::table($this->_PRFIX_TABLE . '_woocommerce_order_itemmeta')->insert(
-                    array(
-                        
-                        array(
-                            'order_item_id' => $orderItemShipId,
-                            'meta_key' => 'instance_id',
-                            'meta_value' => '2',
-                        ),
-                        array(
-                            'order_item_id' => $orderItemShipId,
-                            'meta_key' => 'cost',
-                            'meta_value' => $fee,
-                        ),
-                        array(
-                            'order_item_id' => $orderItemShipId,
-                            'meta_key' => 'total_tax',
-                            'meta_value' => 0,
-                        ),
-                        array(
-                            'order_item_id' => $orderItemShipId,
-                            'meta_key' => 'taxes',
-                            'meta_value' => 'a:1:{s:5:"total";a:0:{}}',
-                        ),
-                        array(
-                            'order_item_id' => $orderItemShipId,
-                            'meta_key' => 'Mặt hàng',
-                            'meta_value' =>  $motahang,
-                        ),
-
-                    )
-                );
-            }
+                
+            
             $paymentTitle  = 'Chuyển khoản ngân hàng';
             // them wp_postmeta
             $postMeta = DB::table($this->_PRFIX_TABLE . '_postmeta')->insert(
@@ -816,11 +777,7 @@ class Controller extends BaseController
                         'meta_key' => '_shipping_first_name',
                         'meta_value' => $user['name'],
                     ),
-                    array(
-                        'post_id' => $postId,
-                        'meta_key' => '_billing_address_1',
-                        'meta_value' => $user['address'],
-                    ),
+                    
                     // array(
                     //     'post_id' => $postId,
                     //     'meta_key' => '_billing_address_2',
@@ -923,6 +880,8 @@ class Controller extends BaseController
                     ),
                 )
             );
+            print_r($totalQuantity);die;
+
             //them order wp_wc_order_stats
 
             try {

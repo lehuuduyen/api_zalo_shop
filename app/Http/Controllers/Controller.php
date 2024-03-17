@@ -575,7 +575,6 @@ class Controller extends BaseController
 
 
             $totalPriceDetails =  $this->getTotalPriceDetails($data['order'], $postId);
-            print_r($totalPriceDetails);die;
 
             $totalOrderBanDau = $totalPriceDetails['total'];
             $finalDetails = $this->getFinalPriceDetails($user, $data, $totalPriceDetails);

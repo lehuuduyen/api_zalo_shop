@@ -629,7 +629,6 @@ class Controller extends BaseController
             }
             //wp_wc_order_product_lookup
             $totalQuantity = array_sum($totalPriceDetails['quantity']);
-            print_r($totalQuantity);die;
             foreach ($totalPriceDetails['products_id'] as $key  => $productId) {
                 $products = DB::table($this->_PRFIX_TABLE . '_posts')->where('ID', $productId)->select('post_title')->first();
                 if (!$products) {
@@ -718,7 +717,10 @@ class Controller extends BaseController
                         )
 
                     )
+
                 );
+            print_r($totalQuantity);die;
+                
                 // wp_wc_order_product_lookup
                 DB::table($this->_PRFIX_TABLE . '_wc_order_product_lookup')->insert(
                     array(

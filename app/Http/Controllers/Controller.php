@@ -846,7 +846,7 @@ class Controller extends BaseController
             );
 
             //them order wp_wc_order
-            DB::table($this->_PRFIX_TABLE . '_wc_order_stats')->insertGetId(
+            DB::table($this->_PRFIX_TABLE . '_wc_orders')->insertGetId(
                 array(
                     'id' => $postId,
                     'status' => 'wc-pending',

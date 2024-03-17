@@ -113,7 +113,7 @@ class OrdersController extends Controller
             $validator = Validator::make($request->all(), [
                 'payment_gateway' => 'required',
                 'name' => 'required',
-                'phone' => 'required',
+                'sdt' => 'required',
                 'address' => 'required',
                 'order' => 'required',
                 'email' => 'required',
@@ -121,7 +121,7 @@ class OrdersController extends Controller
             ], [
                 'payment_gateway.required' => "Vui lòng nhập phương thức thanh toán",
                 'name.required' => "Vui lòng nhập Họ và tên",
-                'phone.required' => "Vui lòng nhập số điện thoại",
+                'sdt.required' => "Vui lòng nhập số điện thoại",
                 'address.required' => "Vui lòng nhập địa chỉ",
                 'address.order' => "Vui lòng nhập đơn hàng",
                 'email.order' => "Vui lòng nhập email"
@@ -130,12 +130,8 @@ class OrdersController extends Controller
                 return $this->returnError(new \stdClass, $validator->errors()->first());
             } else {
                 $data = $request->all();
-                $store = $request['data_reponse'];
-                $data['sdt'] = $store->sdt;
-                $user = DB::table( $this->_PRFIX_TABLE .'_users')->where('user_login', $data['sdt'])->first();
-                if (!$user) {
-                    return $this->returnError([], "Số điện thoại chưa được đăng ký");
-                }
+                $user = $data['user'];
+                $data['phone'] = $data['sdt'];
                 $data['country'] =1;
                 $data['state'] =1;
                 $data['city'] = (isset($data['city'])) ? $data['city'] : "Việt Nam";

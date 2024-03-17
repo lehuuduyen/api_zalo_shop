@@ -572,24 +572,7 @@ class Controller extends BaseController
                     'comment_count' => '0',
                 )
             );
-            // $data['message'] wp_comments
-            if ($data['message']) {
-                DB::table($this->_PRFIX_TABLE . '_comments')->insert(
-                    array(
-                        'comment_post_ID' => $postId,
-                        'comment_author' => $user['name'],
-                        'comment_author_email' => $user['email'],
-                        'comment_author_url' => '',
-                        'comment_author_IP' => '',
-                        'comment_date_gmt' => $timeNow,
-                        'comment_date' => $timeNow,
-                        'comment_content' => $data['message'],
-                        'comment_approved' => 1,
-                        'comment_agent' => 'WooCommerce',
-                        'comment_type' => 'order_note',
-                    )
-                );
-            }
+           
 
 
             $totalPriceDetails =  $this->getTotalPriceDetails($data['order'], $postId);

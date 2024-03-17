@@ -568,7 +568,6 @@ class Controller extends BaseController
                     'to_ping' => '',
                     'pinged' => '',
                     'post_content_filtered' => '',
-
                     'comment_count' => '0',
                 )
             );
@@ -576,9 +575,7 @@ class Controller extends BaseController
 
 
             $totalPriceDetails =  $this->getTotalPriceDetails($data['order'], $postId);
-            if (!$totalPriceDetails) {
-                throw new \Exception('Không đủ số lượng trong kho');
-            }
+            print_r($totalPriceDetails);die;
             $totalOrderBanDau = $totalPriceDetails['total'];
             $finalDetails = $this->getFinalPriceDetails($user, $data, $totalPriceDetails);
 

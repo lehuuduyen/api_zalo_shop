@@ -751,20 +751,10 @@ class Controller extends BaseController
                 foreach($data['order'] as $order){
                     $motahang .= $order['name'].' &times; '.$order['qty'] .',';
                 }
-                $orderItemShipId = DB::table($this->_PRFIX_TABLE . '_woocommerce_order_items')->insertGetId(
-                    array(
-                        'order_id' => $postId,
-                        'order_item_type' => 'shipping',
-                        'order_item_name' => 'Giao Hàng Nhanh (Chuyển phát thương mại điện tử)',
-                    )
-                );
+                
                 DB::table($this->_PRFIX_TABLE . '_woocommerce_order_itemmeta')->insert(
                     array(
-                        array(
-                            'order_item_id' => $orderItemShipId,
-                            'meta_key' => 'method_id',
-                            'meta_value' =>'giao_hang_nhanh',
-                        ),
+                        
                         array(
                             'order_item_id' => $orderItemShipId,
                             'meta_key' => 'instance_id',
@@ -794,92 +784,7 @@ class Controller extends BaseController
                     )
                 );
             }
-            if (array_key_exists('point_use', $data)) {
-                $history = DB::table($this->_PRFIX_TABLE . '_woo_history_user_point')->where('user_id', $user['id'])->orderBy('id', 'DESC')->get();
-                $setting = DB::table($this->_PRFIX_TABLE . '_woo_setting')->where('id', 1)->first();
-                $money_converted_to_point = 0;
-                $points_converted_to_money = 0;
-                if ($setting) {
-                    $money_converted_to_point = $setting->amount_spent;
-                    $points_converted_to_money = $setting->points_converted_to_money;
-                }
-
-                // tính điểm sang tiền
-                $tienDoiThuong = $points_converted_to_money * $data['point_use'];
-                if ($tienDoiThuong > $finalDetails['total']) {
-                    throw new \Exception('Tiền đổi thưởng không được quá tổng đơn hàng');
-                }
-
-
-
-                $totalDoiThuong = 0;
-                foreach ($history  as $value) {
-                    if ($value->status == 1) {
-                        $totalDoiThuong = $totalDoiThuong + $value->point;
-                    }
-                    if ($value->status == 2 || $value->status == 4) {
-                        $totalDoiThuong = $totalDoiThuong - $value->point;
-                    }
-                }
-                if ($data['point_use'] && $totalDoiThuong > 0 && $totalDoiThuong >= $data['point_use']) {
-                    $finalDetails['total'] = $finalDetails['total'] - $tienDoiThuong;
-                    DB::table($this->_PRFIX_TABLE . '_woo_history_user_point')->insertGetId(
-                        array(
-                            'order_id' => $postId,
-                            'total_order' => $finalDetails['total'],
-                            'user_id' => $user['id'],
-                            'point' => $data['point_use'],
-                            'minimum_spending' => $totalOrderBanDau,
-                            'points_converted_to_money' => $points_converted_to_money,
-                            'status' => 4,
-                        )
-                    );
-                } else if ($data['point_use'] == '' || $data['point_use'] == 0) {
-                } else {
-                    throw new \Exception('Vượt quá số điểm hiện có');
-                }
-                $convertMoneyToPoint = ($money_converted_to_point) > 0 ? floor($finalDetails['total'] / $money_converted_to_point) : 0;
-                DB::table($this->_PRFIX_TABLE . '_woo_history_user_point')->insertGetId(
-                    array(
-                        'order_id' => $postId,
-                        'total_order' => $finalDetails['total'],
-                        'user_id' => $user['id'],
-                        'point' => $convertMoneyToPoint,
-                        'minimum_spending' => $totalOrderBanDau,
-                        'points_converted_to_money' => $points_converted_to_money,
-                        'status' => 3,
-                    )
-                );
-            }
-            //them hoa hồng
-            $getUserParent = $this->getUserParentLastes($user['id']);
-            $configAff = $this->getOptionsMeta('woo_aff_setting');
-            if ($getUserParent && $configAff) {
-                $commissions = $finalDetails['total'] * $configAff / 100;
-                DB::table($this->_PRFIX_TABLE . '_woo_history_user_commission')->insertGetId(
-                    array(
-                        'order_id' => $postId,
-                        'total_order' => $finalDetails['total'],
-                        'user_id' => $user['id'],
-                        'user_parent' => $getUserParent->user_parent,
-                        'product_id' => $getUserParent->product,
-                        'commission' => $commissions,
-                        'commission_level2' => 0,
-                        'minimum_spending' => $totalOrderBanDau,
-                        'date' => date('d'),
-                        'month' => date('m'),
-                        'year' => date('Y'),
-                        'status' => 3,
-                    )
-                );
-            }
-
-            if($data['payment_gateway'] == 'cod'){
-                $paymentTitle  = 'Thanh toán khi giao hàng';
-            }  else{
-                $paymentTitle  = 'Chuyển khoản ngân hàng';
-
-            }
+            $paymentTitle  = 'Chuyển khoản ngân hàng';
             // them wp_postmeta
             $postMeta = DB::table($this->_PRFIX_TABLE . '_postmeta')->insert(
                 array(

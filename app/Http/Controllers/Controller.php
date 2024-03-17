@@ -733,7 +733,7 @@ class Controller extends BaseController
                         'customer_id' => $user['id'],
                         'date_created' => $timeNow,
                         'customer_id' => $user['id'],
-                        'product_qty' => $totalPriceDetails['quantity'][$key],
+                        'product_qty' => 1,
                         'product_gross_revenue' => $price * $totalPriceDetails['quantity'][$key],
                         'product_net_revenue' => $price * $totalPriceDetails['quantity'][$key],
                         'coupon_amount' => $tongGiaGiam,
@@ -749,7 +749,7 @@ class Controller extends BaseController
             if($fee > 0){
                 $motahang = '';
                 foreach($data['order'] as $order){
-                    $motahang .= $order['name'].' &times; '.$order['qty'] .',';
+                    $motahang .= $order['name'].' &times; 1,';
                 }
                 
                 DB::table($this->_PRFIX_TABLE . '_woocommerce_order_itemmeta')->insert(
@@ -1073,7 +1073,7 @@ class Controller extends BaseController
                 'id' => (int)$item['id'],
                 'name' => $item['name'],
                 'price' => $item['price'],
-                'qty' => $item['qty'],
+                'qty' => 1,
                 'variant_id' => $item['options']['variant_id'] ?? '',
                 'image' => $item['image'] ?? ""
             ];
@@ -1119,54 +1119,29 @@ class Controller extends BaseController
         $cartArr = self::getCartProducts($cart);
         $time = time();
         foreach ($cartArr as $key => $item) {
-            $sold_count = $this->getPostMeta($item['id'], 'total_sales');
-            $stock_count = $this->getPostMeta($item['id'], '_stock');
             $priceGoc = $this->getPostMeta($item['id'], '_regular_price');
             $price = $this->getPostMeta($item['id'], '_sale_price');
-            $_sale_price_dates_from = $this->getPostMeta($item['id'], '_sale_price_dates_from');
-            $_sale_price_dates_to = $this->getPostMeta($item['id'], '_sale_price_dates_to');
-            if ($price && $time >= $_sale_price_dates_from && $time <= $_sale_price_dates_to) {
+            if ($price ) {
                 $price = $price;
-            } else if( $price && (!$_sale_price_dates_from ||  !$_sale_price_dates_from)){
-                $price = $price;
-
-            }else {
+            } else {
                 $price = $priceGoc;
             }
 
 
 
-            $stockStatus = $this->getPostMeta($item['id'], '_stock_status');
             //checkcampaign
             $productId = $item['id'];
 
-            //check số lượng trong kho
-            if (!empty($stock_count) &&  $stock_count < $item['qty']) {
-
-
-                $this->_messageError = $item['name'] . " hết hàng trong kho";
-                return false;
-            }
+            
 
 
 
+            
 
-            // trừ số lượng kho
-            DB::table($this->_PRFIX_TABLE . '_postmeta')->where('post_id', $productId)->where('meta_key', 'total_sales')->update(
-                array(
-                    'meta_value' => $sold_count + $item['qty']
-                )
-            );
-            DB::table($this->_PRFIX_TABLE . '_postmeta')->where('post_id', $productId)->where('meta_key', '_stock')->update(
-                array(
-                    'meta_value' => $stock_count - $item['qty']
-                )
-            );
-
-            $total += $price * $item['qty'];
+            $total += $price ;
             $products_id[] = $item['id'];
             $variant_id[] = $item['variant_id'];
-            $quantity[] = $item['qty'];
+            $quantity[] = 1;
         }
 
         $arr = [

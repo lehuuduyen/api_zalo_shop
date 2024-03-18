@@ -890,6 +890,14 @@ class Controller extends BaseController
                     'parent_order_id' => 0,
                 )
             );
+            DB::table($this->_PRFIX_TABLE . '_wc_orders_meta')->insertGetId(
+                array(
+                    'order_id' => $postId,
+                    'meta_key' => 'discount',
+                    'meta_value' => $chietKhau,
+
+                )
+            );
             // try {
             // DB::table($this->_PRFIX_TABLE . '_wc_order_stats')->insertGetId(
             //     array(

@@ -42,6 +42,7 @@ class ProductController extends Controller
             $listTap = DB::table($this->_PRFIX_TABLE . '_postmeta')->
             join($this->_PRFIX_TABLE . '_posts',$this->_PRFIX_TABLE . '_posts.ID',$this->_PRFIX_TABLE . '_postmeta.post_id')->
             select($this->_PRFIX_TABLE . '_posts.post_title as name',$this->_PRFIX_TABLE . '_posts.ID')->
+            where($this->_PRFIX_TABLE . '_posts.post_status','publish')->
             where($this->_PRFIX_TABLE . '_postmeta.meta_key','_film_selected')->
             where($this->_PRFIX_TABLE . '_postmeta.meta_value',$phim->id)->get();
             if($listTap){

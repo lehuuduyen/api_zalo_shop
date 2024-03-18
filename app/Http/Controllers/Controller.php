@@ -605,7 +605,7 @@ class Controller extends BaseController
 
             $totalPriceDetails =  $this->getTotalPriceDetails($data['order'], $postId, $user['id']);
 
-            $totalOrderBanDau = $totalPriceDetails['total'];
+            $chietKhau = $totalPriceDetails['totalChietKhau'];
             $finalDetails = $this->getFinalPriceDetails($user, $data, $totalPriceDetails);
 
 
@@ -862,7 +862,7 @@ class Controller extends BaseController
                     array(
                         'post_id' => $postId,
                         'meta_key' => '_order_total',
-                        'meta_value' => $finalDetails['total'],
+                        'meta_value' => $finalDetails['total'] + $chietKhau,
                     ),
                     array(
                         'post_id' => $postId,
@@ -882,7 +882,7 @@ class Controller extends BaseController
                     'currency' => 'VND',
                     'type' => 'shop_order',
                     'tax_amount' => 0,
-                    'total_amount' => $finalDetails['total'],
+                    'total_amount' => $finalDetails['total']+ $chietKhau,
                     'customer_id' => $user['id'],
                     'billing_email' => $user['email'],
                     'date_created_gmt' => $timeNow,
@@ -1066,17 +1066,18 @@ class Controller extends BaseController
     public function getTotalPriceDetails($cart, $postId, $userId)
     {
 
-
+        $totalChietKhau = 0;
         $total = 0.0;
         $cartArr = self::getCartProducts($cart);
         $listPhim = [];
+        $listGiaGoc = [];
 
         $time = time();
         foreach ($cartArr as $key => $item) {
-            if (!in_array($item['phim'], $listPhim)) {
+            if (!array_key_exists($item['phim'], $listPhim)) {
                 $listPhim[$item['phim']] = $this->getAllTapByPhim($item['phim'], $userId);
-
             }
+            $listPhim[$item['phim']] = array_diff($listPhim[$item['phim']],[$item['id']]);
             $priceGoc = $this->getPostMeta($item['id'], '_regular_price');
             $price = $this->getPostMeta($item['id'], '_sale_price');
             if ($price) {
@@ -1085,18 +1086,32 @@ class Controller extends BaseController
                 $price = $priceGoc;
             }
 
-            //checkcampaign
-            $productId = $item['id'];
+            $listGiaGoc[$item['phim']][] = $price;
 
             $total += $price;
             $products_id[] = $item['id'];
             $quantity[] = 1;
         }
 
+
+
+
+        foreach($listPhim as $phim => $val){
+            if(count($val) == 0){
+                $chietKhau = DB::table($this->_PRFIX_TABLE . '_films')->find($phim)->discount;
+                if(count($listGiaGoc[$phim])>1 && $chietKhau){
+                    $sum = array_sum($listGiaGoc[$phim]);
+                    $totalChietKhau += ($sum * $chietKhau /100) ;
+                }
+
+            }
+        }
+
         $arr = [
             'total' => $total,
             'products_id' => $products_id,
-            'quantity' => $quantity
+            'quantity' => $quantity,
+            'totalChietKhau' =>$totalChietKhau
         ];
 
         return $arr;

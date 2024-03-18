@@ -862,7 +862,7 @@ class Controller extends BaseController
                     array(
                         'post_id' => $postId,
                         'meta_key' => '_order_total',
-                        'meta_value' => $finalDetails['total'] + $chietKhau,
+                        'meta_value' => $finalDetails['total'] - $chietKhau,
                     ),
                     array(
                         'post_id' => $postId,
@@ -882,7 +882,7 @@ class Controller extends BaseController
                     'currency' => 'VND',
                     'type' => 'shop_order',
                     'tax_amount' => 0,
-                    'total_amount' => $finalDetails['total']+ $chietKhau,
+                    'total_amount' => $finalDetails['total']- $chietKhau,
                     'customer_id' => $user['id'],
                     'billing_email' => $user['email'],
                     'date_created_gmt' => $timeNow,

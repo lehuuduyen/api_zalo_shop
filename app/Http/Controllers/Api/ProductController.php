@@ -36,6 +36,7 @@ class ProductController extends Controller
             $allTapDaMuaByPhim =[];
             if($userId){
                 $allTapDaMuaByPhim = $this->getAllTapDaMuaByPhim($phim->id,$userId);
+
             }
             $listTap =[];
             $listTap = DB::table($this->_PRFIX_TABLE . '_postmeta')->
@@ -47,7 +48,7 @@ class ProductController extends Controller
                 foreach($listTap as $key => $tap){
                     $listTap[$key]->link_movie = $this->getPostMeta($tap->ID,'_film_episode');
                     $listTap[$key]->price = $this->getPostMeta($tap->ID,'_price');
-                    $listTap[$key]->is_buy = (in_array($tap->ID,$allTapDaMuaByPhim))?1:0;
+                    $listTap[$key]->is_buy = (in_array($tap->ID,$allTapDaMuaByPhim))?0:1;
                     $listTap[$key]->film_length = $this->getPostMeta($tap->ID,'_film_length');
                 }
                 $phim->episode =$listTap;

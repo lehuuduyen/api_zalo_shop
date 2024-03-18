@@ -874,6 +874,15 @@ class Controller extends BaseController
                 )
             );
 
+            DB::table($this->_PRFIX_TABLE . '_wc_order_operational_data')->insertGetId(
+                array(
+                    'order_id' => $postId,
+                    'created_via' => 'admin',
+                    'woocommerce_version' => '8.5.2',
+                    'coupon_usages_are_counted' => ($finalDetails['coupon_discounted']>0)?1:0,
+                    'discount_total_amount' => $finalDetails['coupon_discounted']
+                )
+            );
             //them order wp_wc_order
             DB::table($this->_PRFIX_TABLE . '_wc_orders')->insertGetId(
                 array(

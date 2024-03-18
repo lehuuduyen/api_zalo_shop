@@ -550,7 +550,7 @@ class Controller extends BaseController
         // $coupon = DB::table($this->_PRFIX_TABLE . '_wc_orders')->where('post_title', $paramCoupon)->where('post_status', 'publish')->where('post_type', 'shop_coupon')->first();
 
     }
-    public function getAllTapByPhim($phim, $userId)
+    public function getAllTapDaMuaByPhim($phim, $userId)
     {
         $listTap = DB::table($this->_PRFIX_TABLE . '_postmeta')
             ->join($this->_PRFIX_TABLE . '_posts', $this->_PRFIX_TABLE . '_postmeta.post_id', '=', $this->_PRFIX_TABLE . '_posts.ID')
@@ -1083,7 +1083,7 @@ class Controller extends BaseController
         $time = time();
         foreach ($cartArr as $key => $item) {
             if (!array_key_exists($item['phim'], $listPhim)) {
-                $listPhim[$item['phim']] = $this->getAllTapByPhim($item['phim'], $userId);
+                $listPhim[$item['phim']] = $this->getAllTapDaMuaByPhim($item['phim'], $userId);
             }
             $listPhim[$item['phim']] = array_diff($listPhim[$item['phim']],[$item['id']]);
             $priceGoc = $this->getPostMeta($item['id'], '_regular_price');

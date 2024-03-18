@@ -19,17 +19,24 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         $results =[];
-
+        $userId = false;
         $phims = DB::table($this->_PRFIX_TABLE . '_films');
 
         $phims = $phims->orderBy('create_at', 'DESC')->get();
-
+        $data = $request->all();
+        if(isset($data['user'])){
+            $userId = $data['user']->ID;
+        }
 
         $time = time();
         $hot= 1;
         foreach ($phims as $key => $phim) {
             $phim->category_ids = json_decode($phim->category_ids);
             $phim->episode =[];
+            $allTapDaMuaByPhim =[];
+            if($userId){
+                $allTapDaMuaByPhim = $this->getAllTapDaMuaByPhim($phim->id,$userId);
+            }
             $listTap =[];
             $listTap = DB::table($this->_PRFIX_TABLE . '_postmeta')->
             join($this->_PRFIX_TABLE . '_posts',$this->_PRFIX_TABLE . '_posts.ID',$this->_PRFIX_TABLE . '_postmeta.post_id')->
@@ -40,7 +47,7 @@ class ProductController extends Controller
                 foreach($listTap as $key => $tap){
                     $listTap[$key]->link_movie = $this->getPostMeta($tap->ID,'_film_episode');
                     $listTap[$key]->price = $this->getPostMeta($tap->ID,'_price');
-                    $listTap[$key]->is_buy = 0;
+                    $listTap[$key]->is_buy = (in_array($tap->ID,$allTapDaMuaByPhim))?1:0;
                     $listTap[$key]->film_length = $this->getPostMeta($tap->ID,'_film_length');
                 }
                 $phim->episode =$listTap;

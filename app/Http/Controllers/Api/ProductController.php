@@ -45,9 +45,7 @@ class ProductController extends Controller
                 }
                 $phim->episode =$listTap;
                 $phim->is_hot = $hot;
-                $phim->content =
-                'Tony Stark và Scott Lang quay trở về cột mốc 2012, ngay khi trận chiến ở New York kết thúc, để “mượn tạm” quyền trượng của Loki. Nhưng một tai nạn bất ngờ xảy đến, khiến Loki nhặt được khối lặp phương Tesseract và tiện thể tẩu thoát.
-                Cuộc trốn thoát này đã dẫn đến dòng thời gian bị rối loạn. Cục TVA – tổ chức bảo vệ tính nguyên vẹn của dòng chảy thời gian, buộc phải can thiệp, đi gô cổ ông thần này về làm việc. Tại đây, Loki có hai lựa chọn, một là giúp TVA ổn định lại thời gian, không thì bị tiêu hủy. Dĩ nhiên Loki chọn lựa chọn thứ nhất. Nhưng đây là nước đi vô cùng mạo hiểm, vì ông thần này thường lọc lừa, “lươn lẹo”, chuyên đâm lén như bản tính tự nhiên của gã.';
+                $phim->content =$phim->film_description;
                 $results[]=$phim;
 
             }
@@ -94,7 +92,7 @@ class ProductController extends Controller
             $user = $data['user'];
 
             $listFavorite = $this->getUserMeta($user->ID, 'favorite');
-            
+
             if($listFavorite){
                 $favorite = json_decode($listFavorite);
                 if(in_array($data['phim'],$favorite)){
@@ -117,10 +115,10 @@ class ProductController extends Controller
                 );
             }
             return $this->returnSuccess($result);
-            
+
         }
         return $this->returnSuccess($data);
-        
+
     }
     public function getWatched(Request $request)
     {
@@ -132,7 +130,7 @@ class ProductController extends Controller
             if($listWatched){
                 $data = json_decode($listWatched);
 
-                
+
                 // Flatten the data and include "phim" ID for each "tap"
                 $flattenedData = [];
                 foreach ($data->phim as $phim) {
@@ -165,8 +163,8 @@ class ProductController extends Controller
 
                 return $this->returnSuccess($output);
             }
-            
-        
+
+
         }
 
         return $this->returnSuccess($data);
@@ -183,8 +181,8 @@ class ProductController extends Controller
             if(!$listWatched)
             {
                 $object = new \stdClass();
-               
-                $object->phim[]  =['id'=>$data['phim'],'tap'=>[$objectWatch]] ; 
+
+                $object->phim[]  =['id'=>$data['phim'],'tap'=>[$objectWatch]] ;
                 $insertId = DB::table($this->_PRFIX_TABLE . '_usermeta')->insertGetId(
                     array(
                         'user_id'     =>   $user->ID,
@@ -194,7 +192,7 @@ class ProductController extends Controller
                 );
             }else{
                 $listWatch = json_decode($listWatched);
-                // check watch ay da co 
+                // check watch ay da co
                 $issetPhim = false;
                 $issetTap = false;
                 foreach($listWatch->phim as $keyPhim => $phim ){
@@ -300,7 +298,7 @@ class ProductController extends Controller
             if (!isset($data['subtotal'])) {
                 return $this->returnError([], "Bắt buộc phải nhập total");
             }
-            
+
             $coupon_amount_total = $this->calculateCoupon($data, [], true);
             if ($coupon_amount_total > 0) {
                 return $this->returnSuccess($coupon_amount_total);

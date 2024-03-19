@@ -68,12 +68,9 @@ class OrdersController extends Controller
         ->select($this->_PRFIX_TABLE . '_wc_order_product_lookup.*', $this->_PRFIX_TABLE . '_posts.post_title')->get();
         $products = [];
         foreach ($ordersDetail as $key => $value) {
-            echo '<pre>';
-            print_r($value);
-            echo '</pre>';
-            die;
             
-            $phimId = $this->getPostMeta($value->order_id,'_film_selected');
+            
+            $phimId = $this->getPostMeta($value->product_id,'_film_selected');
             $phim = DB::table($this->_PRFIX_TABLE . '_films')->find($phimId);
 
             $product[$key]['name'] = $value->post_title;

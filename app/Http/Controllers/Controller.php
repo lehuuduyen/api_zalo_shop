@@ -110,7 +110,7 @@ class Controller extends BaseController
         }
     }
 
-    public function getImage($id, $store, $checkTerm = false)
+    public function getImage($id, $checkTerm = false)
     {
 
         $image = "";
@@ -121,12 +121,6 @@ class Controller extends BaseController
             }
         } else {
             $image = DB::table($this->_PRFIX_TABLE . '_postmeta')->where('meta_key', '_wp_attached_file')->where('post_id', $id)->first();
-        }
-
-
-        if ($image) {
-            $domain = "https://" . $store->domain . "/wp-content/uploads/" . $image->meta_value;
-            $image->path = $domain;
         }
 
         return $image;

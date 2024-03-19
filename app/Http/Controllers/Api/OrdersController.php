@@ -23,10 +23,11 @@ class OrdersController extends Controller
     }
     public function index(Request $request)
     {
+        $orders=[];
         //
         // $languare = env('DEFAULT_LANGUARE')?env('DEFAULT_LANGUARE'):"vi";
         $data = $request->all();
-        if ($data['user']) {
+        if (isset($data['user'])) {
             $user = $data['user'];
             $orders = DB::table($this->_PRFIX_TABLE . '_wc_order')->join($this->_PRFIX_TABLE . '_posts', $this->_PRFIX_TABLE . '_posts.ID', $this->_PRFIX_TABLE . '_wc_order.id')->where($this->_PRFIX_TABLE . '_wc_order.customer_id', $user->ID)->where($this->_PRFIX_TABLE . '_posts.post_status', '!=', 'trash')->orderBy($this->_PRFIX_TABLE . '_wc_order.date_created', 'DESC')->get();
 

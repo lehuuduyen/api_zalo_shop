@@ -15,89 +15,62 @@ class OrdersController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function info($id){
-        $user = DB::table( $this->_PRFIX_TABLE .'_users')->where('ID', $id)->select('ID','display_name as name','user_email as email','user_login as mobile')
-        ->first();
+    public function info($id)
+    {
+        $user = DB::table($this->_PRFIX_TABLE . '_users')->where('ID', $id)->select('ID', 'display_name as name', 'user_email as email', 'user_login as mobile')
+            ->first();
         return $user;
     }
     public function index(Request $request)
     {
         //
         // $languare = env('DEFAULT_LANGUARE')?env('DEFAULT_LANGUARE'):"vi";
+        $data = $request->all();
+        if ($data['user']) {
+            $user = $data['user'];
+            $orders = DB::table($this->_PRFIX_TABLE . '_wc_order')->join($this->_PRFIX_TABLE . '_posts', $this->_PRFIX_TABLE . '_posts.ID', $this->_PRFIX_TABLE . '_wc_order.id')->where($this->_PRFIX_TABLE . '_wc_order.customer_id', $user->ID)->where($this->_PRFIX_TABLE . '_posts.post_status', '!=', 'trash')->orderBy($this->_PRFIX_TABLE . '_wc_order.date_created', 'DESC')->get();
 
-        $store = $request['data_reponse'];
-        $this->_PRFIX_TABLE = $store->prefixTable;
-        $orders = DB::table( $this->_PRFIX_TABLE .'_wc_order_stats')->join( $this->_PRFIX_TABLE .'_posts', $this->_PRFIX_TABLE .'_posts.ID', $this->_PRFIX_TABLE .'_wc_order_stats.order_id')->where( $this->_PRFIX_TABLE .'_wc_order_stats.customer_id', $store->user_id)->where( $this->_PRFIX_TABLE .'_posts.post_status','!=', 'trash')->orderBy( $this->_PRFIX_TABLE .'_wc_order_stats.date_created', 'DESC')->get();
+            foreach ($orders as $key => $order) {
+                $user = $this->info($order->customer_id);
+                $orders[$key]->name = $user->name;
+                $orders[$key]->id = $order->id;
+                $orders[$key]->phone = $user->mobile;
 
-        foreach ($orders as $key => $order) {
-            $user = $this->info($order->customer_id);
-            $orders[$key]->name = $user->name;
-            $orders[$key]->id = $order->order_id;
-            $orders[$key]->phone = $user->mobile;
-            $feeShipping = $this->getPostMeta($order->order_id,'_order_shipping');
-            $orders[$key]->fee_shipping = ($feeShipping)?$feeShipping:0;
+                $discount = DB::table($this->_PRFIX_TABLE . '_wc_orders_meta')->where('order_id', $order->id)->where('meta_key', $discount)->first();
 
-            $orders[$key]->address = $this->getPostMeta($order->order_id,'_shipping_address_index');
+                $orders[$key]->total_amount = $order->total_sales;
+                $orders[$key]->discount = ($discount)?$discount:0;
+                $orders[$key]->total_price = $order->total_sales;
 
-            $orders[$key]->total_amount = $order->total_sales;
-            $ghichu = DB::table( $this->_PRFIX_TABLE .'_comments')->where('comment_post_ID',$order->order_id)->where('comment_type','order_note')->where('comment_author','!=','WooCommerce')->first();
-            if($ghichu){
-                $ghichu = $ghichu->comment_content;
-            }
-            $orders[$key]->message = $ghichu;
-            $orders[$key]->discount = 0;
-            $orders[$key]->total_price = $order->total_sales;
-
-            $coupon = DB::table( $this->_PRFIX_TABLE .'_wc_order_coupon_lookup')->where('order_id',$order->order_id)->first();
-            if($coupon){
-                $orders[$key]->discount = $coupon->discount_amount;
-                $orders[$key]->total_price = $order->total_sales + $coupon->discount_amount;
-            }
-
-            // $orders[$key]->state = $this->getState($order->state);
-            $orders[$key]->order_details = $this->detailOrder($order->order_id, $store);
-            $temp = new stdClass;
-            $temp->shipping_cost = 0;
-            $orders[$key]->payment_meta = $temp;
-            $history_user_point = DB::table( $this->_PRFIX_TABLE .'_woo_history_user_point')->where( 'order_id', $order->order_id)->where( 'user_id',$order->customer_id)->get();
-            $pointUse =  0;
-            $pointReceive =  0;
-            $pointUseMoney =  0;
-            foreach($history_user_point as  $history){
-                if($history->status == 4){
-                    $pointUse = $history->point;
-                    $pointUseMoney = $pointUse * $history->points_converted_to_money;
+                $coupon = DB::table($this->_PRFIX_TABLE . '_wc_order_coupon_lookup')->where('order_id', $order->id)->first();
+                if ($coupon) {
+                    $orders[$key]->discount = $coupon->discount_amount;
+                    $orders[$key]->total_price = $order->total_sales + $coupon->discount_amount;
                 }
-                if($history->status == 1){
-                    $pointReceive = $history->point;
-                }
-            }
-            if($pointUseMoney!=0){
-                $orders[$key]->total_price = $orders[$key]->total_price + $pointUseMoney;
-            }
-            $orders[$key]->point_use = $pointUse;
-            $orders[$key]->points_converted_to_money = $pointUseMoney;
 
-            $orders[$key]->point_receive = $pointReceive;
+                // $orders[$key]->state = $this->getState($order->state);
+                $orders[$key]->order_details = $this->detailOrder($order->id);
 
+
+            }
         }
+
 
         return $this->returnSuccess($orders);
     }
-    public function detailOrder($orderId, $store)
+    public function detailOrder($orderId)
     {
-        $ordersDetail = DB::table( $this->_PRFIX_TABLE .'_wc_order_product_lookup')->join( $this->_PRFIX_TABLE .'_posts', $this->_PRFIX_TABLE .'_posts.ID', $this->_PRFIX_TABLE .'_wc_order_product_lookup.product_id')->where( $this->_PRFIX_TABLE .'_wc_order_product_lookup.order_id', $orderId)->select( $this->_PRFIX_TABLE .'_wc_order_product_lookup.*', $this->_PRFIX_TABLE .'_posts.post_title')->get();
+        $ordersDetail = DB::table($this->_PRFIX_TABLE . '_wc_order_product_lookup')->join($this->_PRFIX_TABLE . '_posts', $this->_PRFIX_TABLE . '_posts.ID', $this->_PRFIX_TABLE . '_wc_order_product_lookup.product_id')->where($this->_PRFIX_TABLE . '_wc_order_product_lookup.order_id', $orderId)->select($this->_PRFIX_TABLE . '_wc_order_product_lookup.*', $this->_PRFIX_TABLE . '_posts.post_title')->get();
         $products = [];
         foreach ($ordersDetail as $key => $value) {
-            $product[$key]['name']=$value->post_title;
+            $product[$key]['name'] = $value->post_title;
             $temp = new stdClass;
-            $temp->image = $this->getImage($value->product_id, $store);
-            $total = $this->getOrderMeta($value->order_item_id,'_line_subtotal');
-            $product[$key]['options']= $temp;
-            $product[$key]['qty']= $value->product_qty;
-            $product[$key]['price']= $total / $value->product_qty;
-            $product[$key]['subtotal']= $total;
-
+            $temp->image = $this->getImage($value->product_id,);
+            $total = $this->getOrderMeta($value->order_item_id, '_line_subtotal');
+            $product[$key]['options'] = $temp;
+            $product[$key]['qty'] = $value->product_qty;
+            $product[$key]['price'] = $total / $value->product_qty;
+            $product[$key]['subtotal'] = $total;
         }
         return $product;
     }
@@ -134,8 +107,8 @@ class OrdersController extends Controller
                 $data = $request->all();
                 $user = $data['user'];
                 $data['phone'] = $data['sdt'];
-                $data['country'] =1;
-                $data['state'] =1;
+                $data['country'] = 1;
+                $data['state'] = 1;
                 $data['city'] = (isset($data['city'])) ? $data['city'] : "Việt Nam";
                 $user = [
                     'id' => $user->ID,

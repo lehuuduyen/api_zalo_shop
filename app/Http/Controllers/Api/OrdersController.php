@@ -66,7 +66,7 @@ class OrdersController extends Controller
         foreach ($ordersDetail as $key => $value) {
             $product[$key]['name'] = $value->post_title;
             $temp = new stdClass;
-            $temp->image = $this->getImage($value->product_id,);
+            $temp->image = $this->getImage($value->product_id);
             $total = $this->getOrderMeta($value->order_item_id, '_line_subtotal');
             $product[$key]['options'] = $temp;
             $product[$key]['qty'] = $value->product_qty;

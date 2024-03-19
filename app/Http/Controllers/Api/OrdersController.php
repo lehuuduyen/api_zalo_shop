@@ -43,10 +43,10 @@ class OrdersController extends Controller
                 $orders[$key]->discount = ($discount)?$discount->meta_value:0;
                 $orders[$key]->total_price = $order->total_amount;
 
-                $coupon = DB::table($this->_PRFIX_TABLE . '_wc_order_coupon_lookup')->where('order_id', $order->id)->first();
+                $coupon = DB::table($this->_PRFIX_TABLE . '_wc_order_operational_data')->where('order_id', $order->id)->first();
                 if ($coupon) {
-                    $orders[$key]->coupon = $coupon->discount_amount;
-                    $orders[$key]->total_price = $order->total_amount + $coupon->discount_amount;
+                    $orders[$key]->coupon = $coupon->discount_total_amount;
+                    $orders[$key]->total_price = $order->total_amount + $coupon->discount_total_amount;
                 }
 
                 // $orders[$key]->state = $this->getState($order->state);

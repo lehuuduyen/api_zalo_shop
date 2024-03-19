@@ -29,7 +29,7 @@ class OrdersController extends Controller
         $data = $request->all();
         if (isset($data['user'])) {
             $user = $data['user'];
-            $orders = DB::table($this->_PRFIX_TABLE . '_wc_order')->join($this->_PRFIX_TABLE . '_posts', $this->_PRFIX_TABLE . '_posts.ID', $this->_PRFIX_TABLE . '_wc_order.id')->where($this->_PRFIX_TABLE . '_wc_order.customer_id', $user->ID)->where($this->_PRFIX_TABLE . '_posts.post_status', '!=', 'trash')->orderBy($this->_PRFIX_TABLE . '_wc_order.date_created', 'DESC')->get();
+            $orders = DB::table($this->_PRFIX_TABLE . '_wc_order')->join($this->_PRFIX_TABLE . '_posts', $this->_PRFIX_TABLE . '_posts.ID', $this->_PRFIX_TABLE . '_wc_orders.id')->where($this->_PRFIX_TABLE . '_wc_orders.customer_id', $user->ID)->where($this->_PRFIX_TABLE . '_posts.post_status', '!=', 'trash')->orderBy($this->_PRFIX_TABLE . '_wc_orders.date_created', 'DESC')->get();
 
             foreach ($orders as $key => $order) {
                 $user = $this->info($order->customer_id);

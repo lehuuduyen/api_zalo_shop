@@ -76,7 +76,7 @@ class OrdersController extends Controller
             $temp->image = $this->getImage($value->product_id);
             $total = $this->getOrderMeta($value->order_item_id, '_line_subtotal');
             $product[$key]['phim_id'] = $phimId;
-            $product[$key]['phim_name'] = $phim->film_name;
+            $product[$key]['phim_name'] = ($phim)?$phim->film_name:'';
             $product[$key]['options'] = $temp;
             $product[$key]['qty'] = $value->product_qty;
             $product[$key]['price'] = $total / $value->product_qty;

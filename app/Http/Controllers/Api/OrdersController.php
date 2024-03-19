@@ -62,13 +62,21 @@ class OrdersController extends Controller
     }
     public function detailOrder($orderId)
     {
-        $ordersDetail = DB::table($this->_PRFIX_TABLE . '_wc_order_product_lookup')->join($this->_PRFIX_TABLE . '_posts', $this->_PRFIX_TABLE . '_posts.ID', $this->_PRFIX_TABLE . '_wc_order_product_lookup.product_id')->where($this->_PRFIX_TABLE . '_wc_order_product_lookup.order_id', $orderId)->select($this->_PRFIX_TABLE . '_wc_order_product_lookup.*', $this->_PRFIX_TABLE . '_posts.post_title')->get();
+        $ordersDetail = DB::table($this->_PRFIX_TABLE . '_wc_order_product_lookup')
+        ->join($this->_PRFIX_TABLE . '_posts', $this->_PRFIX_TABLE . '_posts.ID', $this->_PRFIX_TABLE . '_wc_order_product_lookup.product_id')
+        ->where($this->_PRFIX_TABLE . '_wc_order_product_lookup.order_id', $orderId)
+        ->select($this->_PRFIX_TABLE . '_wc_order_product_lookup.*', $this->_PRFIX_TABLE . '_posts.post_title')->get();
         $products = [];
         foreach ($ordersDetail as $key => $value) {
+            $phimId = $this->getPostMeta($value->ID,'_film_selected');
+            $phim = DB::table($this->_PRFIX_TABLE . '_films')->find($phimId);
+
             $product[$key]['name'] = $value->post_title;
             $temp = new stdClass;
             $temp->image = $this->getImage($value->product_id);
             $total = $this->getOrderMeta($value->order_item_id, '_line_subtotal');
+            $product[$key]['phim_id'] = $phimId;
+            $product[$key]['phim_name'] = $phim->film_name;
             $product[$key]['options'] = $temp;
             $product[$key]['qty'] = $value->product_qty;
             $product[$key]['price'] = $total / $value->product_qty;

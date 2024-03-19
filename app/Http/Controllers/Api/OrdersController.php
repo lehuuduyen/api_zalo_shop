@@ -45,7 +45,7 @@ class OrdersController extends Controller
 
                 $coupon = DB::table($this->_PRFIX_TABLE . '_wc_order_coupon_lookup')->where('order_id', $order->id)->first();
                 if ($coupon) {
-                    $orders[$key]->discount = $coupon->discount_amount;
+                    $orders[$key]->coupon = $coupon->discount_amount;
                     $orders[$key]->total_price = $order->total_amount + $coupon->discount_amount;
                 }
 

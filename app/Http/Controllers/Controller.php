@@ -606,7 +606,6 @@ class Controller extends BaseController
             $totalPriceDetails =  $this->getTotalPriceDetails($data['order'], $postId, $user['id']);
 
             $chietKhau = $totalPriceDetails['totalChietKhau'];
-            $totalPriceDetails['total'] = $totalPriceDetails['total'] -$chietKhau;
 
             $finalDetails = $this->getFinalPriceDetails($user, $data, $totalPriceDetails);
 
@@ -963,7 +962,7 @@ class Controller extends BaseController
 
 
         $price = $totalPriceDetails;
-        $coupon = ["coupon" => $validated_data['used_coupon'], "subtotal" => $price['total']];
+        $coupon = ["coupon" => $validated_data['used_coupon'], "subtotal" => $price['total'] - $price['totalChietKhau']];
 
 
 

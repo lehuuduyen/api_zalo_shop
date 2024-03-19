@@ -606,8 +606,9 @@ class Controller extends BaseController
             $totalPriceDetails =  $this->getTotalPriceDetails($data['order'], $postId, $user['id']);
 
             $chietKhau = $totalPriceDetails['totalChietKhau'];
-            $finalDetails = $this->getFinalPriceDetails($user, $data, $totalPriceDetails);
+            $totalPriceDetails['total'] = $totalPriceDetails['total'] -$chietKhau;
 
+            $finalDetails = $this->getFinalPriceDetails($user, $data, $totalPriceDetails);
 
 
 

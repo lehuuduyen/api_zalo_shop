@@ -37,7 +37,7 @@ class OrdersController extends Controller
                 $orders[$key]->id = $order->id;
                 $orders[$key]->phone = $user->mobile;
 
-                $discount = DB::table($this->_PRFIX_TABLE . '_wc_orders_meta')->where('order_id', $order->id)->where('meta_key', $discount)->first();
+                $discount = DB::table($this->_PRFIX_TABLE . '_wc_orders_meta')->where('order_id', $order->id)->where('meta_key', 'discount')->first();
 
                 $orders[$key]->total_amount = $order->total_sales;
                 $orders[$key]->discount = ($discount)?$discount:0;

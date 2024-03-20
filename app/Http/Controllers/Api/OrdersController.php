@@ -68,8 +68,8 @@ class OrdersController extends Controller
         ->select($this->_PRFIX_TABLE . '_wc_order_product_lookup.*', $this->_PRFIX_TABLE . '_posts.post_title')->get();
         $products = [];
         foreach ($ordersDetail as $key => $value) {
-            
-            
+
+
             $phimId = $this->getPostMeta($value->product_id,'_film_selected');
             $phim = DB::table($this->_PRFIX_TABLE . '_films')->find($phimId);
 
@@ -77,6 +77,7 @@ class OrdersController extends Controller
             $temp = new stdClass;
             $temp->image = $this->getImage($value->product_id);
             $total = $this->getOrderMeta($value->order_item_id, '_line_subtotal');
+            $product[$key]['image'] =($phim)?$phim->film_poster:'';
             $product[$key]['phim_id'] = $phimId;
             $product[$key]['phim_name'] = ($phim)?$phim->film_name:'';
             $product[$key]['options'] = $temp;

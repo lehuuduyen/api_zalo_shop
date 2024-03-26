@@ -30,6 +30,25 @@ class ProductController extends Controller
         $time = time();
 
         foreach ($products as $key => $product) {
+            $childProduct = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->where('post_parent', $product->ID)->where('post_type', 'product_variation')->where('post_status', 'publish')->get();
+            foreach($childProduct as $keyChild =>  $child){
+             $postMetaGiaGoc = $this->getPostMeta($child->ID, '_regular_price');
+             $postMetaGiaKhuyenMai = $this->getPostMeta($child->ID, '_sale_price');
+             $_sale_price_dates_from = $this->getPostMeta($child->ID, '_sale_price_dates_from');
+             $_sale_price_dates_to = $this->getPostMeta($child->ID, '_sale_price_dates_to');
+             $childProduct[$keyChild]->price =  $postMetaGiaGoc;
+             $childProduct[$keyChild]->sale_price =  $postMetaGiaGoc;
+             if ($postMetaGiaKhuyenMai && empty($_sale_price_dates_from) && empty($_sale_price_dates_to)) {
+                 $childProduct[$keyChild]->sale_price = $postMetaGiaKhuyenMai;
+             }
+             if ($postMetaGiaKhuyenMai && $time >= $_sale_price_dates_from && $time <= $_sale_price_dates_to) {
+                 $childProduct[$keyChild]->sale_price = $postMetaGiaKhuyenMai;
+                 $childProduct[$keyChild]->is_campaign = true;
+                 $childProduct[$keyChild]->end_date = date('Y/m/d H:i:s', $_sale_price_dates_to);
+             }
+
+            }
+
             $products[$key]->id = $product->ID;
             $products[$key]->product_id = $product->ID;
             $postMetaStatus = $this->getPostMeta($product->ID, '_stock_status');
@@ -73,6 +92,7 @@ class ProductController extends Controller
 
             $products[$key]->review = $this->getreview($product->ID);
             $products[$key]->sold_count =  $products[$key]->product_inventory->sold_count;
+            $products[$key]->childProduct =  $childProduct;
 
             // $products[$key]->state = $this->getState($order->state);
             // $products[$key]->order_details = json_decode($order->order_details);

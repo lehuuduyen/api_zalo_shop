@@ -374,7 +374,7 @@ class StoreController extends Controller
             $result[$stt]->tong_hoa_hong = (isset($user->total_commission))?$user->total_commission:0;
             $result[$stt]->tong_doanh_thu = (isset($user->total_order))?$user->total_order:0;
             $result[$stt]->level = "Cấp 1";
-            $result[$stt]->image = $this->getPostMeta($user->ID,'image_user');
+            $result[$stt]->image = $this->getUserMeta($user->ID,'image_user');
             $stt++;
         }
         return $this->returnSuccess($result);

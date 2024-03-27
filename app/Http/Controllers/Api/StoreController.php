@@ -293,7 +293,14 @@ class StoreController extends Controller
         $this->_PRFIX_TABLE = $store->prefixTable;
         $userId = $store->user_id;
 
-        $listUserChild = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->select($this->_PRFIX_TABLE . '_users.*', $this->_PRFIX_TABLE . '_users.user_login as mobile', $this->_PRFIX_TABLE . '_woo_history_user_commission.commission', $this->_PRFIX_TABLE . '_woo_history_user_commission.total_order')->join($this->_PRFIX_TABLE . '_users', $this->_PRFIX_TABLE . '_users.ID', $this->_PRFIX_TABLE . '_woo_history_user_commission.user_id')->where('user_parent', $userId)->where('status', 1);
+        $listUserChild = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->
+        select($this->_PRFIX_TABLE . '_users.ID',
+         $this->_PRFIX_TABLE . '_users.user_login as mobile',
+         DB::raw("SUM(".$this->_PRFIX_TABLE."_woo_history_user_commission.commission) as total_commission") ,
+         DB::raw("SUM(".$this->_PRFIX_TABLE."_woo_history_user_commission.total_order) as total_order") ,
+         $this->_PRFIX_TABLE . '_woo_history_user_commission.create_at')
+        ->join($this->_PRFIX_TABLE . '_users', $this->_PRFIX_TABLE . '_users.ID', $this->_PRFIX_TABLE . '_woo_history_user_commission.user_id')
+        ->where('user_parent', $userId)->where('status', 1);
 
 
         if (isset($request['search'])) {
@@ -302,14 +309,54 @@ class StoreController extends Controller
         if (isset($request['order'])) {
             $listUserChild = $listUserChild->orderBy('ID', $request['order']);
         }
-        $listUserChild = $listUserChild->get();
+        $listUserChild = $listUserChild
+        ->groupBy($this->_PRFIX_TABLE . '_users.ID',$this->_PRFIX_TABLE . '_users.user_login',$this->_PRFIX_TABLE . '_woo_history_user_commission.create_at')
+        ->get();
+        
 
-        foreach ($listUserChild as $key => $user) {
-            $listUserChild[$key]->tong_hoa_hong = $user->commission;
-            $listUserChild[$key]->tong_doanh_thu = $user->total_order;
-            $listUserChild[$key]->level = "Cấp 1";
+
+
+        $tempIds =[];
+        foreach($listUserChild as $key => $child){
+        $tempIds[]= $child->ID;
         }
-        return $this->returnSuccess($listUserChild);
+        $listUserClick = DB::connection('mysql_external')->
+        table($this->_PRFIX_TABLE . '_woo_history_share_link')->
+        select($this->_PRFIX_TABLE . '_users.ID', $this->_PRFIX_TABLE . '_users.user_login as mobile', $this->_PRFIX_TABLE . '_woo_history_share_link.create_at')->
+        join($this->_PRFIX_TABLE . '_users', $this->_PRFIX_TABLE . '_users.ID', $this->_PRFIX_TABLE . '_woo_history_share_link.user_id')->
+        where('user_parent', $userId)->where('user_id','!=', $userId)->where('status','!=', 2)->whereNotIn('user_id', $tempIds);
+
+        if (isset($request['search'])) {
+            $listUserClick = $listUserClick->where('user_login', 'like', '%' . $request['search'] . '%');
+        }
+        if (isset($request['order'])) {
+            $listUserClick = $listUserClick->orderBy('ID', $request['order']);
+        }
+
+
+        $listUserClick = $listUserClick->groupBy($this->_PRFIX_TABLE . '_users.ID',$this->_PRFIX_TABLE . '_users.user_login',$this->_PRFIX_TABLE . '_woo_history_share_link.create_at')->get();
+        $tempClick =[];
+        $listUserClickNew =[];
+        foreach($listUserClick as $val){
+            if(!in_array($val->ID,$tempClick)){
+                $tempClick[]=$val->ID;
+                $listUserClickNew[]=$val;
+            }
+        }
+
+        $mergedData = $listUserChild->merge($listUserClickNew);
+        $sortedData = $mergedData->sortByDesc('create_at');
+
+        $stt=0;
+        $result =[];
+        foreach ($sortedData as $key => $user) {
+            $result[$stt]=$user;
+            $result[$stt]->tong_hoa_hong = (isset($user->total_commission))?$user->total_commission:0;
+            $result[$stt]->tong_doanh_thu = (isset($user->total_order))?$user->total_order:0;
+            $result[$stt]->level = "Cấp 1";
+            $stt++;
+        }
+        return $this->returnSuccess($result);
     }
     public function historyWithdraw(Request $request)
     {
@@ -600,9 +647,9 @@ class StoreController extends Controller
             if ($validator->fails()) {
                 return $this->returnError(new \stdClass, $validator->errors()->first());
             } else {
-                
+
                 $fee = $this->calFee($data['quan'],$data['phuong']);
-                
+
                 return $this->returnSuccess($fee);
             }
         } catch (\Throwable $th) {

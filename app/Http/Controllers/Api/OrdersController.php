@@ -97,6 +97,7 @@ class OrdersController extends Controller
             $product[$key]['qty']= $value->product_qty;
             $product[$key]['price']= $total / $value->product_qty;
             $product[$key]['subtotal']= $total;
+            $product[$key]['product_id']= $value->product_id;
 
         }
         return $product;

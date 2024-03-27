@@ -179,6 +179,15 @@ class StoreController extends Controller
                     )
                 );
             }
+            if (isset($data['image'])) {
+                $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
+                    array(
+                        'user_id' => $userId, 'meta_key' => 'image_user'
+                    ),
+                    array('meta_value' => $data['image'])
+                );
+
+            }
             if (isset($data['city'])) {
                 $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
                     array(
@@ -363,6 +372,7 @@ class StoreController extends Controller
             $result[$stt]->tong_hoa_hong = (isset($user->total_commission))?$user->total_commission:0;
             $result[$stt]->tong_doanh_thu = (isset($user->total_order))?$user->total_order:0;
             $result[$stt]->level = "Cấp 1";
+            $result[$stt]->image = $this->getPostMeta($user->ID,'image_user');
             $stt++;
         }
         return $this->returnSuccess($result);

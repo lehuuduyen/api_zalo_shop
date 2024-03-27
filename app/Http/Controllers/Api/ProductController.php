@@ -172,7 +172,67 @@ class ProductController extends Controller
 
         }
     }
+    public function reviewProductOrder(Request $request)
+    {
+        try {
+            $store = $request['data_reponse'];
+            $this->_PRFIX_TABLE = $store->prefixTable;
+            $data = $request->all();
+            $data['sdt'] = $store->sdt;
+            if (!isset($data['rating'])) {
+                return $this->returnError([], "Bắt buộc phải nhập rating");
+            } else if (!isset($data['product_id'])) {
+                return $this->returnError([], "Bắt buộc phải nhập product");
+            }
+            else if (!isset($data['order_id'])) {
+                return $this->returnError([], "Bắt buộc phải nhập order");
+            }else {
+                $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_users')->where('user_login', $data['sdt'])->first();
+                if (!$user) {
+                    return $this->returnError([], "Số điện thoại chưa được đăng ký");
+                }
+                $ordersDetail = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_wc_order_product_lookup')
+                ->where( $this->_PRFIX_TABLE .'_wc_order_product_lookup.order_id', $data['order_id'])
+                ->where( $this->_PRFIX_TABLE .'_wc_order_product_lookup.product_id', $data['product_id'])
+                ->first();
+                if($ordersDetail){
+                    $insertId = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_comments')->insertGetId(
+                        array(
+                            'comment_post_ID'     =>   $data['product_id'],
+                            'comment_author'     =>   $store->name,
+                            'comment_content'     =>   $data['review_text'],
+                            'comment_type'     =>   'review',
+                            'comment_karma'     =>    $data['order_id'],
+                            'user_id'   =>   $store->user_id,
+                            'comment_date' => date('Y/m/d H:i:s'),
+                            'comment_date_gmt' => date('Y/m/d H:i:s')
 
+                        )
+                    );
+
+
+                    $insert = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_commentmeta')->insert(
+                        array(
+                            'comment_id'     =>   $insertId,
+                            'meta_value'     =>   $data['rating'],
+                            'meta_key'     =>   'rating',
+                        )
+                    );
+                    return $this->returnSuccess($insert, 'Thêm review thành công');
+
+                }
+                return $this->returnError([], "Không thể đánh giá");
+
+
+            }
+        } catch (\Throwable $th) {
+            //throw $th;
+            $this->woo_logs('review', $th->getMessage());
+
+            return $this->returnError([], "Lỗi hệ thống");
+
+        }
+    }
 
     public function checkCoupon(Request $request)
     {

@@ -89,6 +89,10 @@ class OrdersController extends Controller
         $ordersDetail = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_wc_order_product_lookup')->join( $this->_PRFIX_TABLE .'_posts', $this->_PRFIX_TABLE .'_posts.ID', $this->_PRFIX_TABLE .'_wc_order_product_lookup.product_id')->where( $this->_PRFIX_TABLE .'_wc_order_product_lookup.order_id', $orderId)->select( $this->_PRFIX_TABLE .'_wc_order_product_lookup.*', $this->_PRFIX_TABLE .'_posts.post_title')->get();
         $products = [];
         foreach ($ordersDetail as $key => $value) {
+            $checkReview = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_comments')
+            ->where( $this->_PRFIX_TABLE .'_comments.comment_post_ID', $value->product_id)
+            ->where( $this->_PRFIX_TABLE .'_comments.comment_karma', $orderId)->first();
+
             $product[$key]['name']=$value->post_title;
             $temp = new stdClass;
             $temp->image = $this->getImage($value->product_id, $store);
@@ -98,6 +102,7 @@ class OrdersController extends Controller
             $product[$key]['price']= $total / $value->product_qty;
             $product[$key]['subtotal']= $total;
             $product[$key]['product_id']= $value->product_id;
+            $product[$key]['is_review']= ($checkReview)?1:0 ;
 
         }
         return $product;

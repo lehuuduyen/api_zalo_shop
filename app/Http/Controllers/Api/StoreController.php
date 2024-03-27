@@ -313,7 +313,9 @@ class StoreController extends Controller
 
         $listUserChild = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->
         select($this->_PRFIX_TABLE . '_users.ID',
-         $this->_PRFIX_TABLE . '_users.user_login as mobile',
+         $this->_PRFIX_TABLE . '_users.user_login as mobile'
+         ,$this->_PRFIX_TABLE . '_users.display_name as name',
+         
          DB::raw("SUM(".$this->_PRFIX_TABLE."_woo_history_user_commission.commission) as total_commission") ,
          DB::raw("SUM(".$this->_PRFIX_TABLE."_woo_history_user_commission.total_order) as total_order") ,
          $this->_PRFIX_TABLE . '_woo_history_user_commission.create_at')
@@ -340,7 +342,7 @@ class StoreController extends Controller
         }
         $listUserClick = DB::connection('mysql_external')->
         table($this->_PRFIX_TABLE . '_woo_history_share_link')->
-        select($this->_PRFIX_TABLE . '_users.ID', $this->_PRFIX_TABLE . '_users.user_login as mobile', $this->_PRFIX_TABLE . '_woo_history_share_link.create_at')->
+        select($this->_PRFIX_TABLE . '_users.ID',$this->_PRFIX_TABLE . '_users.display_name as name', $this->_PRFIX_TABLE . '_users.user_login as mobile', $this->_PRFIX_TABLE . '_woo_history_share_link.create_at')->
         join($this->_PRFIX_TABLE . '_users', $this->_PRFIX_TABLE . '_users.ID', $this->_PRFIX_TABLE . '_woo_history_share_link.user_id')->
         where('user_parent', $userId)->where('user_id','!=', $userId)->where('status','!=', 2)->whereNotIn('user_id', $tempIds);
 
@@ -352,7 +354,7 @@ class StoreController extends Controller
         }
 
 
-        $listUserClick = $listUserClick->groupBy($this->_PRFIX_TABLE . '_users.ID',$this->_PRFIX_TABLE . '_users.user_login',$this->_PRFIX_TABLE . '_woo_history_share_link.create_at')->get();
+        $listUserClick = $listUserClick->groupBy($this->_PRFIX_TABLE . '_users.ID',$this->_PRFIX_TABLE . '_users.display_name',$this->_PRFIX_TABLE . '_users.user_login',$this->_PRFIX_TABLE . '_woo_history_share_link.create_at')->get();
         $tempClick =[];
         $listUserClickNew =[];
         foreach($listUserClick as $val){

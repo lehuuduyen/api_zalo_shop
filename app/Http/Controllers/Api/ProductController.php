@@ -118,6 +118,84 @@ class ProductController extends Controller
 
         return $this->returnSuccess($categories);
     }
+    public function rewardPolicy(Request $request)
+    {
+        $store = $request['data_reponse'];
+        $this->_PRFIX_TABLE = $store->prefixTable;
+        $rewardPolicy = $this->getOptionsMeta('reward_policy');
+
+
+        return $this->returnSuccess($rewardPolicy);
+    }
+    public function checkFavorite(Request $request){
+        $data  = $request->all();
+        $store = $request['data_reponse'];
+        $this->_PRFIX_TABLE = $store->prefixTable;
+        $isFavorite = false;
+        if(isset($data['product_id']) ){
+            $userId = $store->user_id;
+            $listFavorite = $this->getUserMeta($userId, 'favorite');
+            if($listFavorite ){
+                $result = json_decode($listFavorite );
+                if(in_array($data['product_id'],$result)){
+                    $isFavorite =  true;
+                }
+            }
+
+        }
+        return $this->returnSuccess($isFavorite);
+    }
+    public function getFavorite(Request $request){
+        $data  = $request->all();
+        $store = $request['data_reponse'];
+        $this->_PRFIX_TABLE = $store->prefixTable;
+        $result = [];
+        if(isset($data['product_id']) ){
+            $userId = $store->user_id;
+            $listFavorite = $this->getUserMeta($userId, 'favorite');
+            if($listFavorite ){
+                $result = json_decode($listFavorite );
+            }
+
+        }
+        return $this->returnSuccess($result);
+    }
+    public function addFavorite(Request $request){
+        $data  = $request->all();
+        $store = $request['data_reponse'];
+        $this->_PRFIX_TABLE = $store->prefixTable;
+        if( isset($data['product_id']) ){
+            $userId = $store->user_id;
+
+            $listFavorite = $this->getUserMeta($userId, 'favorite');
+
+            if($listFavorite){
+                $favorite = json_decode($listFavorite);
+                if(in_array($data['product_id'],$favorite)){
+                    $favorite = array_values(array_diff($favorite, [$data['product_id']]));
+                }else{
+                    $favorite[]=$data['product_id'];
+                }
+                $result =DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->where('user_id', $userId)->where('meta_key', 'favorite')->update(
+                    array(
+                        'meta_value' => json_encode($favorite)
+                    )
+                );
+            }else{
+                $result = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->insertGetId(
+                    array(
+                        'user_id'     =>   $userId,
+                        'meta_key'     =>   'favorite',
+                        'meta_value'     =>   json_encode([$data['product_id']])
+                    )
+                );
+            }
+            return $this->returnSuccess($result);
+
+        }
+        return $this->returnSuccess($data);
+
+    }
 
     /**
      * Store a newly created resource in storage.

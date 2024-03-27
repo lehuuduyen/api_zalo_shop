@@ -69,6 +69,15 @@ class StoreController extends Controller
         $country = DB::connection('mysql_external')->table('countries')->where('status', 'publish')->get();
         return $this->returnSuccess($country);
     }
+    public function getShare(Request $request)
+    {
+        $store = $request['data_reponse'];
+        $this->_PRFIX_TABLE = $store->prefixTable;
+
+
+        $count = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_share_link')->where('user_parent', $store->user_id)->count();
+        return $this->returnSuccess($count);
+    }
     public function log(Request $request)
     {
         $store = $request['data_reponse'];
@@ -312,7 +321,7 @@ class StoreController extends Controller
         $listUserChild = $listUserChild
         ->groupBy($this->_PRFIX_TABLE . '_users.ID',$this->_PRFIX_TABLE . '_users.user_login',$this->_PRFIX_TABLE . '_woo_history_user_commission.create_at')
         ->get();
-        
+
 
 
 

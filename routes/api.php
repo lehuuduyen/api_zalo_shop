@@ -26,13 +26,18 @@ Route::get('getFee', 'App\Http\Controllers\Api\StoreController@getFee')->middlew
 
 Route::group([  'middleware' => ['CorsApi','CheckStore']], function()
 {
+    Route::get('getShare', 'App\Http\Controllers\Api\StoreController@getShare');
     Route::post('log', 'App\Http\Controllers\Api\StoreController@log');
 
-
-
+    Route::get('check_yeuthich', 'App\Http\Controllers\Api\ProductController@checkFavorite');
+    Route::get('yeuthich', 'App\Http\Controllers\Api\ProductController@getFavorite');
+    Route::post('yeuthich', 'App\Http\Controllers\Api\ProductController@addFavorite');
     Route::get('products', 'App\Http\Controllers\Api\ProductController@index');
     Route::post('check_coupon', 'App\Http\Controllers\Api\ProductController@checkCoupon');
     Route::post('product/review', 'App\Http\Controllers\Api\ProductController@review');
+    Route::post('product/reviewProductOrder', 'App\Http\Controllers\Api\ProductController@reviewProductOrder');
+    Route::get('reward_policy', 'App\Http\Controllers\Api\ProductController@rewardPolicy');
+
     Route::get('brands', 'App\Http\Controllers\Api\BrandsController@index');
     Route::get('coupons', 'App\Http\Controllers\Api\CouponsController@index');
     Route::get('store', 'App\Http\Controllers\Api\StoreController@index');

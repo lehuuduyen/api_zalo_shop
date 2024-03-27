@@ -330,7 +330,7 @@ class StoreController extends Controller
             $listUserChild = $listUserChild->orderBy('ID', $request['order']);
         }
         $listUserChild = $listUserChild
-        ->groupBy($this->_PRFIX_TABLE . '_users.ID',$this->_PRFIX_TABLE . '_users.user_login',$this->_PRFIX_TABLE . '_woo_history_user_commission.create_at')
+        ->groupBy($this->_PRFIX_TABLE . '_users.ID',$this->_PRFIX_TABLE . '_users.display_name',$this->_PRFIX_TABLE . '_users.user_login',$this->_PRFIX_TABLE . '_woo_history_user_commission.create_at')
         ->get();
 
 

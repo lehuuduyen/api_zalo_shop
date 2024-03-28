@@ -376,9 +376,13 @@ class Controller extends BaseController
             }
             $list['Kích thước'] = [$kichThuoc];
         }
+        $listChild =[];
         if ($proAttr) {
             foreach ($proAttr as $attr => $val) {
                 $val['attribute'] = $val;
+                if($val['name'] != "Trọng lượng" || $val['name'] != "Kích thước"){
+                    $listChild[$val['name']] = explode('|', $val['value']);
+                }
                 $list[$val['name']] = explode('|', $val['value']);
                 $response->product_inventory_details[] = $val;
             }
@@ -386,6 +390,7 @@ class Controller extends BaseController
 
 
         $response->attribute = $list;
+        $response->attributeListChild = $listChild;
 
 
         return $response;
@@ -640,8 +645,8 @@ class Controller extends BaseController
             }
             //wp_wc_order_product_lookup
             $totalQuantity = array_sum($totalPriceDetails['quantity']);
-            
-            
+
+
             foreach ($totalPriceDetails['products_id'] as $key  => $productId) {
                 $products = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->where('ID', $productId)->select('post_title')->first();
                 if (!$products) {
@@ -664,7 +669,7 @@ class Controller extends BaseController
                     }
                 }
 
-                
+
 
                 //wp_woocommerce_order_items
                 $orderItemId = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woocommerce_order_items')->insertGetId(
@@ -674,7 +679,7 @@ class Controller extends BaseController
                         'order_item_name' => $products->post_title,
                     )
                 );
-                
+
 
                 DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woocommerce_order_itemmeta')->insert(
                     array(

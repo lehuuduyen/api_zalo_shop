@@ -47,6 +47,7 @@ class ProductController extends Controller
                  $childProduct[$keyChild]->is_campaign = true;
                  $childProduct[$keyChild]->end_date = date('Y/m/d H:i:s', $_sale_price_dates_to);
              }
+             $childProduct[$keyChild]->is_bien_the = true;
              $listChildProducts[]=$childProduct[$keyChild];
             }
 
@@ -94,6 +95,8 @@ class ProductController extends Controller
             $products[$key]->review = $this->getreview($product->ID);
             $products[$key]->sold_count =  $products[$key]->product_inventory->sold_count;
             $products[$key]->childProduct =  $childProduct;
+            $products[$key]->is_bien_the = false;
+
             $listProducts[] = $products[$key];
             // $products[$key]->state = $this->getState($order->state);
             // $products[$key]->order_details = json_decode($order->order_details);

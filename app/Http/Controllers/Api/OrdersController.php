@@ -103,7 +103,7 @@ class OrdersController extends Controller
             }
             $product[$key]['name']=$value->post_title;
             $temp = new stdClass;
-            $temp->image = $this->getImage($value->product_id, $store);
+            $temp->image = $image;
             $total = $this->getOrderMeta($value->order_item_id,'_line_subtotal');
             $product[$key]['options']= $temp;
             $product[$key]['qty']= $value->product_qty;

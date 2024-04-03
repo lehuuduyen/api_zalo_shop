@@ -46,9 +46,8 @@ class ProductController extends Controller
                  $childProduct[$keyChild]->is_campaign = true;
                  $childProduct[$keyChild]->end_date = date('Y/m/d H:i:s', $_sale_price_dates_to);
              }
-
+             $listChild[]=$childProduct;
             }
-            $listChild = array_merge($listChild,$childProduct);
 
             $products[$key]->id = $product->ID;
             $products[$key]->product_id = $product->ID;
@@ -100,6 +99,10 @@ class ProductController extends Controller
             // $products[$key]->payment_meta = json_decode($order->payment_meta);
 
         }
+        echo '<pre>';
+        print_r($listChild);
+        echo '</pre>';
+        die;
         $products = array_merge($products,$listChild);
         return $this->returnSuccess($products);
     }

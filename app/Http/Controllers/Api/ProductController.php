@@ -99,11 +99,8 @@ class ProductController extends Controller
             // $products[$key]->payment_meta = json_decode($order->payment_meta);
 
         }
-        echo '<pre>';
-        print_r($listChild);
-        echo '</pre>';
-        die;
-        $products = array_merge($products,$listChild);
+        
+        array_push($products,$listChild);
         return $this->returnSuccess($products);
     }
     public function getCategories(Request $request)

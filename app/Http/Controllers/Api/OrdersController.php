@@ -94,7 +94,7 @@ class OrdersController extends Controller
             ->where( $this->_PRFIX_TABLE .'_comments.comment_karma', $orderId)->first();
             $image = $this->getImage($value->product_id, $store);
             if(!$image){
-                $parentProduct = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_posts')->where('ID',$value->product_id)->select('post_parent')->find();
+                $parentProduct = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_posts')->select('post_parent')->find($value->product_id);
                 if($parentProduct){
                     $image = $this->getImage($parentProduct->post_parent, $store);
                 }

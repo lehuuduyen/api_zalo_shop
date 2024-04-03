@@ -47,7 +47,7 @@ class ProductController extends Controller
                  $childProduct[$keyChild]->is_campaign = true;
                  $childProduct[$keyChild]->end_date = date('Y/m/d H:i:s', $_sale_price_dates_to);
              }
-             $listChild[]=$childProduct[$keyChild];
+             $listChildProducts[]=$childProduct[$keyChild];
             }
 
             $products[$key]->id = $product->ID;

@@ -92,7 +92,14 @@ class OrdersController extends Controller
             $checkReview = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_comments')
             ->where( $this->_PRFIX_TABLE .'_comments.comment_post_ID', $value->product_id)
             ->where( $this->_PRFIX_TABLE .'_comments.comment_karma', $orderId)->first();
-
+            $image = $this->getImage($value->product_id, $store);
+            if(!$image){
+                $parentProduct = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_posts')->where('ID',$value->product_id)->select('post_parent')->find();
+                if($parentProduct){
+                    $image = $this->getImage($parentProduct->post_parent, $store);
+                }
+                    
+            }
             $product[$key]['name']=$value->post_title;
             $temp = new stdClass;
             $temp->image = $this->getImage($value->product_id, $store);

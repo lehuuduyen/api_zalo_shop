@@ -99,7 +99,11 @@ class ProductController extends Controller
             // $products[$key]->payment_meta = json_decode($order->payment_meta);
 
         }
-        
+        echo '<pre>';
+        print_r(gettype($products));
+        print_r(gettype($listChild));
+        echo '</pre>';
+        die;
         array_push($products,$listChild);
         return $this->returnSuccess($products);
     }

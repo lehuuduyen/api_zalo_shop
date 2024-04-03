@@ -43,6 +43,8 @@ class ProductController extends Controller
              $_sale_price_dates_to = $this->getPostMeta($child->ID, '_sale_price_dates_to');
              $childProduct[$keyChild]->price =  $postMetaGiaGoc;
              $childProduct[$keyChild]->sale_price =  $postMetaGiaGoc;
+             $childProduct[$keyChild]->is_campaign =  false;
+
              if ($postMetaGiaKhuyenMai && empty($_sale_price_dates_from) && empty($_sale_price_dates_to)) {
                  $childProduct[$keyChild]->sale_price = $postMetaGiaKhuyenMai;
              }

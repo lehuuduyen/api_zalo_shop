@@ -402,6 +402,7 @@ class StoreController extends Controller
         $userParents = [];
 
         foreach($userParentIsset as $val){
+            echo $val->user_id;
             $val->parent = $this->loopChild($val->user_id);
             $userParents[] = $val;
         }

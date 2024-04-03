@@ -101,7 +101,7 @@ class ProductController extends Controller
 
         }
         
-        array_push($listProducts,$listChildProducts);
+        $listProducts = array_merge($listProducts,$listChildProducts);
         return $this->returnSuccess($listProducts);
     }
     public function getCategories(Request $request)

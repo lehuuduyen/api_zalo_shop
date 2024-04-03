@@ -28,7 +28,7 @@ class ProductController extends Controller
 
 
         $time = time();
-
+        $listChild = [];
         foreach ($products as $key => $product) {
             $childProduct = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->where('post_parent', $product->ID)->where('post_type', 'product_variation')->where('post_status', 'publish')->get();
             foreach($childProduct as $keyChild =>  $child){
@@ -48,6 +48,7 @@ class ProductController extends Controller
              }
 
             }
+            $listChild = array_merge($listChild,$childProduct);
 
             $products[$key]->id = $product->ID;
             $products[$key]->product_id = $product->ID;
@@ -99,6 +100,7 @@ class ProductController extends Controller
             // $products[$key]->payment_meta = json_decode($order->payment_meta);
 
         }
+        $products = array_merge($products,$listChild);
         return $this->returnSuccess($products);
     }
     public function getCategories(Request $request)

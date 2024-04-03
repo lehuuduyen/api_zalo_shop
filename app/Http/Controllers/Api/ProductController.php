@@ -100,8 +100,7 @@ class ProductController extends Controller
 
         }
         echo '<pre>';
-        print_r(gettype($products));
-        print_r(gettype($listChild));
+        print_r($products);
         echo '</pre>';
         die;
         array_push($products,$listChild);

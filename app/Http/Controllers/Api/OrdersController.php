@@ -95,13 +95,14 @@ class OrdersController extends Controller
             $image = $this->getImage($value->product_id, $store);
             if(!$image){
                 $parentProduct = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_posts')->select('post_parent')->find($value->product_id);
-                echo $value->product_id;
-                echo '<pre>';
-                print_r($parentProduct);
-                echo '</pre>';
-                die;
+                
                 if($parentProduct){
                     $image = $this->getImage($parentProduct->post_parent, $store);
+                    echo $parentProduct->post_parent;
+                echo '<pre>';
+                print_r($image);
+                echo '</pre>';
+                die;
                 }
                     
             }

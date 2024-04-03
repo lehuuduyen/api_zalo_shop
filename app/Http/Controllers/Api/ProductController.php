@@ -32,6 +32,9 @@ class ProductController extends Controller
         $listChildProducts = [];
         foreach ($products as $key => $product) {
             $childProduct = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->where('post_parent', $product->ID)->where('post_type', 'product_variation')->where('post_status', 'publish')->get();
+            $products[$key]->product_inventory = $this->getProductInventory($product->ID);
+            $products[$key]->category = $this->getCategoryByProduct($product->ID, $store);
+            
             foreach($childProduct as $keyChild =>  $child){
              $postMetaGiaGoc = $this->getPostMeta($child->ID, '_regular_price');
              $postMetaGiaKhuyenMai = $this->getPostMeta($child->ID, '_sale_price');
@@ -48,6 +51,9 @@ class ProductController extends Controller
                  $childProduct[$keyChild]->end_date = date('Y/m/d H:i:s', $_sale_price_dates_to);
              }
              $childProduct[$keyChild]->is_bien_the = true;
+             $childProduct[$keyChild]->product_inventory = $products[$key]->product_inventory;
+             $childProduct[$keyChild]->category = $products[$key]->category;
+             
              $listChildProducts[]=$childProduct[$keyChild];
             }
 
@@ -80,9 +86,7 @@ class ProductController extends Controller
             $products[$key]->summary = $product->post_excerpt;
             $products[$key]->description = $product->post_content;
             $products[$key]->badge_id = [];
-            $products[$key]->category = $this->getCategoryByProduct($product->ID, $store);
             $products[$key]->galleries = $this->getGalleries($product->ID, $store);
-            $products[$key]->product_inventory = $this->getProductInventory($product->ID);
             $products[$key]->delivery_option = [];
             // $products[$key]->delivery_option = $this->getProductDeliveryOption($product->id);
             $products[$key]->unit = [];

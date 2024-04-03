@@ -53,6 +53,7 @@ class ProductController extends Controller
              $childProduct[$keyChild]->is_bien_the = true;
              $childProduct[$keyChild]->product_inventory = $products[$key]->product_inventory;
              $childProduct[$keyChild]->category = $products[$key]->category;
+             $childProduct[$keyChild]->getreview = $this->getreview($child->ID);
              
              $listChildProducts[]=$childProduct[$keyChild];
             }

@@ -395,7 +395,7 @@ class StoreController extends Controller
     }
     public function loopChild($userParentId){
         $userParentIsset = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')
-                ->select($this->_PRFIX_TABLE . '_users.*')
+                ->select($this->_PRFIX_TABLE . '_users.*',$this->_PRFIX_TABLE . '_usermeta.user_id')
                 ->leftJoin($this->_PRFIX_TABLE . '_users',  $this->_PRFIX_TABLE . '_users.ID',  $this->_PRFIX_TABLE . '_usermeta.user_id')
                 ->where($this->_PRFIX_TABLE . '_usermeta.meta_value', $userParentId)
                 ->where($this->_PRFIX_TABLE . '_usermeta.meta_key', 'user_parent')

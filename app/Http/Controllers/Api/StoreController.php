@@ -307,7 +307,9 @@ class StoreController extends Controller
     }
     public function userChild(Request $request)
     {
-        $store = $request['data_reponse'];
+        try {
+            //code...
+            $store = $request['data_reponse'];
         $this->_PRFIX_TABLE = $store->prefixTable;
         $userId = $store->user_id;
 
@@ -387,6 +389,9 @@ class StoreController extends Controller
         }
         $result = array_merge($result,$userParent);
         return $this->returnSuccess($result);
+        } catch (\Throwable $th) {
+            return $this->returnError($th->getMessage());
+        }
     }
     public function loopChild($userParentId){
         $userParentIsset = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')

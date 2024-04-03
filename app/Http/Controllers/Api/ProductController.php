@@ -34,6 +34,7 @@ class ProductController extends Controller
             $childProduct = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->where('post_parent', $product->ID)->where('post_type', 'product_variation')->where('post_status', 'publish')->get();
             $products[$key]->product_inventory = $this->getProductInventory($product->ID);
             $products[$key]->category = $this->getCategoryByProduct($product->ID, $store);
+            $products[$key]->image_id = $this->getImage($product->ID, $store);
             
             foreach($childProduct as $keyChild =>  $child){
              $postMetaGiaGoc = $this->getPostMeta($child->ID, '_regular_price');
@@ -54,6 +55,8 @@ class ProductController extends Controller
              $childProduct[$keyChild]->product_inventory = $products[$key]->product_inventory;
              $childProduct[$keyChild]->category = $products[$key]->category;
              $childProduct[$keyChild]->review = $this->getreview($child->ID);
+             $imgChild = $this->getImage($child->ID, $store);
+             $childProduct[$keyChild]->image_id = ($imgChild)?$imgChild:$products[$key]->image_id;
              
              $listChildProducts[]=$childProduct[$keyChild];
             }
@@ -81,7 +84,6 @@ class ProductController extends Controller
                 $products[$key]->end_date = date('Y/m/d H:i:s', $_sale_price_dates_to);
             }
 
-            $products[$key]->image_id = $this->getImage($product->ID, $store);
             // $products[$key]->brand_id = $this->getBrand($product->brand_id, $store);
             $products[$key]->name = $product->post_title;
             $products[$key]->summary = $product->post_excerpt;

@@ -340,18 +340,21 @@ class StoreController extends Controller
         foreach($listUserChild as $key => $child){
         $tempIds[]= $child->ID;
         }
-        $listUserClick = DB::connection('mysql_external')->
-        table($this->_PRFIX_TABLE . '_woo_history_share_link')->
-        select($this->_PRFIX_TABLE . '_users.ID',$this->_PRFIX_TABLE . '_users.display_name as name', $this->_PRFIX_TABLE . '_users.user_login as mobile', $this->_PRFIX_TABLE . '_woo_history_share_link.create_at')->
-        join($this->_PRFIX_TABLE . '_users', $this->_PRFIX_TABLE . '_users.ID', $this->_PRFIX_TABLE . '_woo_history_share_link.user_id')->
-        where('user_parent', $userId)->where('user_id','!=', $userId)->where('status','!=', 2)->whereNotIn('user_id', $tempIds);
+        
 
-        if (isset($request['search'])) {
-            $listUserClick = $listUserClick->where('user_login', 'like', '%' . $request['search'] . '%');
-        }
-        if (isset($request['order'])) {
-            $listUserClick = $listUserClick->orderBy('ID', $request['order']);
-        }
+        //----Get user click
+        // $listUserClick = DB::connection('mysql_external')->
+        // table($this->_PRFIX_TABLE . '_woo_history_share_link')->
+        // select($this->_PRFIX_TABLE . '_users.ID',$this->_PRFIX_TABLE . '_users.display_name as name', $this->_PRFIX_TABLE . '_users.user_login as mobile', $this->_PRFIX_TABLE . '_woo_history_share_link.create_at')->
+        // join($this->_PRFIX_TABLE . '_users', $this->_PRFIX_TABLE . '_users.ID', $this->_PRFIX_TABLE . '_woo_history_share_link.user_id')->
+        // where('user_parent', $userId)->where('user_id','!=', $userId)->where('status','!=', 2)->whereNotIn('user_id', $tempIds);
+
+        // if (isset($request['search'])) {
+        //     $listUserClick = $listUserClick->where('user_login', 'like', '%' . $request['search'] . '%');
+        // }
+        // if (isset($request['order'])) {
+        //     $listUserClick = $listUserClick->orderBy('ID', $request['order']);
+        // }
 
 
         // $listUserClick = $listUserClick->groupBy($this->_PRFIX_TABLE . '_users.ID',$this->_PRFIX_TABLE . '_users.display_name',$this->_PRFIX_TABLE . '_users.user_login',$this->_PRFIX_TABLE . '_woo_history_share_link.create_at')->get();
@@ -365,8 +368,13 @@ class StoreController extends Controller
         // }
 
         // $mergedData = $listUserChild->merge($listUserClickNew);
-        $sortedData = $listUserChild->sortByDesc('create_at');
+        // $sortedData = $mergedData->sortByDesc('create_at');
 
+        //----Get user click
+
+        $sortedData = $listUserChild->sortByDesc('create_at');
+        $userParent = $this->loopChild($userId);
+        
         $stt=0;
         $result =[];
         foreach ($sortedData as $key => $user) {
@@ -377,7 +385,22 @@ class StoreController extends Controller
             $result[$stt]->image = $this->getUserMeta($user->ID,'image_user');
             $stt++;
         }
+        $result = array_merge($result,$userParent);
         return $this->returnSuccess($result);
+    }
+    public function loopChild($userParentId){
+        $userParentIsset = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')
+                ->where('meta_value', $userParentId)
+                ->where('meta_key', 'user_parent')
+                ->get();
+        $userParents = [];
+
+        foreach($userParentIsset as $val){
+            $val->parent = $this->loopChild($val->user_id);
+            $userParents[] = $val;
+        }
+        return $userParents;
+
     }
     public function historyWithdraw(Request $request)
     {

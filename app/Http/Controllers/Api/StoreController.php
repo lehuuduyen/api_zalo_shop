@@ -387,7 +387,7 @@ class StoreController extends Controller
             $result[$stt]->image = $this->getUserMeta($user->ID,'image_user');
             $stt++;
         }
-        $result = array_merge($result,$userParent);
+        $result = array_merge($userParent,$result);
         return $this->returnSuccess($result);
         } catch (\Throwable $th) {
             return $this->returnError($th->getMessage());

@@ -1502,7 +1502,6 @@ class Controller extends BaseController
     }
     public function calFee($quan,$phuong){
         // Create a stream
-        return 0;
         $opts = [
             "http" => [
                 "method" => "GET",

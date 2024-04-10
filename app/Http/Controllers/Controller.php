@@ -550,24 +550,47 @@ class Controller extends BaseController
 
         try {
             // them wp_posts
-            $postId = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->insertGetId(
-                array(
-                    'post_date' => $timeNow,
-                    'post_date_gmt' => $timeNow,
-                    'post_modified' => $timeNow,
-                    'post_modified_gmt' => $timeNow,
-                    'post_title' => 'Order &ndash; ' . $this->timeFormat(),
-                    'post_status' => 'wc-processing',
-                    'post_type' => 'shop_order',
-                    'post_content' => '',
-                    'post_excerpt' => '',
-                    'to_ping' => '',
-                    'pinged' => '',
-                    'post_content_filtered' => '',
 
-                    'comment_count' => '0',
-                )
-            );
+            if(isset($data['status']) & $data['status'] == 1){
+                $postId = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->insertGetId(
+                    array(
+                        'post_date' => $timeNow,
+                        'post_date_gmt' => $timeNow,
+                        'post_modified' => $timeNow,
+                        'post_modified_gmt' => $timeNow,
+                        'post_title' => 'Order &ndash; ' . $this->timeFormat(),
+                        'post_status' => 'wc-completed',
+                        'post_type' => 'shop_order',
+                        'post_content' => '',
+                        'post_excerpt' => '',
+                        'to_ping' => '',
+                        'pinged' => '',
+                        'post_content_filtered' => '',
+    
+                        'comment_count' => '0',
+                    )
+                );
+            }else{
+                $postId = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->insertGetId(
+                    array(
+                        'post_date' => $timeNow,
+                        'post_date_gmt' => $timeNow,
+                        'post_modified' => $timeNow,
+                        'post_modified_gmt' => $timeNow,
+                        'post_title' => 'Order &ndash; ' . $this->timeFormat(),
+                        'post_status' => 'wc-processing',
+                        'post_type' => 'shop_order',
+                        'post_content' => '',
+                        'post_excerpt' => '',
+                        'to_ping' => '',
+                        'pinged' => '',
+                        'post_content_filtered' => '',
+    
+                        'comment_count' => '0',
+                    )
+                );
+            }
+            
             // $data['message'] wp_comments
             if ($data['message']) {
                 DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_comments')->insert(
@@ -889,9 +912,10 @@ class Controller extends BaseController
 
             if($data['payment_gateway'] == 'cod'){
                 $paymentTitle  = 'Thanh toán khi giao hàng';
-            }  else{
+            } elseif($data['payment_gateway'] == 'zalopay'){
+                $paymentTitle  = 'Thanh toán zalopay';
+            } else{
                 $paymentTitle  = 'Chuyển khoản ngân hàng';
-
             }
             // them wp_postmeta
             $postMeta = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_postmeta')->insert(

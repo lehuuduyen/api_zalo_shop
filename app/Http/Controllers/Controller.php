@@ -1054,6 +1054,22 @@ class Controller extends BaseController
                         'post_id' => $postId,
                         'meta_key' => '_shipping_address_2',
                         'meta_value' => $phuong,
+                    ),array(
+                        'post_id' => $postId,
+                        'meta_key' => '_wc_order_attribution_device_type',
+                        'meta_value' => 'zaloapp',
+                    ),array(
+                        'post_id' => $postId,
+                        'meta_key' => '_wc_order_attribution_session_count',
+                        'meta_value' => 0,
+                    ),array(
+                        'post_id' => $postId,
+                        'meta_key' => '_wc_order_attribution_session_pages',
+                        'meta_value' => 0,
+                    ),array(
+                        'post_id' => $postId,
+                        'meta_key' => '_wc_order_attribution_source_type',
+                        'meta_value' => 'typein',
                     ),
                 )
             );
@@ -1486,7 +1502,6 @@ class Controller extends BaseController
     }
     public function calFee($quan,$phuong){
         // Create a stream
-        return 0;
         $opts = [
             "http" => [
                 "method" => "GET",

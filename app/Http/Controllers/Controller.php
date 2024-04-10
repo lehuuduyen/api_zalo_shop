@@ -1251,6 +1251,8 @@ class Controller extends BaseController
         $_sale_price_dates_to = $this->getPostMeta($postId, '_sale_price_dates_to');
         if ($price && $time >= $_sale_price_dates_from && $time <= $_sale_price_dates_to) {
             $price = $price;
+        }else if($price && $price != $priceGoc){
+            $price = $price;
         } else {
             $price = $priceGoc;
         }

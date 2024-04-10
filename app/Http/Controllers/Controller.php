@@ -550,10 +550,7 @@ class Controller extends BaseController
 
         try {
             // them wp_posts
-            echo '<pre>';
-            print_r($data);
-            echo '</pre>';
-            die;
+           
             if(isset($data['status']) && $data['status'] == 1){
                 $postId = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->insertGetId(
                     array(

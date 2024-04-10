@@ -1057,7 +1057,7 @@ class Controller extends BaseController
                     ),array(
                         'post_id' => $postId,
                         'meta_key' => '_wc_order_attribution_device_type',
-                        'meta_value' => 'zaloapp',
+                        'meta_value' => 'Mobile',
                     ),array(
                         'post_id' => $postId,
                         'meta_key' => '_wc_order_attribution_session_count',

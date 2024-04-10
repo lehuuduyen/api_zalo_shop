@@ -551,7 +551,7 @@ class Controller extends BaseController
         try {
             // them wp_posts
 
-            if(isset($data['status']) & $data['status'] == 1){
+            if(isset($data['status']) && $data['status'] == 1){
                 $postId = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->insertGetId(
                     array(
                         'post_date' => $timeNow,
@@ -1502,6 +1502,7 @@ class Controller extends BaseController
     }
     public function calFee($quan,$phuong){
         // Create a stream
+        return 0;
         $opts = [
             "http" => [
                 "method" => "GET",

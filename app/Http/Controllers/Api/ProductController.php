@@ -346,12 +346,27 @@ class ProductController extends Controller
                 $listProductId[] = $value['id'];
             }
             $products = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->whereIn('id', $listProductId)->get();
-            $coupon_amount_total = $this->calculateCoupon($data, $products, true);
-            if ($coupon_amount_total > 0) {
-                return $this->returnSuccess($coupon_amount_total);
-            } else {
-                return $this->returnError($coupon_amount_total, 'Mã khuyễn mãi không đúng');
+            
+            if(is_array($data['coupon'])){
+                $listCoupon = [];
+                foreach($data['coupon'] as $coupon ){
+                    $coupon_amount_total = $this->calculateCoupon($data, $products, true);
+                    $list[]=[
+                        'coupon'=>$coupon,
+                        'discount'=>$coupon_amount_total
+                    ];
+                }
+                return $this->returnSuccess($listCoupon);
+                
+            }else{
+                $coupon_amount_total = $this->calculateCoupon($data, $products, true);
+                if ($coupon_amount_total > 0) {
+                    return $this->returnSuccess($coupon_amount_total);
+                } else {
+                    return $this->returnError($coupon_amount_total, 'Mã khuyễn mãi không đúng');
+                }
             }
+           
         } catch (\Throwable $th) {
             //throw $th;
             $this->woo_logs('checkCoupon', $th->getMessage());

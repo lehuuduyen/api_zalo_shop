@@ -1506,6 +1506,10 @@ class Controller extends BaseController
     }
     public function calFee($quan,$phuong){
         // Create a stream
+        $freeship = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woocommerce_shipping_zone_methods')->where('method_id', 'free_shipping')->where('is_enabled', 1)->get()->count();
+        if($freeship == 1){
+            return 0;
+        }
         $opts = [
             "http" => [
                 "method" => "GET",

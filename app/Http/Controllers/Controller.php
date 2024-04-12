@@ -1191,8 +1191,16 @@ class Controller extends BaseController
         $coupon['subtotal'] = $price['total'];
         if(is_array($coupon['coupon'])){
             $listCoupon = [];
+            $temp['subtotal']=0;
+            $subtotal =0;
             foreach($coupon['coupon'] as $coupon ){
                 $temp['coupon']=$coupon;
+                if($key ==0){
+                    $temp['subtotal']=$data['subtotal'];
+                }else{
+                    $temp['subtotal']=$subtotal;
+                    
+                }
                 $coupon_amount_total = $this->calculateCoupon($temp, $products, true);
                 $discounted_price += $coupon_amount_total;
             }

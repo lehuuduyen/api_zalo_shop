@@ -350,8 +350,9 @@ class ProductController extends Controller
             if(is_array($data['coupon'])){
                 $listCoupon = [];
                 foreach($data['coupon'] as $coupon ){
-                    $coupon_amount_total = $this->calculateCoupon($data, $products, true);
-                    $list[]=[
+                    $temp['coupon']=$coupon;
+                    $coupon_amount_total = $this->calculateCoupon($temp, $products, true);
+                    $listCoupon[]=[
                         'coupon'=>$coupon,
                         'discount'=>$coupon_amount_total
                     ];

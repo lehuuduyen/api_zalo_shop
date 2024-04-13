@@ -1209,7 +1209,8 @@ class Controller extends BaseController
                
                 $coupon_amount_total = $this->calculateCoupon($temp, [], true);
                 $listDetail[]=array(
-                    "$detailCoupon" => $coupon_amount_total
+                    "coupon" => $detailCoupon,
+                    "discount" => $coupon_amount_total,
                 );
                 $subtotal = $subtotal -$coupon_amount_total;
                 $discounted_price += $coupon_amount_total;

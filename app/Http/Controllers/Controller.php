@@ -1188,7 +1188,10 @@ class Controller extends BaseController
 
         $price = $totalPriceDetails;
         $coupon = ["coupon" => $validated_data['used_coupon'], "subtotal" => $price['total']];
-
+        echo '<pre>';
+        print_r($coupon);
+        echo '</pre>';
+        die;
         $discounted_price = 0;
         
 
@@ -1216,10 +1219,7 @@ class Controller extends BaseController
         }else{
             $discounted_price = $this->calculateCoupon($coupon, []);
         }
-        echo '<pre>';
-        print_r($listDetail);
-        echo '</pre>';
-        die;
+        
         $price['total'] -= $discounted_price;            
 
         $product_tax = $data['product_tax'];

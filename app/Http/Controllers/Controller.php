@@ -1341,7 +1341,7 @@ class Controller extends BaseController
             $price = $this->getPostMeta($item['id'], '_sale_price');
             echo '<pre>';
             print_r($priceGoc);
-            echo "---";
+            echo "---".$item['id'];
             print_r($price);
             echo '</pre>';
             die;

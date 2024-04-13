@@ -626,8 +626,13 @@ class Controller extends BaseController
             //them wp_wc_order_coupon_lookup && wp_woocommerce_order_items
             if ($finalDetails['coupon_discounted'] && $finalDetails['coupon_discounted'] > 0) {
                 if(is_array($data['used_coupon'])){
+
                     $coupons = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->whereIn('post_title', $data['used_coupon'])->where('post_status', 'publish')->where('post_type', 'shop_coupon')->first();
                     foreach($coupons as $coupon){
+                        echo '<pre>';
+                        print_r($finalDetails);
+                        echo '</pre>';
+                        die;
                         $coupon_amount = $this->getPostMeta($coupon->ID, 'coupon_amount');
                         $coupon_type = $this->getPostMeta($coupon->ID, 'discount_type');
     
@@ -1189,6 +1194,7 @@ class Controller extends BaseController
 
         $data = $this->get_product_shipping_tax(['country' => $country, 'state' => $state, 'shipping_method' => (int)$shipping_method]);
         $coupon['subtotal'] = $price['total'];
+        $listDetail =[];
         if(is_array($coupon['coupon'])){
             $listCoupon = [];
             $temp['subtotal']=0;
@@ -1202,6 +1208,9 @@ class Controller extends BaseController
                     
                 }
                 $coupon_amount_total = $this->calculateCoupon($temp, $products, true);
+                $listDetail[]=array(
+                    $coupon => $coupon_amount_total
+                );
                 $discounted_price += $coupon_amount_total;
             }
         }else{
@@ -1215,7 +1224,7 @@ class Controller extends BaseController
         $taxed_price = ($price['total'] * $product_tax) / 100;
         $subtotal = $price['total'] + $discounted_price;
         $total['total'] = $price['total'] + $taxed_price + $shipping_cost;
-
+        $total['detail_voucher']=$listDetail;
         // $total['payment_meta'] = $this->payment_meta(compact('product_tax', 'shipping_cost', 'subtotal', 'total'));
         $total['coupon_discounted'] = $discounted_price;
         return $total;

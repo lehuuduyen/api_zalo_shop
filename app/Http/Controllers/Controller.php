@@ -844,7 +844,8 @@ class Controller extends BaseController
 
             $phuong = $this->getUserMeta($user['id'], 'phuong');
             echo '<pre>';
-                print_r($user);
+                var_dump($phuong);
+                var_dump($quan);
                 echo '</pre>';
                 die;
             $fee = $this->calFee($quan,$phuong);

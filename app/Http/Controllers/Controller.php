@@ -540,6 +540,15 @@ class Controller extends BaseController
         $formattedDate = strftime('%B %d, %Y @ %I:%M %p', $now);
         return $formattedDate;
     }
+    public function checkPriceDiscount($detail_voucher,$coupon)
+    {
+        foreach($detail_voucher as $voucher){
+            if($voucher['coupon'] == $coupon){
+                return $voucher['discount'] ;
+            }
+        }
+        return 0;
+    }
     public function createOrder($data, $user)
     {
 
@@ -629,10 +638,7 @@ class Controller extends BaseController
 
                     $coupons = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->whereIn('post_title', $data['used_coupon'])->where('post_status', 'publish')->where('post_type', 'shop_coupon')->first();
                     foreach($coupons as $coupon){
-                        echo '<pre>';
-                        print_r($finalDetails);
-                        echo '</pre>';
-                        die;
+                        $coupon_discounted=$this->checkPriceDiscount($finalDetails['detail_voucher'],$coupon);
                         $coupon_amount = $this->getPostMeta($coupon->ID, 'coupon_amount');
                         $coupon_type = $this->getPostMeta($coupon->ID, 'discount_type');
     
@@ -641,7 +647,7 @@ class Controller extends BaseController
                             'order_id' => $postId,
                             'coupon_id' => $coupon->ID,
                             'date_created' => $timeNow,
-                            'discount_amount' => $finalDetails['coupon_discounted'],
+                            'discount_amount' =>$coupon_discounted,
                         )
                     );
                     $orderItemIdCoupon = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woocommerce_order_items')->insertGetId(
@@ -668,7 +674,7 @@ class Controller extends BaseController
                             array(
                                 'order_item_id' => $orderItemIdCoupon,
                                 'meta_key' => 'discount_amount',
-                                'meta_value' => $finalDetails['coupon_discounted'],
+                                'meta_value' => $coupon_discounted,
                             )
                         ),
                     );

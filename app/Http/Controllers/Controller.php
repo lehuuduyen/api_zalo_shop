@@ -638,15 +638,16 @@ class Controller extends BaseController
 
                     $coupons = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->whereIn('post_title', $data['used_coupon'])->where('post_status', 'publish')->where('post_type', 'shop_coupon')->first();
                     foreach($coupons as $coupon){
-                        $coupon_discounted=$this->checkPriceDiscount($finalDetails['detail_voucher'],$coupon);
-                        $coupon_amount = $this->getPostMeta($coupon->ID, 'coupon_amount');
-                        $coupon_type = $this->getPostMeta($coupon->ID, 'discount_type');
                         echo '<pre>';
-                        print_r($coupon_discounted);
                         echo "-----";
                         print_r($coupon);
                         echo '</pre>';
                         die;
+                        $coupon_discounted=$this->checkPriceDiscount($finalDetails['detail_voucher'],$coupon->post_title);
+                        
+                        $coupon_amount = $this->getPostMeta($coupon->ID, 'coupon_amount');
+                        $coupon_type = $this->getPostMeta($coupon->ID, 'discount_type');
+                        
                     DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_wc_order_coupon_lookup')->insertGetId(
                         array(
                             'order_id' => $postId,

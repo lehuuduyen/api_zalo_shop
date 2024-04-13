@@ -1190,10 +1190,7 @@ class Controller extends BaseController
         $coupon = ["coupon" => $validated_data['used_coupon'], "subtotal" => $price['total']];
 
         $discounted_price = 0;
-        echo '<pre>';
-        print_r($coupon);
-        echo '</pre>';
-        die;
+        
 
         $data = $this->get_product_shipping_tax(['country' => $country, 'state' => $state, 'shipping_method' => (int)$shipping_method]);
         $coupon['subtotal'] = $price['total'];
@@ -1352,7 +1349,10 @@ class Controller extends BaseController
                 $price = $priceGoc;
             }
 
-
+            echo '<pre>';
+            print_r($price);
+            echo '</pre>';
+            die;
 
             $stockStatus = $this->getPostMeta($item['id'], '_stock_status');
             //checkcampaign

@@ -1199,7 +1199,7 @@ class Controller extends BaseController
             $listCoupon = [];
             $temp['subtotal']=0;
             $subtotal =0;
-            foreach($coupon['coupon'] as $coupon ){
+            foreach($coupon['coupon'] as $key => $coupon ){
                 $temp['coupon']=$coupon;
                 if($key ==0){
                     $temp['subtotal']=$data['subtotal'];

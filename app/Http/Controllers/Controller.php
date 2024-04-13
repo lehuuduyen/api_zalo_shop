@@ -641,7 +641,12 @@ class Controller extends BaseController
                         $coupon_discounted=$this->checkPriceDiscount($finalDetails['detail_voucher'],$coupon);
                         $coupon_amount = $this->getPostMeta($coupon->ID, 'coupon_amount');
                         $coupon_type = $this->getPostMeta($coupon->ID, 'discount_type');
-    
+                        echo '<pre>';
+                        print_r($coupon_discounted);
+                        echo "-----";
+                        print_r($coupon);
+                        echo '</pre>';
+                        die;
                     DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_wc_order_coupon_lookup')->insertGetId(
                         array(
                             'order_id' => $postId,

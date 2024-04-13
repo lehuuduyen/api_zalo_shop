@@ -843,12 +843,7 @@ class Controller extends BaseController
             $quan = $this->getUserMeta($user['id'], 'quan');
 
             $phuong = $this->getUserMeta($user['id'], 'phuong');
-            echo '<pre>';
-                var_dump($phuong);
-                var_dump($quan);
-                echo '</pre>';
-                die;
-            $fee = $this->calFee($quan,$phuong);
+            $fee = ($quan && $phuong)? $this->calFee($quan,$phuong):0;
             
             if($fee > 0){
                 $motahang = '';

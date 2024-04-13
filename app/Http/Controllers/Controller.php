@@ -1207,7 +1207,7 @@ class Controller extends BaseController
                     
                 }
                
-                $coupon_amount_total = $this->calculateCoupon($temp, $products, true);
+                $coupon_amount_total = $this->calculateCoupon($temp, [], true);
                 $listDetail[]=array(
                     $detailCoupon => $coupon_amount_total
                 );

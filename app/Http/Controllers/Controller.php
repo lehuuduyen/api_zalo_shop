@@ -1216,6 +1216,10 @@ class Controller extends BaseController
         }else{
             $discounted_price = $this->calculateCoupon($coupon, []);
         }
+        echo '<pre>';
+        print_r($discounted_price);
+        echo '</pre>';
+        die;
         $price['total'] -= $discounted_price;            
 
         $product_tax = $data['product_tax'];

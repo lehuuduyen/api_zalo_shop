@@ -1188,10 +1188,7 @@ class Controller extends BaseController
 
         $price = $totalPriceDetails;
         $coupon = ["coupon" => $validated_data['used_coupon'], "subtotal" => $price['total']];
-        echo '<pre>';
-        print_r($coupon);
-        echo '</pre>';
-        die;
+        
         $discounted_price = 0;
         
 
@@ -1202,8 +1199,8 @@ class Controller extends BaseController
             $listCoupon = [];
             $temp['subtotal']=0;
             $subtotal =0;
-            foreach($coupon['coupon'] as $key => $coupon ){
-                $temp['coupon']=$coupon;
+            foreach($coupon['coupon'] as $key => $detailCoupon ){
+                $temp['coupon']=$detailCoupon;
                 if($key ==0){
                     $temp['subtotal']=$data['subtotal'];
                 }else{
@@ -1212,7 +1209,7 @@ class Controller extends BaseController
                 }
                 $coupon_amount_total = $this->calculateCoupon($temp, $products, true);
                 $listDetail[]=array(
-                    $coupon => $coupon_amount_total
+                    $detailCoupon => $coupon_amount_total
                 );
                 $discounted_price += $coupon_amount_total;
             }

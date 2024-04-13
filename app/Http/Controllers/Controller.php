@@ -752,10 +752,7 @@ class Controller extends BaseController
                     }
                 }
 
-                echo '<pre>';
-                print_r(123);
-                echo '</pre>';
-                die;
+                
 
                 //wp_woocommerce_order_items
                 $orderItemId = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woocommerce_order_items')->insertGetId(
@@ -845,6 +842,10 @@ class Controller extends BaseController
 
             $phuong = $this->getUserMeta($user['id'], 'phuong');
             $fee = $this->calFee($quan,$phuong);
+            echo '<pre>';
+                print_r(123);
+                echo '</pre>';
+                die;
             if($fee > 0){
                 $motahang = '';
                 foreach($data['order'] as $order){

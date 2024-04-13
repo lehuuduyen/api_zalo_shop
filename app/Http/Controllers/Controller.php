@@ -1345,6 +1345,7 @@ class Controller extends BaseController
                 $price = $price;
             } else if(!empty($price) && $price != $priceGoc){
                 $price = $price;
+                echo 123;
             }else {
                 $price = $priceGoc;
             }

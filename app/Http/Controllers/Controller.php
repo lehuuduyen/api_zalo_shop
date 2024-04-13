@@ -1339,12 +1339,6 @@ class Controller extends BaseController
             $stock_count = $this->getPostMeta($item['id'], '_stock');
             $priceGoc = $this->getPostMeta($item['id'], '_regular_price');
             $price = $this->getPostMeta($item['id'], '_sale_price');
-            echo '<pre>';
-            print_r($priceGoc);
-            echo "---".$item['id'];
-            print_r($price);
-            echo '</pre>';
-            die;
             $_sale_price_dates_from = $this->getPostMeta($item['id'], '_sale_price_dates_from');
             $_sale_price_dates_to = $this->getPostMeta($item['id'], '_sale_price_dates_to');
             if ($price && $time >= $_sale_price_dates_from && $time <= $_sale_price_dates_to) {

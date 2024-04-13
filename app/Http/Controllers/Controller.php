@@ -661,7 +661,10 @@ class Controller extends BaseController
                         )
                     );
     
-    
+                    echo '<pre>';
+                    print_r($orderItemIdCoupon);
+                    echo '</pre>';
+                    die;
                     DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woocommerce_order_itemmeta')->insert(
                         array(
                             array(

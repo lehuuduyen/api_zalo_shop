@@ -819,10 +819,7 @@ class Controller extends BaseController
 
                     )
                 );
-                echo '<pre>';
-                print_r(123);
-                echo '</pre>';
-                die;
+                
                 // wp_wc_order_product_lookup
                 DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_wc_order_product_lookup')->insert(
                     array(
@@ -841,6 +838,10 @@ class Controller extends BaseController
                     )
                 );
             }
+            echo '<pre>';
+                print_r(123);
+                echo '</pre>';
+                die;
             $city = $this->getUserMeta($user['id'], 'city');
             $quan = $this->getUserMeta($user['id'], 'quan');
 

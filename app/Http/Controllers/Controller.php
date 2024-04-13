@@ -636,12 +636,8 @@ class Controller extends BaseController
             if ($finalDetails['coupon_discounted'] && $finalDetails['coupon_discounted'] > 0) {
                 if(is_array($data['used_coupon'])){
 
-                    $coupons = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->whereIn('post_title', $data['used_coupon'])->where('post_status', 'publish')->where('post_type', 'shop_coupon')->first();
-                    echo '<pre>';
-                        echo "-----";
-                        print_r($coupons);
-                        echo '</pre>';
-                        die;
+                    $coupons = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->whereIn('post_title', $data['used_coupon'])->where('post_status', 'publish')->where('post_type', 'shop_coupon')->get();
+                    
                     foreach($coupons as $coupon){
                         
                         $coupon_discounted=$this->checkPriceDiscount($finalDetails['detail_voucher'],$coupon->post_title);

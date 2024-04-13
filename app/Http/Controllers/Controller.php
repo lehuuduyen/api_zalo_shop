@@ -838,14 +838,15 @@ class Controller extends BaseController
                     )
                 );
             }
-            echo '<pre>';
-                print_r(123);
-                echo '</pre>';
-                die;
+            
             $city = $this->getUserMeta($user['id'], 'city');
             $quan = $this->getUserMeta($user['id'], 'quan');
 
             $phuong = $this->getUserMeta($user['id'], 'phuong');
+            echo '<pre>';
+                print_r($user);
+                echo '</pre>';
+                die;
             $fee = $this->calFee($quan,$phuong);
             
             if($fee > 0){

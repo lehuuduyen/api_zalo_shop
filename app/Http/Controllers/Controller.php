@@ -625,46 +625,92 @@ class Controller extends BaseController
 
             //them wp_wc_order_coupon_lookup && wp_woocommerce_order_items
             if ($finalDetails['coupon_discounted'] && $finalDetails['coupon_discounted'] > 0) {
-                $coupon = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->where('post_title', $data['used_coupon'])->where('post_status', 'publish')->where('post_type', 'shop_coupon')->first();
-                $coupon_amount = $this->getPostMeta($coupon->ID, 'coupon_amount');
-                $coupon_type = $this->getPostMeta($coupon->ID, 'discount_type');
-
-                DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_wc_order_coupon_lookup')->insertGetId(
-                    array(
-                        'order_id' => $postId,
-                        'coupon_id' => $coupon->ID,
-                        'date_created' => $timeNow,
-                        'discount_amount' => $finalDetails['coupon_discounted'],
-                    )
-                );
-                $orderItemIdCoupon = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woocommerce_order_items')->insertGetId(
-                    array(
-                        'order_id' => $postId,
-                        'order_item_type' => 'coupon',
-                        'order_item_name' => $data['used_coupon'],
-                    )
-                );
-
-
-                DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woocommerce_order_itemmeta')->insert(
-                    array(
+                if(is_array($data['used_coupon'])){
+                    $coupons = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->whereIn('post_title', $data['used_coupon'])->where('post_status', 'publish')->where('post_type', 'shop_coupon')->first();
+                    foreach($coupons as $coupon){
+                        $coupon_amount = $this->getPostMeta($coupon->ID, 'coupon_amount');
+                        $coupon_type = $this->getPostMeta($coupon->ID, 'discount_type');
+    
+                    DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_wc_order_coupon_lookup')->insertGetId(
                         array(
-                            'order_item_id' => $orderItemIdCoupon,
-                            'meta_key' => 'coupon_data',
-                            'meta_value' => '',
-                        ),
-                        array(
-                            'order_item_id' => $orderItemIdCoupon,
-                            'meta_key' => 'discount_amount_tax',
-                            'meta_value' => 0,
-                        ),
-                        array(
-                            'order_item_id' => $orderItemIdCoupon,
-                            'meta_key' => 'discount_amount',
-                            'meta_value' => $finalDetails['coupon_discounted'],
+                            'order_id' => $postId,
+                            'coupon_id' => $coupon->ID,
+                            'date_created' => $timeNow,
+                            'discount_amount' => $finalDetails['coupon_discounted'],
                         )
-                    ),
-                );
+                    );
+                    $orderItemIdCoupon = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woocommerce_order_items')->insertGetId(
+                        array(
+                            'order_id' => $postId,
+                            'order_item_type' => 'coupon',
+                            'order_item_name' => $data['used_coupon'],
+                        )
+                    );
+    
+    
+                    DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woocommerce_order_itemmeta')->insert(
+                        array(
+                            array(
+                                'order_item_id' => $orderItemIdCoupon,
+                                'meta_key' => 'coupon_data',
+                                'meta_value' => '',
+                            ),
+                            array(
+                                'order_item_id' => $orderItemIdCoupon,
+                                'meta_key' => 'discount_amount_tax',
+                                'meta_value' => 0,
+                            ),
+                            array(
+                                'order_item_id' => $orderItemIdCoupon,
+                                'meta_key' => 'discount_amount',
+                                'meta_value' => $finalDetails['coupon_discounted'],
+                            )
+                        ),
+                    );
+                    }
+                }else{
+                    $coupon = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->where('post_title', $data['used_coupon'])->where('post_status', 'publish')->where('post_type', 'shop_coupon')->first();
+                    $coupon_amount = $this->getPostMeta($coupon->ID, 'coupon_amount');
+                    $coupon_type = $this->getPostMeta($coupon->ID, 'discount_type');
+    
+                    DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_wc_order_coupon_lookup')->insertGetId(
+                        array(
+                            'order_id' => $postId,
+                            'coupon_id' => $coupon->ID,
+                            'date_created' => $timeNow,
+                            'discount_amount' => $finalDetails['coupon_discounted'],
+                        )
+                    );
+                    $orderItemIdCoupon = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woocommerce_order_items')->insertGetId(
+                        array(
+                            'order_id' => $postId,
+                            'order_item_type' => 'coupon',
+                            'order_item_name' => $data['used_coupon'],
+                        )
+                    );
+    
+    
+                    DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woocommerce_order_itemmeta')->insert(
+                        array(
+                            array(
+                                'order_item_id' => $orderItemIdCoupon,
+                                'meta_key' => 'coupon_data',
+                                'meta_value' => '',
+                            ),
+                            array(
+                                'order_item_id' => $orderItemIdCoupon,
+                                'meta_key' => 'discount_amount_tax',
+                                'meta_value' => 0,
+                            ),
+                            array(
+                                'order_item_id' => $orderItemIdCoupon,
+                                'meta_key' => 'discount_amount',
+                                'meta_value' => $finalDetails['coupon_discounted'],
+                            )
+                        ),
+                    );
+                }
+                
             }
             //wp_wc_order_product_lookup
             $totalQuantity = array_sum($totalPriceDetails['quantity']);
@@ -1138,17 +1184,30 @@ class Controller extends BaseController
         $price = $totalPriceDetails;
         $coupon = ["coupon" => $validated_data['used_coupon'], "subtotal" => $price['total']];
 
-
+        $discounted_price = 0;
 
 
         $data = $this->get_product_shipping_tax(['country' => $country, 'state' => $state, 'shipping_method' => (int)$shipping_method]);
         $coupon['subtotal'] = $price['total'];
-        $discounted_price = $this->calculateCoupon($coupon, []);
-
-
-
-
-        $price['total'] -= $discounted_price;
+        if(is_array($coupon['coupon'])){
+            $listCoupon = [];
+            $temp['subtotal']=0;
+            $subtotal =0;
+            foreach($coupon['coupon'] as $coupon ){
+                $temp['coupon']=$coupon;
+                if($key ==0){
+                    $temp['subtotal']=$data['subtotal'];
+                }else{
+                    $temp['subtotal']=$subtotal;
+                    
+                }
+                $coupon_amount_total = $this->calculateCoupon($temp, $products, true);
+                $discounted_price += $coupon_amount_total;
+            }
+        }else{
+            $discounted_price = $this->calculateCoupon($coupon, []);
+        }
+        $price['total'] -= $discounted_price;            
 
         $product_tax = $data['product_tax'];
         $shipping_cost = $data['shipping_cost'];

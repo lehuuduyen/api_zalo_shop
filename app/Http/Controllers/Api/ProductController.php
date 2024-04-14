@@ -165,13 +165,10 @@ class ProductController extends Controller
         $store = $request['data_reponse'];
         $this->_PRFIX_TABLE = $store->prefixTable;
         $result = [];
-        if(isset($data['product_id']) ){
-            $userId = $store->user_id;
-            $listFavorite = $this->getUserMeta($userId, 'favorite');
-            if($listFavorite ){
-                $result = json_decode($listFavorite );
-            }
-
+        $userId = $store->user_id;
+        $listFavorite = $this->getUserMeta($userId, 'favorite');
+        if($listFavorite ){
+            $result = json_decode($listFavorite );
         }
         return $this->returnSuccess($result);
     }

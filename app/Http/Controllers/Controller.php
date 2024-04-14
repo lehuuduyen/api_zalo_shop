@@ -742,11 +742,13 @@ class Controller extends BaseController
                 $tongGiaGiam = 0;
                 if (isset($coupon) && $coupon) {
                     if ($coupon_type == 'fixed_cart') {
-                        $giagiam = round($coupon_amount / $totalQuantity * $totalPriceDetails['quantity'][$key]);
+                        // $giagiam = round($coupon_amount / $totalQuantity * $totalPriceDetails['quantity'][$key]);
+                        $giagiam = $finalDetails['coupon_discounted'];
                         $price = $price - $giagiam;
                         $tongGiaGiam = $tongGiaGiam + $giagiam;
                     } else {
-                        $giagiam = round($price * $coupon_amount  / 100);
+                        // $giagiam = round($price * $coupon_amount  / 100);
+                        $giagiam = $finalDetails['coupon_discounted'];
                         $price = $price - $giagiam;
                         $tongGiaGiam = $tongGiaGiam + $giagiam * $totalPriceDetails['quantity'][$key];
                     }

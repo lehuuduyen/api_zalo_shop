@@ -751,7 +751,7 @@ class Controller extends BaseController
                         $tongGiaGiam = $tongGiaGiam + $giagiam * $totalPriceDetails['quantity'][$key];
                     }
                 }
-
+                $tongGiaGiam = $finalDetails['coupon_discounted'];
                 
 
                 //wp_woocommerce_order_items

@@ -60,7 +60,11 @@ class GatewaveController extends Controller
                 
             }
         } catch (\Throwable $th) {
-            //throw $th;
+            return $this->returnError([
+                'mess'=>$th->getMessage(),
+                'follow'=> false
+            ]);
+            throw $th;
         }
     }
     public function index(Request $request)

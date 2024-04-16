@@ -43,7 +43,7 @@ class GatewaveController extends Controller
                         'follow'=> true
                     ]);
                 }else{
-                    $option = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
+                    $option = DB::table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
                         array(
                             'meta_key' => 'follow',
                             'user_id'=> $data['user_id']

@@ -31,7 +31,7 @@ class GatewaveController extends Controller
             $validator = Validator::make($request->all(), [
                 'user_id' => 'required',
             ],[
-                'user_id.required' => "Vui lòng nhập store",
+                'user_id.required' => "Vui lòng nhập user_id",
             ]);
             if ($validator->fails()) {
                 return $this->returnError(new \stdClass,$validator->errors()->first());

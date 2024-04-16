@@ -584,7 +584,7 @@ class Controller extends BaseController
                     'post_modified' => $timeNow,
                     'post_modified_gmt' => $timeNow,
                     'post_title' => 'Order &ndash; ' . $this->timeFormat(),
-                    'post_status' => 'wc-processing',
+                    'post_status' => 'wc-completed',
                     'post_type' => 'shop_order_placehold',
                     'post_content' => '',
                     'post_excerpt' => '',
@@ -881,7 +881,7 @@ class Controller extends BaseController
             DB::table($this->_PRFIX_TABLE . '_wc_orders')->insertGetId(
                 array(
                     'id' => $postId,
-                    'status' => 'wc-pending',
+                    'status' => 'wc-completed',
                     'currency' => 'VND',
                     'type' => 'shop_order',
                     'tax_amount' => 0,

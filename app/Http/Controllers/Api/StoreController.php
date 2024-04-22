@@ -671,7 +671,7 @@ class StoreController extends Controller
     }
     public function listRotation(Request $request)
     {
-        $rotation = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_list_rotations')->where('status', 'publish')->get();
+        $rotation = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_list_rotations')->get();
 
         return $this->returnSuccess($rotation);
     }

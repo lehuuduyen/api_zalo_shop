@@ -27,6 +27,8 @@ Route::group([  'middleware' => ['CorsApi','CheckStore']], function()
 {
 Route::get('getFee', 'App\Http\Controllers\Api\StoreController@getFee')->middleware('CorsApi');
 Route::get('list_rotation', 'App\Http\Controllers\Api\StoreController@listRotation')->middleware('CorsApi');
+Route::get('get_turn', 'App\Http\Controllers\Api\StoreController@getTurn')->middleware('CorsApi');
+Route::post('active_rotation', 'App\Http\Controllers\Api\StoreController@activeRotation')->middleware('CorsApi');
 
     Route::get('getShare', 'App\Http\Controllers\Api\StoreController@getShare');
     Route::post('log', 'App\Http\Controllers\Api\StoreController@log');

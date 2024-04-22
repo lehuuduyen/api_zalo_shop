@@ -675,6 +675,18 @@ class StoreController extends Controller
 
         return $this->returnSuccess($rotation);
     }
+    public function getTurn(Request $request)
+    {
+        // $rotation = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_list_rotations')->get();
+        return $this->returnSuccess(1);
+
+    }
+    public function activeRotation(Request $request)
+    {
+        // $rotation = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_list_rotations')->get();
+        return $this->returnSuccess(1);
+
+    }
     public function phuong(Request $request)
     {
         try {

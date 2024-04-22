@@ -669,6 +669,12 @@ class StoreController extends Controller
             return $this->returnError([], "Lỗi hệ thống");
         }
     }
+    public function listRotation(Request $request)
+    {
+        $rotation = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_list_rotations')->where('status', 'publish')->get();
+
+        return $this->returnSuccess($rotation);
+    }
     public function phuong(Request $request)
     {
         try {

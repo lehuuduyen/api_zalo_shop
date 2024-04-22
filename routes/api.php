@@ -26,6 +26,7 @@ Route::get('phuong', 'App\Http\Controllers\Api\StoreController@phuong')->middlew
 Route::group([  'middleware' => ['CorsApi','CheckStore']], function()
 {
 Route::get('getFee', 'App\Http\Controllers\Api\StoreController@getFee')->middleware('CorsApi');
+Route::get('list_rotation', 'App\Http\Controllers\Api\StoreController@listRotation')->middleware('CorsApi');
 
     Route::get('getShare', 'App\Http\Controllers\Api\StoreController@getShare');
     Route::post('log', 'App\Http\Controllers\Api\StoreController@log');

@@ -22,7 +22,7 @@ class ProductController extends Controller
         $userId = false;
         $phims = DB::table($this->_PRFIX_TABLE . '_films');
 
-        $phims = $phims->orderBy('create_at', 'DESC')->get();
+        $phims = $phims->orderBy('name', 'DESC')->get();
         $data = $request->all();
         if(isset($data['user'])){
             $userId = $data['user']->ID;

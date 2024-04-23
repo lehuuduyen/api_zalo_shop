@@ -684,14 +684,24 @@ class StoreController extends Controller
     public function addTurn(Request $request)
     {
         $store = $request['data_reponse'];
-        echo '<pre>';
-        print_r($store);
-        echo '</pre>';
-        die;
         $this->_PRFIX_TABLE = $store->prefixTable;
+        $userId = $store->user_id;
+        $checkTurnDaily = $this->checkTurnDaily($userId);
 
+        if(!$checkTurnDaily){
+            DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_user_turn_rotations')->insertGetId(
+                array(
+                    'user_id' => $userId,
+                    'date' => date('Y-m-d'),
+    
+                )
+            );
+            return $this->returnSuccess(true,'Đăng nhập nhận xu thành công');
+
+        }else{
+            return $this->returnError(false,'Bạn đã nhận hôm này');
+        }
         // $rotation = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_list_rotations')->get();
-        return $this->returnSuccess(1);
 
     }
     public function checkTurnDaily($userId){

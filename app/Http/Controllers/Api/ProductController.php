@@ -22,7 +22,7 @@ class ProductController extends Controller
         $userId = false;
         $phims = DB::table($this->_PRFIX_TABLE . '_films');
 
-        $phims = $phims->orderBy('name', 'ASC')->get();
+        $phims = $phims->orderBy('create_at', 'DESC')->get();
         $data = $request->all();
         if(isset($data['user'])){
             $userId = $data['user']->ID;
@@ -44,7 +44,7 @@ class ProductController extends Controller
             select($this->_PRFIX_TABLE . '_posts.post_title as name',$this->_PRFIX_TABLE . '_posts.ID')->
             where($this->_PRFIX_TABLE . '_posts.post_status','publish')->
             where($this->_PRFIX_TABLE . '_postmeta.meta_key','_film_selected')->
-            where($this->_PRFIX_TABLE . '_postmeta.meta_value',$phim->id)->get();
+            where($this->_PRFIX_TABLE . '_postmeta.meta_value',$phim->id)->orderBy($this->_PRFIX_TABLE . '_posts.post_title', 'ASC')->get();
             if($listTap){
                 foreach($listTap as $key => $tap){
                     $listTap[$key]->link_movie = $this->getPostMeta($tap->ID,'_film_episode');

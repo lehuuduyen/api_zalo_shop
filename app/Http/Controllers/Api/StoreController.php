@@ -677,8 +677,11 @@ class StoreController extends Controller
     }
     public function getTurn(Request $request)
     {
-        // $rotation = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_list_rotations')->get();
-        return $this->returnSuccess(1);
+        $store = $request['data_reponse'];
+        $this->_PRFIX_TABLE = $store->prefixTable;
+        $userId = $store->user_id;
+        $turn = $this->getUserMeta($userId, 'turn');
+        return $this->returnSuccess(($turn)?$turn:0);
 
     }
     public function addTurn(Request $request)
@@ -694,6 +697,14 @@ class StoreController extends Controller
                     'date' => date('Y/m/d'),
     
                 )
+            );
+            $turn = $this->getUserMeta($userId, 'turn');
+
+            $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
+                array(
+                    'user_id' => $userId, 'meta_key' => 'turn'
+                ),
+                array('meta_value' => ($turn)?$turn+1:1)
             );
             return $this->returnSuccess(true,'Đăng nhập nhận xu thành công');
 

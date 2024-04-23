@@ -44,7 +44,7 @@ class ProductController extends Controller
             select($this->_PRFIX_TABLE . '_posts.post_title as name',$this->_PRFIX_TABLE . '_posts.ID')->
             where($this->_PRFIX_TABLE . '_posts.post_status','publish')->
             where($this->_PRFIX_TABLE . '_postmeta.meta_key','_film_selected')->
-            where($this->_PRFIX_TABLE . '_postmeta.meta_value',$phim->id)->orderBy($this->_PRFIX_TABLE . '_posts.post_title', 'ASC')->get();
+            where($this->_PRFIX_TABLE . '_postmeta.meta_value',$phim->id)->orderBy(DB::raw('CAST(SUBSTRING('.$this->_PRFIX_TABLE . '_posts.post_title'.', 4) AS UNSIGNED)'))->get();
             if($listTap){
                 foreach($listTap as $key => $tap){
                     $listTap[$key]->link_movie = $this->getPostMeta($tap->ID,'_film_episode');

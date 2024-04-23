@@ -692,7 +692,7 @@ class StoreController extends Controller
             DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_user_turn_rotations')->insertGetId(
                 array(
                     'user_id' => $userId,
-                    'date' => date('Y-m-d'),
+                    'date' => date('Y/m/d'),
     
                 )
             );
@@ -705,8 +705,10 @@ class StoreController extends Controller
 
     }
     public function checkTurnDaily($userId){
+        echo $userId;
+        echo $userId;
         $checkTurnDaily = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_user_turn_rotations')->where('user_id',$userId)->where('date',date('Y/m/d'))->first();
-
+        var_dump($checkTurnDaily);die;
         return ($checkTurnDaily)?false:true;
 
     }

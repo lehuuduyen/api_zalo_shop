@@ -687,8 +687,7 @@ class StoreController extends Controller
         $this->_PRFIX_TABLE = $store->prefixTable;
         $userId = $store->user_id;
         $checkTurnDaily = $this->checkTurnDaily($userId);
-        var_dump($checkTurnDaily);die;
-        if(!$checkTurnDaily){
+        if($checkTurnDaily){
             DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_user_turn_rotations')->insertGetId(
                 array(
                     'user_id' => $userId,

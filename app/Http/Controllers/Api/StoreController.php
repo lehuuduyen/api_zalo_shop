@@ -252,6 +252,7 @@ class StoreController extends Controller
         $user->city = $city;
         $user->quan = $quan;
         $user->phuong = $phuong;
+        $user->xu = 10000;
         $paymentMethod = $this->getUserMeta($user->ID, 'payment_method');
         $user->payment_method = ($paymentMethod) ? json_decode($paymentMethod) : "";
         $user->history = $this->getHistoryUser($user->ID);

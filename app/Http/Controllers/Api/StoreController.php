@@ -706,7 +706,7 @@ class StoreController extends Controller
     }
     public function checkTurnDaily($userId){
         $checkTurnDaily = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_user_turn_rotations')->where('date',date('Y/m/d'))->first();
-        return ($checkTurnDaily)?true:false;
+        return ($checkTurnDaily)?false:true;
 
     }
     public function activeRotation(Request $request)

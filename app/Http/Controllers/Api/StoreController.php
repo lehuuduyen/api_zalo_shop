@@ -740,7 +740,7 @@ class StoreController extends Controller
         }else{
             $tileXuPoint = $this->getOptionsMeta('woo_rotation_change_xu');
             $point =floor($xuChange/ $tileXuPoint) ;
-            $xuTru = $xuChange - ($point * $tileXuPoint); 
+            $xuTru = ($point * $tileXuPoint); 
             $results = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_rotation')->insertGetId(
                 array(
                     'user_id' => $userId,

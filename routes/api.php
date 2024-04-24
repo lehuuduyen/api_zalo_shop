@@ -30,10 +30,11 @@ Route::get('list_rotation', 'App\Http\Controllers\Api\StoreController@listRotati
 Route::get('get_turn', 'App\Http\Controllers\Api\StoreController@getTurn')->middleware('CorsApi');
 Route::post('add_turn', 'App\Http\Controllers\Api\StoreController@addTurn')->middleware('CorsApi');
 Route::post('active_rotation', 'App\Http\Controllers\Api\StoreController@activeRotation')->middleware('CorsApi');
+Route::get('check_turn_daily', 'App\Http\Controllers\Api\StoreController@checkApiTurnDaily');
 
     Route::get('getShare', 'App\Http\Controllers\Api\StoreController@getShare');
     Route::post('log', 'App\Http\Controllers\Api\StoreController@log');
-
+    
     Route::get('check_yeuthich', 'App\Http\Controllers\Api\ProductController@checkFavorite');
     Route::get('yeuthich', 'App\Http\Controllers\Api\ProductController@getFavorite');
     Route::post('yeuthich', 'App\Http\Controllers\Api\ProductController@addFavorite');

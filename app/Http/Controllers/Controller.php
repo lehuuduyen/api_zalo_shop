@@ -1238,6 +1238,7 @@ class Controller extends BaseController
                 $sqlAddMeta = "INSERT INTO ".$this->_PRFIX_TABLE."_postmeta ( `post_id`, `meta_key`, `meta_value` ) VALUES ('$PostIdVoucher', 'discount_type', 'fixed_cart'), ('$PostIdVoucher', 'coupon_amount', '$priceSaleOff'), ('$PostIdVoucher', 'usage_limit', '1'), ('$PostIdVoucher', 'usage_limit_per_user', '1'), ('$PostIdVoucher', 'limit_usage_to_x_items', '0'), ('$PostIdVoucher', 'usage_count', '0'), ('$PostIdVoucher', 'customer_email', '$arrayEmail'), ('$PostIdVoucher', 'customer_user', '$userId')";
                 DB::connection('mysql_external')->insert($sqlAddMeta);
             }
+        }
             // lưu lịch sử commission
             $history = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_history_user_commission')
             ->where('order_id', $order_id)

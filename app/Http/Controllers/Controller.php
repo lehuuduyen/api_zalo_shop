@@ -1180,7 +1180,7 @@ class Controller extends BaseController
         
         if ($history->isNotEmpty()) {
             $id = $history[0]->id;
-            $userId = $order->data['customer_id'];
+            $userId = $user['id'];
         
             $totalOrder = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_point')
                 ->where('user_id', $userId)
@@ -1234,7 +1234,7 @@ class Controller extends BaseController
                     'post_type' => 'shop_coupon'
                 ]);
         
-                $arrayEmail = serialize([$order->data['billing']['email']]);
+                $arrayEmail = serialize([$user['email']]);
                 $sqlAddMeta = "INSERT INTO ".$this->_PRFIX_TABLE."_postmeta ( `post_id`, `meta_key`, `meta_value` ) VALUES ('$PostIdVoucher', 'discount_type', 'fixed_cart'), ('$PostIdVoucher', 'coupon_amount', '$priceSaleOff'), ('$PostIdVoucher', 'usage_limit', '1'), ('$PostIdVoucher', 'usage_limit_per_user', '1'), ('$PostIdVoucher', 'limit_usage_to_x_items', '0'), ('$PostIdVoucher', 'usage_count', '0'), ('$PostIdVoucher', 'customer_email', '$arrayEmail'), ('$PostIdVoucher', 'customer_user', '$userId')";
                 DB::connection('mysql_external')->insert($sqlAddMeta);
             }

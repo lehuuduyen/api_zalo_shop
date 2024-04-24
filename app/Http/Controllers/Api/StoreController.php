@@ -744,7 +744,7 @@ class StoreController extends Controller
         $this->_PRFIX_TABLE = $store->prefixTable;
         $userId = $store->user_id;
         $turnUser = $this->getUserMeta($userId, 'turn');
-        $result =false;
+        $result =[];
         if($turnUser >0){
             
             $getReward = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_list_rotations')->find($request['id']);

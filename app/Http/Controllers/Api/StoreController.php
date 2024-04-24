@@ -755,6 +755,8 @@ class StoreController extends Controller
                         'year' => date('Y'),
                     )
                 );
+                return $this->returnSuccess($result,"Chúc mừng bạn nhận được $getReward");
+
             }else{
                 return $this->returnError($result,"Không có thông tin");
             }
@@ -762,7 +764,6 @@ class StoreController extends Controller
         }else{
             return $this->returnError($result,"Bạn đã hết lượt quay");
         }
-        return $this->returnSuccess($result,"Chúc mừng bạn nhận được $getReward");
 
     }
     public function getXu(Request $request)

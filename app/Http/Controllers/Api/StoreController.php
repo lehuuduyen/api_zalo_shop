@@ -735,7 +735,7 @@ class StoreController extends Controller
         return $this->returnSuccess(1);
 
     }
-    public function getXuUser(Request $request)
+    public function getXu(Request $request)
     {
         $store = $request['data_reponse'];
         $this->_PRFIX_TABLE = $store->prefixTable;

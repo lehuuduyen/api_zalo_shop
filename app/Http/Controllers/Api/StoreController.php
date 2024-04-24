@@ -715,6 +715,14 @@ class StoreController extends Controller
         // $rotation = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_list_rotations')->get();
 
     }
+    public function checkApiTurnDaily(Request $request){
+        $store = $request['data_reponse'];
+        $this->_PRFIX_TABLE = $store->prefixTable;
+        $userId = $store->user_id;
+        return $this->returnSuccess($this->checkTurnDaily($userId));
+
+
+    }
     public function checkTurnDaily($userId){
         $checkTurnDaily = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_user_turn_rotations')->where('user_id',$userId)->where('date',date('Y/m/d'))->first();
         return ($checkTurnDaily)?false:true;

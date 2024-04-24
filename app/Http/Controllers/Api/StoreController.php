@@ -691,7 +691,7 @@ class StoreController extends Controller
         $this->_PRFIX_TABLE = $store->prefixTable;
         $userId = $store->user_id;
         $checkTurnDaily = $this->checkTurnDaily($userId);
-        if($checkTurnDaily){
+        if(!$checkTurnDaily){
             DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_user_turn_rotations')->insertGetId(
                 array(
                     'user_id' => $userId,
@@ -725,14 +725,40 @@ class StoreController extends Controller
     }
     public function checkTurnDaily($userId){
         $checkTurnDaily = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_user_turn_rotations')->where('user_id',$userId)->where('date',date('Y/m/d'))->first();
-        return ($checkTurnDaily)?false:true;
+        return ($checkTurnDaily)?true:false;
 
     }
     public function activeRotation(Request $request)
     {
-        
-        // $rotation = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_list_rotations')->get();
-        return $this->returnSuccess(1);
+        $store = $request['data_reponse'];
+        $this->_PRFIX_TABLE = $store->prefixTable;
+        $userId = $store->user_id;
+        $turnUser = $this->getUserMeta($userId, 'turn');
+        $result =false;
+        if($turnUser >0){
+            
+            $getReward = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_list_rotations')->find($request['id']);
+            if($getReward){
+                $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
+                    array(
+                        'user_id' => $userId, 'meta_key' => 'turn'
+                    ),
+                    array('meta_value' => $turn-1)
+                );
+                $result = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_rotation')->insertGetId(
+                    array(
+                        'user_id' => $userId,
+                        'total_order' => 0,
+                        'commission' => $getReward->point,
+                        'date' => date('d'),
+                        'month' => date('m'),
+                        'year' => date('Y'),
+                    )
+                );
+            }
+            
+        }
+        return $this->returnSuccess($result);
 
     }
     public function getXu(Request $request)

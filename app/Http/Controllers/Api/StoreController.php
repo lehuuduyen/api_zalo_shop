@@ -767,6 +767,17 @@ class StoreController extends Controller
 
 
     }
+    function randomWithWeight(array $values) {
+        $total = array_sum($values);
+        $rand = mt_rand(1, $total);
+        $offset = 0;
+        foreach ($values as $key => $value) {
+            $offset += $value;
+            if ($rand <= $offset) {
+                return $key;
+            }
+        }
+    }
     public function activeRotation(Request $request)
     {
         $store = $request['data_reponse'];
@@ -774,14 +785,20 @@ class StoreController extends Controller
         $userId = $store->user_id;
         $turnUser = $this->getUserMeta($userId, 'turn');
         $result =[];
-        return $this->returnSuccess(1,"Chúc mừng bạn nhận được 10000 xu");
-
         if($turnUser >0){
             $getReward = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_list_rotations')->get();
+            $rates = [];
+            $nameVongQuay = [];
+            $pointVongQuay = [];
             foreach($getReward as $value){
-
+                $tile = $value->rate;
+                $rates[$tile.'%'] =$value->id;
+                $nameVongQuay[$value->id] =$value->name;
+                $pointVongQuay[$value->id] =$value->point;
             }
-            if($getReward){
+            $selected_rate = randomWithWeight($rates);
+
+            if($selected_rate){
                 $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
                     array(
                         'user_id' => $userId, 'meta_key' => 'turn'
@@ -792,13 +809,13 @@ class StoreController extends Controller
                     array(
                         'user_id' => $userId,
                         'total_order' => 0,
-                        'commission' => $getReward->point,
+                        'commission' => $pointVongQuay[$selected_rate],
                         'date' => date('d'),
                         'month' => date('m'),
                         'year' => date('Y'),
                     )
                 );
-                return $this->returnSuccess(1,"Chúc mừng bạn nhận được ".$getReward->name);
+                return $this->returnSuccess($selected_rate,"Chúc mừng bạn nhận được ".$nameVongQuay[$selected_rate]);
 
             }else{
                 return $this->returnError($userId,"Không có thông tin");

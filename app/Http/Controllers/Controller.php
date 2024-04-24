@@ -1172,8 +1172,107 @@ class Controller extends BaseController
                     )
                 );
             }
+            // lưu lịch sử point
+            $history = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_point')
+            ->where('order_id', $order_id)
+            ->where('status', '3')
+            ->get();
+        
+        if ($history->isNotEmpty()) {
+            $id = $history[0]->id;
+            $userId = $order->data['customer_id'];
+        
+            $totalOrder = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_point')
+                ->where('user_id', $userId)
+                ->where('status', '1')
+                ->sum('total_order');
+        
+            $totalOrder = $totalOrder ?: 0;
+        
+            $checkRankBefore = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_rank')
+                ->where('minimum_spending', '<=', $totalOrder)
+                ->orderBy('minimum_spending', 'DESC')
+                ->limit(1)
+                ->get();
+        
+            DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_point')
+                ->where('id', $id)
+                ->update(['status' => 1]);
+        
+            $totalOrder = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_point')
+                ->where('user_id', $userId)
+                ->where('status', '1')
+                ->sum('total_order');
+        
+            $totalOrder = $totalOrder ?: 0;
+        
+            $checkRankAfter = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_rank')
+                ->where('minimum_spending', '<=', $totalOrder)
+                ->orderBy('minimum_spending', 'DESC')
+                ->limit(1)
+                ->get();
+        
+            if ($checkRankBefore->isNotEmpty() && $checkRankAfter->isNotEmpty() && $checkRankBefore[0]->id != $checkRankAfter[0]->id) {
+                $date = now();
+                $code = Str::random(10);
+                $priceSaleOff = $checkRankAfter[0]->price_sale_off;
+                $text = 'Voucher cho ' . $checkRankAfter[0]->name . '. Ưu đãi ' . $priceSaleOff;
+        
+                $PostIdVoucher = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->insertGetId([
+                    'post_author' => $userId,
+                    'post_date' => $date,
+                    'post_date_gmt' => $date,
+                    'post_title' => $code,
+                    'post_excerpt' => $text,
+                    'post_status' => 'publish',
+                    'comment_status' => 'closed',
+                    'ping_status' => 'closed',
+                    'post_name' => $code,
+                    'post_modified' => $date,
+                    'post_modified_gmt' => $date,
+                    'post_parent' => 0,
+                    'post_type' => 'shop_coupon'
+                ]);
+        
+                $arrayEmail = serialize([$order->data['billing']['email']]);
+                $sqlAddMeta = "INSERT INTO ".$this->_PRFIX_TABLE."_postmeta ( `post_id`, `meta_key`, `meta_value` ) VALUES ('$PostIdVoucher', 'discount_type', 'fixed_cart'), ('$PostIdVoucher', 'coupon_amount', '$priceSaleOff'), ('$PostIdVoucher', 'usage_limit', '1'), ('$PostIdVoucher', 'usage_limit_per_user', '1'), ('$PostIdVoucher', 'limit_usage_to_x_items', '0'), ('$PostIdVoucher', 'usage_count', '0'), ('$PostIdVoucher', 'customer_email', '$arrayEmail'), ('$PostIdVoucher', 'customer_user', '$userId')";
+                DB::connection('mysql_external')->insert($sqlAddMeta);
+            }
+            // lưu lịch sử commission
+            $history = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_history_user_commission')
+            ->where('order_id', $order_id)
+            ->where('status', '3')
+            ->first();
 
+            if ($history) {
+                $userId = $history->user_id;
 
+                $traffic = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_history_share_link')
+                            ->where('user_id', $userId)
+                            ->where('status', '1')
+                            ->orderBy('id', 'DESC')
+                            ->first();
+
+                if ($traffic) {
+                    $trafficId = $traffic->id;
+
+                    // Update status of previous traffic
+                    DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_history_share_link')
+                        ->where('user_id', $userId)
+                        ->where('status', '1')
+                        ->update(['status' => 0]);
+
+                    // Update status of current traffic
+                    DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_history_share_link')
+                        ->where('id', $trafficId)
+                        ->update(['status' => 2]);
+
+                    // Update status of commission history
+                    DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_history_user_commission')
+                        ->where('id', $history->id)
+                        ->update(['status' => 1]);
+                }
+            }
             //tính hoa hồng
 
             DB::connection('mysql_external')->commit();

@@ -742,8 +742,8 @@ class StoreController extends Controller
         $userId = $store->user_id;
         return $this->returnSuccess([
             'so_xu'=>$this->getXuUser($userId),
-            'rate_xu'=>10000,
-            'to_point'=>1,
+            'rate_xu'=>$this->getOptionsMeta('woo_rotation_change_xu'),
+            'to_point'=>$this->getOptionsMeta('woo_rotation_to_point'),
         ]);
 
     }

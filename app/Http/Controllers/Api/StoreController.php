@@ -775,7 +775,6 @@ class StoreController extends Controller
         $turnUser = $this->getUserMeta($userId, 'turn');
         $result =[];
         if($turnUser >0){
-            
             $getReward = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_list_rotations')->find($request['id']);
             if($getReward){
                 $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
@@ -794,7 +793,7 @@ class StoreController extends Controller
                         'year' => date('Y'),
                     )
                 );
-                return $this->returnSuccess($userId,"Chúc mừng bạn nhận được ".$getReward->name);
+                return $this->returnSuccess(1,"Chúc mừng bạn nhận được ".$getReward->name);
 
             }else{
                 return $this->returnError($userId,"Không có thông tin");

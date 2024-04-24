@@ -796,11 +796,7 @@ class StoreController extends Controller
                 $nameVongQuay[$value->id] =$value->name;
                 $pointVongQuay[$value->id] =$value->point;
             }
-            $selected_rate = $this->randomWithWeight($rates);
-            echo '<pre>';
-            print_r($selected_rate);
-            echo '</pre>';
-            die;
+            $selected_rate = $rates[$this->randomWithWeight($rates)];
             
             if($selected_rate){
                 $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(

@@ -1240,7 +1240,7 @@ class Controller extends BaseController
             }
         }
             // lưu lịch sử commission
-            $history = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_history_user_commission')
+            $history = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')
             ->where('order_id', $postId)
             ->where('status', '3')
             ->first();
@@ -1248,7 +1248,7 @@ class Controller extends BaseController
             if ($history) {
                 $userId = $history->user_id;
 
-                $traffic = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_history_share_link')
+                $traffic = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_share_link')
                             ->where('user_id', $userId)
                             ->where('status', '1')
                             ->orderBy('id', 'DESC')
@@ -1258,18 +1258,18 @@ class Controller extends BaseController
                     $trafficId = $traffic->id;
 
                     // Update status of previous traffic
-                    DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_history_share_link')
+                    DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_share_link')
                         ->where('user_id', $userId)
                         ->where('status', '1')
                         ->update(['status' => 0]);
 
                     // Update status of current traffic
-                    DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_history_share_link')
+                    DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_share_link')
                         ->where('id', $trafficId)
                         ->update(['status' => 2]);
 
                     // Update status of commission history
-                    DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_history_user_commission')
+                    DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')
                         ->where('id', $history->id)
                         ->update(['status' => 1]);
                 }

@@ -733,8 +733,37 @@ class StoreController extends Controller
         $this->_PRFIX_TABLE = $store->prefixTable;
         $userId = $store->user_id;
         $xuChange = $request['xu'];
-        $tileXuPoint = $this->getOptionsMeta('woo_rotation_change_xu');
-        return $this->returnSuccess($this->checkTurnDaily($userId));
+        $xuNow = $this->getXuUser($userId);
+        if($xuChange > $xuNow){
+            return $this->returnError($userId ,'Xu không đủ');
+            
+        }else{
+            $tileXuPoint = $this->getOptionsMeta('woo_rotation_change_xu');
+            $point =floor($xuChange/ $tileXuPoint) ;
+            $xuTru = $xuChange - ($point * $tileXuPoint); 
+            $results = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_rotation')->insertGetId(
+                array(
+                    'user_id' => $userId,
+                    'total_order' => 0,
+                    'commission' => $xuTru,
+                    'date' => date('d'),
+                    'month' => date('m'),
+                    'year' => date('Y'),
+                    'status' => 2,
+                )
+            );
+            $results = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_point')->insertGetId(
+                array(
+                    'user_id' => $userId,
+                    'total_order' => 0,
+                    'point' => $point,
+                    'minimum_spending' => 0,
+                    'points_converted_to_money' => 0,
+                )
+            );
+            return $this->returnSuccess($this->checkTurnDaily($userId));
+        }
+        
 
 
     }

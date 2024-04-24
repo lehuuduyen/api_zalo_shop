@@ -740,7 +740,7 @@ class StoreController extends Controller
         $store = $request['data_reponse'];
         $this->_PRFIX_TABLE = $store->prefixTable;
         $userId = $store->user_id;
-        return $this->returnSuccess($this->getXu($userId));
+        return $this->returnSuccess($this->getXuUser($userId));
 
     }
     public function phuong(Request $request)

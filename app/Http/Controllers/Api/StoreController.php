@@ -761,7 +761,7 @@ class StoreController extends Controller
                     'points_converted_to_money' => 0,
                 )
             );
-            return $this->returnSuccess($this->checkTurnDaily($userId));
+            return $this->returnSuccess($userId.'-'.$xuTru,'Số điểm nhận được '.$point);
         }
         
 

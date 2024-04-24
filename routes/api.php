@@ -32,7 +32,7 @@ Route::post('add_turn', 'App\Http\Controllers\Api\StoreController@addTurn')->mid
 Route::post('active_rotation', 'App\Http\Controllers\Api\StoreController@activeRotation')->middleware('CorsApi');
 Route::get('check_turn_daily', 'App\Http\Controllers\Api\StoreController@checkApiTurnDaily');
 Route::get('get_xu', 'App\Http\Controllers\Api\StoreController@getXu');
-Route::get('change_xu_to_point', 'App\Http\Controllers\Api\StoreController@changeXuToPoint');
+Route::post('change_xu_to_point', 'App\Http\Controllers\Api\StoreController@changeXuToPoint');
 
     Route::get('getShare', 'App\Http\Controllers\Api\StoreController@getShare');
     Route::post('log', 'App\Http\Controllers\Api\StoreController@log');

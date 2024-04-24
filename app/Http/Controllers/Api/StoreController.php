@@ -735,7 +735,7 @@ class StoreController extends Controller
         $xuChange = $request['xu'];
         $xuNow = $this->getXuUser($userId);
         if($xuChange > $xuNow){
-            return $this->returnError($userId ,'Xu không đủ');
+            return $this->returnError($userId ,'Số xu còn lại '.$xuNow);
             
         }else{
             $tileXuPoint = $this->getOptionsMeta('woo_rotation_change_xu');

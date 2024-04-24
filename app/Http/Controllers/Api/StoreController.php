@@ -743,7 +743,7 @@ class StoreController extends Controller
                     array(
                         'user_id' => $userId, 'meta_key' => 'turn'
                     ),
-                    array('meta_value' => $turn-1)
+                    array('meta_value' => $turnUser-1)
                 );
                 $result = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_rotation')->insertGetId(
                     array(

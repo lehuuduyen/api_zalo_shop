@@ -1174,7 +1174,7 @@ class Controller extends BaseController
             }
             // lưu lịch sử point
             $history = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_point')
-            ->where('order_id', $order_id)
+            ->where('order_id', $postId)
             ->where('status', '3')
             ->get();
         
@@ -1241,7 +1241,7 @@ class Controller extends BaseController
         }
             // lưu lịch sử commission
             $history = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_history_user_commission')
-            ->where('order_id', $order_id)
+            ->where('order_id', $postId)
             ->where('status', '3')
             ->first();
 

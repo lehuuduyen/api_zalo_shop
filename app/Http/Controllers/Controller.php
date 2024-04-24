@@ -1514,7 +1514,10 @@ class Controller extends BaseController
         $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_point')->where('user_id', $userId)->orderBy('id', 'DESC')->get();
         return $data;
     }
-
+    public function getXuUser($history)
+    {
+        return 10000;
+    }
     public function getPointUser($history)
     {
         $total = 0;

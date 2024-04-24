@@ -710,7 +710,7 @@ class StoreController extends Controller
             return $this->returnSuccess(true,'Đăng nhập nhận xu thành công');
 
         }else{
-            return $this->returnError(false,'Bạn đã nhận hôm này');
+            return $this->returnError(false,'Bạn đã nhận hôm nay');
         }
         // $rotation = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_list_rotations')->get();
 
@@ -730,8 +730,17 @@ class StoreController extends Controller
     }
     public function activeRotation(Request $request)
     {
+        
         // $rotation = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_list_rotations')->get();
         return $this->returnSuccess(1);
+
+    }
+    public function getXu(Request $request)
+    {
+        $store = $request['data_reponse'];
+        $this->_PRFIX_TABLE = $store->prefixTable;
+        $userId = $store->user_id;
+        return $this->returnSuccess($this->getXu($userId));
 
     }
     public function phuong(Request $request)

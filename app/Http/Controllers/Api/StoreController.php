@@ -728,6 +728,16 @@ class StoreController extends Controller
         return ($checkTurnDaily)?true:false;
 
     }
+    public function changeXuToPoint(Request $request){
+        $store = $request['data_reponse'];
+        $this->_PRFIX_TABLE = $store->prefixTable;
+        $userId = $store->user_id;
+        $xuChange = $request['xu'];
+        $tileXuPoint = $this->getOptionsMeta('woo_rotation_change_xu');
+        return $this->returnSuccess($this->checkTurnDaily($userId));
+
+
+    }
     public function activeRotation(Request $request)
     {
         $store = $request['data_reponse'];
@@ -745,7 +755,7 @@ class StoreController extends Controller
                     ),
                     array('meta_value' => $turnUser-1)
                 );
-                $result = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_rotation')->insertGetId(
+                $results = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_rotation')->insertGetId(
                     array(
                         'user_id' => $userId,
                         'total_order' => 0,
@@ -755,7 +765,7 @@ class StoreController extends Controller
                         'year' => date('Y'),
                     )
                 );
-                return $this->returnSuccess($result,"Chúc mừng bạn nhận được $getReward");
+                return $this->returnSuccess($result,"Chúc mừng bạn nhận được ".$getReward->name);
 
             }else{
                 return $this->returnError($result,"Không có thông tin");

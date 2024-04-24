@@ -1514,9 +1514,19 @@ class Controller extends BaseController
         $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_point')->where('user_id', $userId)->orderBy('id', 'DESC')->get();
         return $data;
     }
-    public function getXuUser($history)
+    public function getXuUser($userId)
     {
-        return 10000;
+        $history =DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_rotation')->where('user_id', $userId)->get();
+        $totalXu =0;
+        foreach($history as $value){
+            if($value->status == 2){
+                $totalXu -= $value->commission;
+            }else{
+                $totalXu += $value->commission;
+
+            }
+        }
+        return $totalXu;
     }
     public function getPointUser($history)
     {

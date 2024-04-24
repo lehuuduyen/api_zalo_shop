@@ -774,8 +774,13 @@ class StoreController extends Controller
         $userId = $store->user_id;
         $turnUser = $this->getUserMeta($userId, 'turn');
         $result =[];
+        return $this->returnSuccess(1,"Chúc mừng bạn nhận được 10000 xu");
+
         if($turnUser >0){
-            $getReward = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_list_rotations')->find($request['id']);
+            $getReward = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_list_rotations')->get();
+            foreach($getReward as $value){
+
+            }
             if($getReward){
                 $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
                     array(

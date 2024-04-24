@@ -767,13 +767,18 @@ class StoreController extends Controller
 
 
     }
-    function randomWithWeight(array $values) {
-        $total = array_sum($values);
-        $rand = mt_rand(1, $total);
-        $offset = 0;
-        foreach ($values as $key => $value) {
-            $offset += $value;
-            if ($rand <= $offset) {
+    function weighted_random($values) {
+        // Tính tổng phần trăm của tất cả các giá trị
+        $total_percentage = array_sum($values);
+        
+        // Tạo một số ngẫu nhiên từ 0 đến tổng phần trăm
+        $random = mt_rand(1, $total_percentage);
+        
+        // Lặp qua mảng và tăng dần tổng phần trăm cho đến khi tổng phần trăm vượt qua số ngẫu nhiên
+        $cumulative_percentage = 0;
+        foreach ($values as $key => $percentage) {
+            $cumulative_percentage += $percentage;
+            if ($random <= $cumulative_percentage) {
                 return $key;
             }
         }
@@ -792,11 +797,11 @@ class StoreController extends Controller
             $pointVongQuay = [];
             foreach($getReward as $value){
                 $tile = $value->rate;
-                $rates[$tile.'%'] =$value->id;
+                $rates[$value->id] =$tile;
                 $nameVongQuay[$value->id] =$value->name;
                 $pointVongQuay[$value->id] =$value->point;
             }
-            $selected_rate = $rates[$this->randomWithWeight($rates)];
+            $selected_rate = $rates[$this->weighted_random($rates)];
             
             if($selected_rate){
                 $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(

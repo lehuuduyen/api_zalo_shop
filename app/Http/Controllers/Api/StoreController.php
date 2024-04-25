@@ -788,10 +788,13 @@ class StoreController extends Controller
         $store = $request['data_reponse'];
         $this->_PRFIX_TABLE = $store->prefixTable;
         $userId = $store->user_id;
+        $this->woo_logs('vong quay', $userId);
+
         $turnUser = $this->getUserMeta($userId, 'turn');
+        $this->woo_logs('vong quay turn', $turnUser);
+
         $result =[];
         if($turnUser >0){
-            $this->woo_logs('vong quay', $userId);
 
             $getReward = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_list_rotations')->get();
             $rates = [];

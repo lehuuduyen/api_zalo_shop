@@ -791,6 +791,8 @@ class StoreController extends Controller
         $turnUser = $this->getUserMeta($userId, 'turn');
         $result =[];
         if($turnUser >0){
+            $this->woo_logs('vong quay', $userId);
+
             $getReward = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_list_rotations')->get();
             $rates = [];
             $nameVongQuay = [];

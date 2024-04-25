@@ -53,6 +53,7 @@ class ProductController extends Controller
                  $childProduct[$keyChild]->is_campaign = true;
                  $childProduct[$keyChild]->end_date = date('Y/m/d H:i:s', $_sale_price_dates_to);
              }
+             $childProduct[$keyChild]->id = $child->ID;
              $childProduct[$keyChild]->is_bien_the = true;
              $childProduct[$keyChild]->product_inventory = $products[$key]->product_inventory;
              $childProduct[$keyChild]->category = $products[$key]->category;

@@ -678,6 +678,7 @@ class StoreController extends Controller
     }
     public function getTurn(Request $request)
     {
+        echo date('Y/m/d  H:i:s');die;
         $store = $request['data_reponse'];
         $this->_PRFIX_TABLE = $store->prefixTable;
         $userId = $store->user_id;

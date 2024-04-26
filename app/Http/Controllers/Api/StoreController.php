@@ -678,7 +678,7 @@ class StoreController extends Controller
     }
     public function getTurn(Request $request)
     {
-        echo date('Y/m/d  H:i:s');die;
+       
         $store = $request['data_reponse'];
         $this->_PRFIX_TABLE = $store->prefixTable;
         $userId = $store->user_id;
@@ -827,6 +827,8 @@ class StoreController extends Controller
                         'date' => date('d'),
                         'month' => date('m'),
                         'year' => date('Y'),
+                        'create_at' => date('Y-m-d  H:i:s'),
+                        
                     )
                 );
                 return $this->returnSuccess($selected_rate,"Chúc mừng bạn nhận được ".$nameVongQuay[$selected_rate]);

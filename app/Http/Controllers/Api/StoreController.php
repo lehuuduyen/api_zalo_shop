@@ -681,6 +681,8 @@ class StoreController extends Controller
         $store = $request['data_reponse'];
         $this->_PRFIX_TABLE = $store->prefixTable;
         $userId = $store->user_id;
+        $this->woo_logs('getTurn', $userId);
+
         $turn = $this->getUserMeta($userId, 'turn');
         return $this->returnSuccess(($turn)?$turn:0);
 
@@ -788,10 +790,10 @@ class StoreController extends Controller
         $store = $request['data_reponse'];
         $this->_PRFIX_TABLE = $store->prefixTable;
         $userId = $store->user_id;
-        $this->woo_logs('vong quay', $userId);
+        $this->woo_logs('activeRotation', $userId);
 
         $turnUser = $this->getUserMeta($userId, 'turn');
-        $this->woo_logs('vong quay turn', $turnUser);
+        $this->woo_logs('activeRotation turn', $turnUser);
 
         $result =[];
         if($turnUser >0){

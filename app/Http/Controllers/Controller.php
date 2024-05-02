@@ -982,6 +982,7 @@ class Controller extends BaseController
             } else{
                 $paymentTitle  = 'Chuyển khoản ngân hàng';
             }
+
             // them wp_postmeta
             $postMeta = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_postmeta')->insert(
                 array(
@@ -1171,6 +1172,31 @@ class Controller extends BaseController
                         'status' => 'wc-pending',
                     )
                 );
+            }
+        //them lượt vòng quay 
+            $woo_rotation_price_from = $this->getOptionsMeta('woo_rotation_price_from');
+            $woo_rotation_price_to = $this->getOptionsMeta('woo_rotation_price_to');
+            $woo_rotation_xu = $this->getOptionsMeta('woo_rotation_xu');
+            if($woo_rotation_price_from && $woo_rotation_price_to && $woo_rotation_xu){
+                if($finalDetails['total'] >= $woo_rotation_price_from && $finalDetails['total'] <= $woo_rotation_price_to){
+                    DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_user_turn_rotations')->insertGetId(
+                        array(
+                            'user_id' => $user['id'],
+                            'date' => date('Y/m/d'),
+                            'status' => 2
+            
+                        )
+                    );
+                    $turn = $this->getUserMeta($user['id'], 'turn');
+        
+                    $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
+                        array(
+                            'user_id' => $user['id'], 'meta_key' => 'turn'
+                        ),
+                        array('meta_value' => ($turn)?$turn+$woo_rotation_xu:$woo_rotation_xu)
+                    );
+                }
+                
             }
             // lưu lịch sử point
             $history = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_point')

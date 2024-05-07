@@ -465,7 +465,7 @@ class StoreController extends Controller
                 ->where('user_id', $userId)
                 ->where('meta_key', 'user_parent')
                 ->first();
-                if(!$userParentIsset &&  ){
+                if(!$userParentIsset ){
                     DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->insert(
                         array(
                             'user_id' => $userId, 'meta_key' => 'user_parent', 'meta_value' => $userParent->ID

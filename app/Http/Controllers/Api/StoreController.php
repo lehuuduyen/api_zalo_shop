@@ -453,7 +453,7 @@ class StoreController extends Controller
         } else {
             $userId = $store->user_id;
             $userParent = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_users')->where('user_login', $data['user_parent'])->first();
-            if ($data && $userParent) {
+            if ($data && $userParent && $data['user_parent'] != "77777777") {
                 DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_share_link')->insertGetId(
                     array(
                         'user_id' => $userId,
@@ -465,7 +465,7 @@ class StoreController extends Controller
                 ->where('user_id', $userId)
                 ->where('meta_key', 'user_parent')
                 ->first();
-                if(!$userParentIsset ){
+                if(!$userParentIsset &&  ){
                     DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->insert(
                         array(
                             'user_id' => $userId, 'meta_key' => 'user_parent', 'meta_value' => $userParent->ID

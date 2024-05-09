@@ -16,6 +16,12 @@ class ProductController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+    public function calPriceDiscount($price,$discount){
+        if($discount> $price){
+            return $price;
+        }
+        return $price - $discount;
+    }
     public function index(Request $request)
     {
         $store = $request['data_reponse'];
@@ -87,18 +93,18 @@ class ProductController extends Controller
             $postMetaStock = $this->getPostMeta($product->ID, '_stock');
             $products[$key]->is_campaign = false;
             $products[$key]->price =  $postMetaGiaGoc;
-            $products[$key]->price_discount =  $products[$key]->price - $discount;
+            $products[$key]->price_discount =  $this->calPriceDiscount($products[$key]->price,$discount);
             $products[$key]->discount =   $discount;
             $products[$key]->url_rank =  $url_rank;
             $products[$key]->sale_price =  $postMetaGiaGoc;
             if ($postMetaGiaKhuyenMai && empty($_sale_price_dates_from) && empty($_sale_price_dates_to)) {
                 $products[$key]->sale_price = $postMetaGiaKhuyenMai;
-                $products[$key]->price_discount =  $products[$key]->sale_price - $discount;
+                $products[$key]->price_discount =  $this->calPriceDiscount($products[$key]->sale_price,$discount);
 
             }
             if ($postMetaGiaKhuyenMai && $time >= $_sale_price_dates_from && $time <= $_sale_price_dates_to) {
                 $products[$key]->sale_price = $postMetaGiaKhuyenMai;
-                $products[$key]->price_discount =  $products[$key]->sale_price - $discount;
+                $products[$key]->price_discount =  $this->calPriceDiscount($products[$key]->sale_price,$discount);
 
                 $products[$key]->is_campaign = true;
                 $products[$key]->end_date = date('Y/m/d H:i:s', $_sale_price_dates_to);

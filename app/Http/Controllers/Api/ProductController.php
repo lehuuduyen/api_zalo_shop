@@ -59,13 +59,22 @@ class ProductController extends Controller
              $_sale_price_dates_to = $this->getPostMeta($child->ID, '_sale_price_dates_to');
              $childProduct[$keyChild]->price =  $postMetaGiaGoc;
              $childProduct[$keyChild]->sale_price =  $postMetaGiaGoc;
+
+             $childProduct[$keyChild]->price_discount =  $this->calPriceDiscount($childProduct[$keyChild]->price,$discount);
+             $childProduct[$keyChild]->discount =   $discount;
+             $childProduct[$keyChild]->url_rank =  $url_rank;
+
              $childProduct[$keyChild]->is_campaign =  false;
 
              if ($postMetaGiaKhuyenMai && empty($_sale_price_dates_from) && empty($_sale_price_dates_to)) {
                  $childProduct[$keyChild]->sale_price = $postMetaGiaKhuyenMai;
+                 $childProduct[$keyChild]->price_discount =  $this->calPriceDiscount($childProduct[$keyChild]->sale_price,$discount);
+
              }
              if ($postMetaGiaKhuyenMai && $time >= $_sale_price_dates_from && $time <= $_sale_price_dates_to) {
                  $childProduct[$keyChild]->sale_price = $postMetaGiaKhuyenMai;
+                $childProduct[$keyChild]->price_discount =  $this->calPriceDiscount($childProduct[$keyChild]->sale_price,$discount);
+
                  $childProduct[$keyChild]->is_campaign = true;
                  $childProduct[$keyChild]->end_date = date('Y/m/d H:i:s', $_sale_price_dates_to);
              }

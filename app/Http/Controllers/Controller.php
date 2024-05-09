@@ -1554,6 +1554,21 @@ class Controller extends BaseController
         }
         return $totalXu;
     }
+    public function checkRank($history){
+        $totalOrder = 0;
+        foreach ($history  as $value) {
+            if ($value->status == 1) {
+                $total = $total + $value->point;
+                $totalDoiThuong = $totalDoiThuong + $value->point;
+                $totalOrder = $totalOrder + $value->total_order;
+            }
+            if ($value->status == 2 || $value->status == 4) {
+                $totalDoiThuong = $totalDoiThuong - $value->point;
+            }
+        }
+        $checkRank = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_rank')->where('minimum_spending', '<=', $totalOrder)->orderBy('minimum_spending', 'DESC')->first();
+        return $checkRank;
+    }
     public function getPointUser($history)
     {
         $total = 0;

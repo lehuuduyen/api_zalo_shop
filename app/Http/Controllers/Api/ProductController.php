@@ -23,9 +23,9 @@ class ProductController extends Controller
         $userId = $store->user_id;
         
         $history = $this->getHistoryUser($userId);
-        $point = $this->getPointUser($history);
+        $point = $this->checkRank($history);
         echo '<pre>';
-        print_r($store);
+        print_r($point);
         echo '</pre>';
         die;
         $products = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->where('post_type', 'product')->where('post_status', 'publish')->orderBy('post_modified', 'DESC')->get();

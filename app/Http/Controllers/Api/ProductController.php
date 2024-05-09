@@ -22,12 +22,14 @@ class ProductController extends Controller
         $this->_PRFIX_TABLE = $store->prefixTable;
         $userId = $store->user_id;
         
-        $history = $this->getHistoryUser($userId);
-        $point = $this->checkRank($history);
-        echo '<pre>';
-        print_r($point);
-        echo '</pre>';
-        die;
+        $discount = 0;
+        $url_rank = "";
+        if($store->sdt != "77777777" ){
+            $history = $this->getHistoryUser($userId);
+            $point = $this->checkRank($history);
+            $discount = $point->discount;
+            $url_rank = $point->imageurl;
+        }
         $products = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->where('post_type', 'product')->where('post_status', 'publish')->orderBy('post_modified', 'DESC')->get();
         if (isset($request['category'])) {
             $products = $this->getPostByCategoryId($request['category']);
@@ -85,12 +87,19 @@ class ProductController extends Controller
             $postMetaStock = $this->getPostMeta($product->ID, '_stock');
             $products[$key]->is_campaign = false;
             $products[$key]->price =  $postMetaGiaGoc;
+            $products[$key]->price_discount =  $products[$key]->price - $discount;
+            $products[$key]->discount =   $discount;
+            $products[$key]->url_rank =  $url_rank;
             $products[$key]->sale_price =  $postMetaGiaGoc;
             if ($postMetaGiaKhuyenMai && empty($_sale_price_dates_from) && empty($_sale_price_dates_to)) {
                 $products[$key]->sale_price = $postMetaGiaKhuyenMai;
+                $products[$key]->price_discount =  $products[$key]->sale_price - $discount;
+
             }
             if ($postMetaGiaKhuyenMai && $time >= $_sale_price_dates_from && $time <= $_sale_price_dates_to) {
                 $products[$key]->sale_price = $postMetaGiaKhuyenMai;
+                $products[$key]->price_discount =  $products[$key]->sale_price - $discount;
+
                 $products[$key]->is_campaign = true;
                 $products[$key]->end_date = date('Y/m/d H:i:s', $_sale_price_dates_to);
             }

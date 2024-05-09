@@ -20,6 +20,12 @@ class ProductController extends Controller
     {
         $store = $request['data_reponse'];
         $this->_PRFIX_TABLE = $store->prefixTable;
+        echo '<pre>';
+        print_r($store);
+        echo '</pre>';
+        die;
+        //  $this->getHistoryUser($user->ID);
+        // $user->point = $this->getPointUser($user->history);
         $products = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->where('post_type', 'product')->where('post_status', 'publish')->orderBy('post_modified', 'DESC')->get();
         if (isset($request['category'])) {
             $products = $this->getPostByCategoryId($request['category']);

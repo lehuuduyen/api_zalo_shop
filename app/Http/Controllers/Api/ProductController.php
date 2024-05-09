@@ -27,7 +27,7 @@ class ProductController extends Controller
         if($store->sdt != "77777777" ){
             $history = $this->getHistoryUser($userId);
             $point = $this->checkRank($history);
-            $discount = $point->discount;
+            $discount = ($point->discount)?$point->discount:0;
             $url_rank = $point->imageurl;
         }
         $products = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->where('post_type', 'product')->where('post_status', 'publish')->orderBy('post_modified', 'DESC')->get();

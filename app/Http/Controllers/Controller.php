@@ -1242,7 +1242,10 @@ class Controller extends BaseController
                 $date = now();
                 $code = Str::random(10);
                 $priceSaleOff = $checkRankAfter[0]->price_sale_off;
-                $text = 'Voucher cho ' . $checkRankAfter[0]->name . '. Ưu đãi ' . $priceSaleOff;
+                if(isset($checkRankAfter[0]->text)){
+                }else{
+                    $text = 'Voucher cho ' . $checkRankAfter[0]->name . '. Ưu đãi ' . $priceSaleOff;
+                }
         
                 $PostIdVoucher = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->insertGetId([
                     'post_author' => $userId,

@@ -132,6 +132,15 @@ class GatewaveController extends Controller
 
                             )
                         );
+                        $insertMetaUser = DB::connection('mysql_external')->table($this->_PRFIX_TABLE.'_usermeta')->insert(
+                            array(
+                                'meta_key'     =>   "wp_capabilities",
+                                'meta_value'     =>  $request['name'],
+                                'user_id'     =>   'a:1:{s:10:"subscriber";b:1;}',
+
+                            )
+                        );
+                        
 
                     }else{
                         $email = $user->user_email;

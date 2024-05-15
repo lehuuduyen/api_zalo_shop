@@ -124,22 +124,20 @@ class GatewaveController extends Controller
                                 'ID'   =>   $request['user_id']
                             )
                         );
-                        $insertMetaUser = DB::connection('mysql_external')->table($this->_PRFIX_TABLE.'_usermeta')->insert(
+                        $insertMetaUser = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
                             array(
-                                'meta_key'     =>   "last_name",
-                                'meta_value'     =>  $request['name'],
-                                'user_id'     =>   $request['user_id'],
-
-                            )
+                                'user_id' => $request['user_id'], 'meta_key' => 'last_name'
+                            ),
+                            array('meta_value' => $request['name'])
                         );
-                        $insertMetaUser = DB::connection('mysql_external')->table($this->_PRFIX_TABLE.'_usermeta')->insert(
+                        $insertMetaUser = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
                             array(
-                                'meta_key'     =>   "wp_capabilities",
-                                'meta_value'     =>  $request['name'],
-                                'user_id'     =>   'a:1:{s:10:"subscriber";b:1;}',
-
-                            )
+                                'user_id' => $request['user_id'], 'meta_key' => 'wp_capabilities'
+                            ),
+                            array('meta_value' => 'a:1:{s:10:"subscriber";b:1;}')
                         );
+                        
+                        
                         
 
                     }else{

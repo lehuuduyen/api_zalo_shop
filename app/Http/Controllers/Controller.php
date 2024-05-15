@@ -1559,6 +1559,8 @@ class Controller extends BaseController
     }
     public function checkRank($history){
         $totalOrder = 0;
+        $total = 0;
+        $totalDoiThuong = 0;
         foreach ($history  as $value) {
             if ($value->status == 1) {
                 $total = $total + $value->point;

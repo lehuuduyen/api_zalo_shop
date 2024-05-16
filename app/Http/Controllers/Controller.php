@@ -1135,8 +1135,14 @@ class Controller extends BaseController
                     ),array(
                         'post_id' => $postId,
                         'meta_key' => '_wc_order_attribution_source_type',
-                        'meta_value' => 'typein',
+                        'meta_value' => 'referral',
                     ),
+                    array(
+                        'post_id' => $postId,
+                        'meta_key' => '_wc_order_attribution_utm_source',
+                        'meta_value' => 'Zalo App',
+                    )
+                    
                 )
             );
             //them order wp_wc_order_stats

@@ -376,13 +376,9 @@ class Controller extends BaseController
             }
             $list['Kích thước'] = [$kichThuoc];
         }
-        $listChild =[];
         if ($proAttr) {
             foreach ($proAttr as $attr => $val) {
                 $val['attribute'] = $val;
-                if($val['name'] != "Trọng lượng" || $val['name'] != "Kích thước"){
-                    $listChild[$val['name']] = explode('|', $val['value']);
-                }
                 $list[$val['name']] = explode('|', $val['value']);
                 $response->product_inventory_details[] = $val;
             }
@@ -390,7 +386,6 @@ class Controller extends BaseController
 
 
         $response->attribute = $list;
-        $response->attributeListChild = $listChild;
 
 
         return $response;

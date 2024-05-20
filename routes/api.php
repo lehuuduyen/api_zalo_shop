@@ -52,6 +52,11 @@ Route::group([  'middleware' => ['CorsApi','CheckStore']], function()
     Route::get('ranks', 'App\Http\Controllers\Api\RanksController@index');
     Route::get('get_point_to_money', 'App\Http\Controllers\Api\RanksController@get_point_to_money');
 
+
+    Route::get('check_yeuthich', 'App\Http\Controllers\Api\ProductController@checkFavorite');
+    Route::get('yeuthich', 'App\Http\Controllers\Api\ProductController@getFavorite');
+    Route::post('yeuthich', 'App\Http\Controllers\Api\ProductController@addFavorite');
+    
     Route::post('storeImage', 'App\Http\Controllers\Api\StoreController@storeImage');
 
     Route::prefix('booking')->group(function () {

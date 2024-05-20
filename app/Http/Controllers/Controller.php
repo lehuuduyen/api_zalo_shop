@@ -746,7 +746,60 @@ class Controller extends BaseController
                     )
                 );
             }
+            $city = $this->getUserMeta($user['id'], 'city');
+            $quan = $this->getUserMeta($user['id'], 'quan');
 
+            $phuong = $this->getUserMeta($user['id'], 'phuong');
+            $fee = ($quan && $phuong)? $this->calFee($quan,$phuong):0;
+            
+            if($fee > 0){
+                $motahang = '';
+                foreach($data['order'] as $order){
+                    $motahang .= $order['name'].' &times; '.$order['qty'] .',';
+                }
+                $orderItemShipId = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woocommerce_order_items')->insertGetId(
+                    array(
+                        'order_id' => $postId,
+                        'order_item_type' => 'shipping',
+                        'order_item_name' => 'Giao Hàng Nhanh (Chuyển phát thương mại điện tử)',
+                    )
+                );
+                DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woocommerce_order_itemmeta')->insert(
+                    array(
+                        array(
+                            'order_item_id' => $orderItemShipId,
+                            'meta_key' => 'method_id',
+                            'meta_value' =>'giao_hang_nhanh',
+                        ),
+                        array(
+                            'order_item_id' => $orderItemShipId,
+                            'meta_key' => 'instance_id',
+                            'meta_value' => '2',
+                        ),
+                        array(
+                            'order_item_id' => $orderItemShipId,
+                            'meta_key' => 'cost',
+                            'meta_value' => $fee,
+                        ),
+                        array(
+                            'order_item_id' => $orderItemShipId,
+                            'meta_key' => 'total_tax',
+                            'meta_value' => 0,
+                        ),
+                        array(
+                            'order_item_id' => $orderItemShipId,
+                            'meta_key' => 'taxes',
+                            'meta_value' => 'a:1:{s:5:"total";a:0:{}}',
+                        ),
+                        array(
+                            'order_item_id' => $orderItemShipId,
+                            'meta_key' => 'Mặt hàng',
+                            'meta_value' =>  $motahang,
+                        ),
+
+                    )
+                );
+            }
             if (array_key_exists('point_use', $data)) {
                 $history = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_point')->where('user_id', $user['id'])->orderBy('id', 'DESC')->get();
                 $setting = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_setting')->where('id', 1)->first();
@@ -874,6 +927,25 @@ class Controller extends BaseController
                         'post_id' => $postId,
                         'meta_key' => '_billing_email',
                         'meta_value' => $user['email'],
+                    ),
+                    array(
+                        'post_id' => $postId,
+                        'meta_key' => '_shipping_city',
+                        'meta_value' => $quan,
+                    ),
+                    array(
+                        'post_id' => $postId,
+                        'meta_key' => '_shipping_state',
+                        'meta_value' => $city,
+                    ),
+                    array(
+                        'post_id' => $postId,
+                        'meta_key' => '_shipping_address_2',
+                        'meta_value' => $phuong,
+                    ),array(
+                        'post_id' => $postId,
+                        'meta_key' => '_wc_order_attribution_device_type',
+                        'meta_value' => 'Mobile',
                     ),
                     array(
                         'post_id' => $postId,
@@ -1123,6 +1195,42 @@ class Controller extends BaseController
             $price = $priceGoc;
         }
         return $price;
+    }
+    public function calFee($quan,$phuong){
+        // Create a stream
+        $freeship = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woocommerce_shipping_zone_methods')->where('method_id', 'free_shipping')->where('is_enabled', 1)->get()->count();
+        if($freeship == 1){
+            return 0;
+        }
+        $opts = [
+            "http" => [
+                "method" => "GET",
+                "header" => "Accept-language: en\r\n" .
+                    "Token: 80b69b6b-a60f-11ed-b190-ea4934f9883e\r\n"
+            ]
+        ];
+        $listCity = $this->convertCity();
+        $quan = $listCity['districts'][$quan];
+        $phuong = $listCity['wards'][$phuong];
+
+
+        // DOCS: https://www.php.net/manual/en/function.stream-context-create.php
+        $context = stream_context_create($opts);
+        // Open the file using the HTTP headers set above
+        // DOCS: https://www.php.net/manual/en/function.file-get-contents.php
+        for($i=0;$i<=5;$i++){
+            $file = @file_get_contents("https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee?service_id=5332$i&service_type_id=2&insurance_value=0&to_district_id=$quan&to_ward_code=$phuong&weight=1000&width=10&height=10&length=10&coupon", false, $context);
+            if($file){
+                break;
+            }
+        }
+        $fee  = 0;
+        if($file){
+            $file = json_decode($file);
+            $fee = $file->data->total;
+
+        }
+        return $fee;
     }
     public function getTotalPriceDetails($cart, $postId)
     {

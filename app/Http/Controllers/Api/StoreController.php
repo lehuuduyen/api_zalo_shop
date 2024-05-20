@@ -170,6 +170,31 @@ class StoreController extends Controller
                     )
                 );
             }
+            if (isset($data['city'])) {
+                $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
+                    array(
+                        'user_id' => $userId, 'meta_key' => 'city'
+                    ),
+                    array('meta_value' => $data['city'])
+                );
+
+            }
+            if (isset($data['quan'])) {
+                $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
+                    array(
+                        'user_id' => $userId, 'meta_key' => 'quan'
+                    ),
+                    array('meta_value' => $data['quan'])
+                );
+            }
+            if (isset($data['phuong'])) {
+                $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
+                    array(
+                        'user_id' => $userId, 'meta_key' => 'phuong'
+                    ),
+                    array('meta_value' => $data['phuong'])
+                );
+            }
             if (isset($data['company'])) {
                 $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
                     array(
@@ -210,6 +235,12 @@ class StoreController extends Controller
         $user->address = $address;
         $user->user_parent = $this->getUserMeta($user->ID, 'user_parent');
         $user->company = $company;
+        $city = $this->getUserMeta($user->ID, 'city');
+        $quan = $this->getUserMeta($user->ID, 'quan');
+        $phuong = $this->getUserMeta($user->ID, 'phuong');
+        $user->city = $city;
+        $user->quan = $quan;
+        $user->phuong = $phuong;
         $paymentMethod = $this->getUserMeta($user->ID, 'payment_method');
         $user->payment_method = ($paymentMethod) ? json_decode($paymentMethod) : "";
         $user->history = $this->getHistoryUser($user->ID);
@@ -452,5 +483,101 @@ class StoreController extends Controller
             $banner[$key]->image = $this->getImage($value->image, $store);
         }
         return $this->returnSuccess($banner);
+    }
+    public function city(Request $request)
+    {
+        $city = file_get_contents('public/data/tinh_tp.json');
+        $city = json_decode($city);
+        $listCity = [];
+        foreach ($city as $id => $val) {
+            $json['id'] = $id;
+            $json['name'] = $val->name_with_type;
+            $listCity[] = $json;
+        }
+        return $this->returnSuccess($listCity);
+    }
+    public function quan(Request $request)
+    {
+        try {
+            $data = $request->all();
+            $validator = Validator::make($request->all(), [
+                'parent' => 'required',
+            ], [
+                'parent.required' => "Vui lòng chọn thành phố ",
+            ]);
+            if ($validator->fails()) {
+                return $this->returnError(new \stdClass, $validator->errors()->first());
+            } else {
+                $param = $data['parent'];
+                $quan = file_get_contents("public/data/quan-huyen/$param.json");
+                $quan = json_decode($quan);
+                $listQuan = [];
+                foreach ($quan as $id => $val) {
+                    $json['id'] = $id;
+                    $json['name'] = $val->name_with_type;
+                    $listQuan[] = $json;
+                }
+                return $this->returnSuccess($listQuan);
+            }
+        } catch (\Throwable $th) {
+            //throw $th;
+            $this->woo_logs('quan', $th->getMessage());
+
+            return $this->returnError([], "Lỗi hệ thống");
+        }
+    }
+    public function phuong(Request $request)
+    {
+        try {
+            $data = $request->all();
+            $validator = Validator::make($request->all(), [
+                'parent' => 'required',
+            ], [
+                'parent.required' => "Vui lòng chọn thành phố ",
+            ]);
+            if ($validator->fails()) {
+                return $this->returnError(new \stdClass, $validator->errors()->first());
+            } else {
+                $param = $data['parent'];
+                $phuong = file_get_contents("public/data/xa-phuong/$param.json");
+                $phuong = json_decode($phuong);
+                $listPhuong = [];
+                foreach ($phuong as $id => $val) {
+                    $json['id'] = $id;
+                    $json['name'] = $val->name_with_type;
+                    $listPhuong[] = $json;
+                }
+                return $this->returnSuccess($listPhuong);
+            }
+        } catch (\Throwable $th) {
+            //throw $th;
+            $this->woo_logs('phuong', $th->getMessage());
+
+            return $this->returnError([], "Lỗi hệ thống");
+        }
+    }
+    public function getFee(Request $request){
+        try {
+            $data = $request->all();
+            $validator = Validator::make($request->all(), [
+                'quan' => 'required',
+                'phuong' => 'required',
+            ], [
+                'quan.required' => "Vui lòng chọn quận ",
+                'phuong.required' => "Vui lòng chọn phường xã ",
+            ]);
+            if ($validator->fails()) {
+                return $this->returnError(new \stdClass, $validator->errors()->first());
+            } else {
+
+                $fee = $this->calFee($data['quan'],$data['phuong']);
+
+                return $this->returnSuccess($fee);
+            }
+        } catch (\Throwable $th) {
+            //throw $th;
+
+            return $this->returnError([], $th->getMessage());
+        }
     }
 }

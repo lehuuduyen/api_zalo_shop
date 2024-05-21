@@ -16,6 +16,15 @@ class ProductController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+    public function rewardPolicy(Request $request)
+    {
+        $store = $request['data_reponse'];
+        $this->_PRFIX_TABLE = $store->prefixTable;
+        $rewardPolicy = $this->getOptionsMeta('reward_policy');
+
+
+        return $this->returnSuccess($rewardPolicy);
+    }
     public function index(Request $request)
     {
         $store = $request['data_reponse'];

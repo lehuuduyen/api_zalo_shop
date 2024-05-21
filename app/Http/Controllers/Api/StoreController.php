@@ -559,6 +559,8 @@ class StoreController extends Controller
     public function getFee(Request $request){
         try {
             $data = $request->all();
+            $store = $request['data_reponse'];
+            $this->_PRFIX_TABLE = $store->prefixTable;
             $validator = Validator::make($request->all(), [
                 'quan' => 'required',
                 'phuong' => 'required',

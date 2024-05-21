@@ -17,10 +17,11 @@ class ProductController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function calPriceDiscount($price,$discount){
-        if($discount> $price){
-            return $price;
+        if($discount > 0){
+            $sale = $price - ($discount * $price /100);
+            return $sale;
         }
-        return $price - $discount;
+        return 0;
     }
     public function index(Request $request)
     {

@@ -19,6 +19,13 @@ class Controller extends BaseController
     public $_messageError = "Không thể tạo đơn hàng";
     public $_PRFIX_TABLE = 'wp';
 
+    public function calPriceDiscount($price,$discount){
+        if($discount > 0){
+            $sale = $price - ($discount * $price /100);
+            return $sale;
+        }
+        return 0;
+    }
     public function returnSuccess($data = [], $message = "Lấy dữ liệu thành công")
     {
 
@@ -620,7 +627,7 @@ class Controller extends BaseController
             }
 
 
-            $totalPriceDetails =  $this->getTotalPriceDetails($data['order'], $postId);
+            $totalPriceDetails =  $this->getTotalPriceDetails($data['order'], $postId,$user['id']);
             if (!$totalPriceDetails) {
                 throw new \Exception('Không đủ số lượng trong kho');
             }
@@ -1478,7 +1485,7 @@ class Controller extends BaseController
         }
         return $price;
     }
-    public function getTotalPriceDetails($cart, $postId)
+    public function getTotalPriceDetails($cart, $postId,$userId)
     {
 
 
@@ -1500,6 +1507,12 @@ class Controller extends BaseController
                 $price = $priceGoc;
             }
 
+            $history = $this->getHistoryUser($userId);
+            $point = $this->checkRank($history);
+            if(isset($point->discount)){
+                $discount = ($point->discount)?$point->discount:0;
+                $price = $this->calPriceDiscount($price,$discount);
+            }
            
 
             $stockStatus = $this->getPostMeta($item['id'], '_stock_status');

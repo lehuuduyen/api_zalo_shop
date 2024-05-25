@@ -1269,6 +1269,7 @@ class Controller extends BaseController
                     'post_date_gmt' => $date,
                     'post_title' => $code,
                     'post_excerpt' => $text,
+                    'post_content' => $text,
                     'post_status' => 'publish',
                     'comment_status' => 'closed',
                     'ping_status' => 'closed',

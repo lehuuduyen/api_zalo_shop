@@ -1277,7 +1277,12 @@ class Controller extends BaseController
                     'post_modified' => $date,
                     'post_modified_gmt' => $date,
                     'post_parent' => 0,
-                    'post_type' => 'shop_coupon'
+                    'post_type' => 'shop_coupon',
+                    'to_ping' => '',
+                    'pinged' => '',
+                    'post_content_filtered' => '',
+
+                    'comment_count' => '0',
                 ]);
         
                 $arrayEmail = serialize([$user['email']]);

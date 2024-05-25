@@ -1250,19 +1250,20 @@ class Controller extends BaseController
                 ->orderBy('minimum_spending', 'DESC')
                 ->limit(1)
                 ->get();
-        
+              
             if ($checkRankBefore->isNotEmpty() && $checkRankAfter->isNotEmpty() && $checkRankBefore[0]->id != $checkRankAfter[0]->id) {
                 $date = now();
                 $code = Str::random(10);
                 $priceSaleOff = $checkRankAfter[0]->price_sale_off;
+                echo '<pre>';
+                print_r($checkRankAfter);
+                echo '</pre>';
+                die;
                 if(isset($checkRankAfter[0]->text)){
                 }else{
                     $text = 'Voucher cho ' . $checkRankAfter[0]->name . '. Ưu đãi ' . $priceSaleOff;
                 }
-                echo '<pre>';
-                print_r($text);
-                echo '</pre>';
-                die;
+               
                 
                 $PostIdVoucher = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->insertGetId([
                     'post_author' => $userId,

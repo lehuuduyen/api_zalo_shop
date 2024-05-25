@@ -1255,11 +1255,9 @@ class Controller extends BaseController
                 $date = now();
                 $code = Str::random(10);
                 $priceSaleOff = $checkRankAfter[0]->price_sale_off;
-                echo '<pre>';
-                print_r($checkRankAfter);
-                echo '</pre>';
-                die;
-                if(isset($checkRankAfter[0]->text)){
+                
+                if(!isset($checkRankAfter[0]->text)){
+                    $text = $checkRankAfter[0]->text;
                 }else{
                     $text = 'Voucher cho ' . $checkRankAfter[0]->name . '. Ưu đãi ' . $priceSaleOff;
                 }

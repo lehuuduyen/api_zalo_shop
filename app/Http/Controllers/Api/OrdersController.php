@@ -31,7 +31,7 @@ class OrdersController extends Controller
 
         foreach ($orders as $key => $order) {
             if($orders[$key]->post_status =="wc-da-thanh-toan"){
-                $orders[$key]->post_status =="wc-processing";
+                $orders[$key]->post_status ="wc-processing";
             }
             $user = $this->info($order->customer_id);
             $orders[$key]->name = $user->name;

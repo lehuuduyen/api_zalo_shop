@@ -575,7 +575,7 @@ class Controller extends BaseController
                         'post_modified' => $timeNow,
                         'post_modified_gmt' => $timeNow,
                         'post_title' => 'Order &ndash; ' . $this->timeFormat(),
-                        'post_status' => 'wc-completed',
+                        'post_status' => 'wc-da-thanh-toan',
                         'post_type' => 'shop_order',
                         'post_content' => 'ZaloApp',
                         'post_excerpt' => '',

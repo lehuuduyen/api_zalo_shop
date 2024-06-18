@@ -35,6 +35,11 @@ class CouponsController extends Controller
             if($usage_limit <= $usage_count){
                 continue;            
             }
+            echo '<pre>';
+            print_r($val);
+            echo '</pre>';
+            die;
+            
             if($customer_user){
                if($store->user_id == $customer_user){
                 $coupons[$key]->title=$val->post_excerpt;

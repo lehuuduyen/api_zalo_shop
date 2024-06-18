@@ -32,13 +32,14 @@ class CouponsController extends Controller
             $date_expires = $this->getPostMeta($val->ID,'date_expires');
             $usage_limit = $this->getPostMeta($val->ID,'usage_limit');
             $usage_count = $this->getPostMeta($val->ID,'usage_count');
-            if($usage_limit <= $usage_count){
-                continue;            
-            }
             echo '<pre>';
             print_r($val);
             echo '</pre>';
             die;
+            if($usage_limit <= $usage_count){
+                continue;            
+            }
+            
             
             if($customer_user){
                if($store->user_id == $customer_user){

@@ -32,11 +32,16 @@ class CouponsController extends Controller
             $date_expires = $this->getPostMeta($val->ID,'date_expires');
             $usage_limit = $this->getPostMeta($val->ID,'usage_limit');
             $usage_count = $this->getPostMeta($val->ID,'usage_count');
-          
+            $free_shipping = $this->getPostMeta($val->ID,'free_shipping');
             if($usage_limit <= $usage_count){
                 continue;            
             }
-            
+            $product_ids = [];
+
+            if($discount_type == 'fixed_product'){
+                $product_ids = $this->getPostMeta($val->ID,'product_ids');
+                
+            }
             
             if($customer_user){
                if($store->user_id == $customer_user){
@@ -53,6 +58,9 @@ class CouponsController extends Controller
                     continue;
                 }
                 $coupons[$key]->title=$val->post_excerpt;
+                $coupons[$key]->free_shipping=$free_shipping;
+                $coupons[$key]->product_ids=$product_ids;
+
                 $coupons[$key]->code=$val->post_title;
                 $coupons[$key]->discount_type=$discount_type;
                 $coupons[$key]->discount=$discount;

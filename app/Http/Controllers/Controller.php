@@ -475,7 +475,7 @@ class Controller extends BaseController
         }
         return $data;
     }
-    public function calculateCoupon($data, $products, $isCheckApiCoupon = false)
+    public function calculateCoupon($userId,$data, $products, $isCheckApiCoupon = false)
     {
         $discount_total = 0;
         $paramCoupon = $data['coupon'];
@@ -499,6 +499,8 @@ class Controller extends BaseController
         $coupon_amount = $this->getPostMeta($coupon->ID, 'coupon_amount');
         $usage_limit = $this->getPostMeta($coupon->ID, 'usage_limit');
         $usage_count = $this->getPostMeta($coupon->ID, 'usage_count');
+        $free_shipping = $this->getPostMeta($coupon->ID, 'free_shipping');
+
         if ($usage_limit <= $usage_count) {
             return $discount_total;
         }
@@ -506,17 +508,37 @@ class Controller extends BaseController
         if ($coupon_type == "percent") {
             $coupon_type = 'percentage';
         }
+        if ($coupon_type == "fixed_product") {
+            $listProductSaleOff = $this->getPostMeta($coupon->ID, 'product_ids');
+            $tempListProductSaleOff = explode(",",$listProductSaleOff);
+            if(!in_array($products->ID,$tempListProductSaleOff)){
+                return 0;
+            }
+        }
 
 
         // calculate based on coupon type
         if ($coupon_type === 'percentage') {
             $discount_total = $data['subtotal'] / 100 * $coupon_amount;
+            if ($discount_total > $data['subtotal']) {
+                $discount_total = $data['subtotal'];
+            }
+        }elseif($free_shipping == "yes"){
+            $city = $this->getUserMeta($userId, 'city');
+            $quan = $this->getUserMeta($userId, 'quan');
+
+            $phuong = $this->getUserMeta($userId, 'phuong');
+            $fee = ($quan && $phuong)? $this->calFee($quan,$phuong):0;
+            if ($coupon_amount > $fee) {
+                $discount_total = $fee;
+            }
         } else { # =====
             $discount_total = $coupon_amount;
+            if ($discount_total > $data['subtotal']) {
+                $discount_total = $data['subtotal'];
+            }
         }
-        if ($discount_total > $data['subtotal']) {
-            $discount_total = $data['subtotal'];
-        }
+        
         if (!$isCheckApiCoupon) {
             DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_postmeta')->where('post_id', $coupon->ID)->where('meta_key', 'usage_count')->update(
                 array(
@@ -1083,7 +1105,7 @@ class Controller extends BaseController
 
         $data = $this->get_product_shipping_tax(['country' => $country, 'state' => $state, 'shipping_method' => (int)$shipping_method]);
         $coupon['subtotal'] = $price['total'];
-        $discounted_price = $this->calculateCoupon($coupon, []);
+        $discounted_price = $this->calculateCoupon($user->ID,$coupon, []);
 
 
 

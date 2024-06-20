@@ -195,7 +195,7 @@ class ProductController extends Controller
                         $temp['subtotal']=$subtotal;
                         
                     }
-                    $coupon_amount_total = $this->calculateCoupon($temp, $products, true);
+                    $coupon_amount_total = $this->calculateCoupon($store->user_id,$temp, $products, true);
                     $subtotal = $data['subtotal'] - $coupon_amount_total;
                     $listCoupon[]=[
                         'coupon'=>$coupon,
@@ -205,7 +205,7 @@ class ProductController extends Controller
                 return $this->returnSuccess($listCoupon);
                 
             }else{
-                $coupon_amount_total = $this->calculateCoupon($data, $products, true);
+                $coupon_amount_total = $this->calculateCoupon($store->user_id,$data, $products, true);
                 if ($coupon_amount_total > 0) {
                     return $this->returnSuccess($coupon_amount_total);
                 } else {

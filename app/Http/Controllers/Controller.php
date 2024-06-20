@@ -536,6 +536,9 @@ class Controller extends BaseController
 
             $phuong = $this->getUserMeta($userId, 'phuong');
             $fee = ($quan && $phuong)? $this->calFee($quan,$phuong):0;
+            $this->woo_logs('fee', $fee);
+            $this->woo_logs('discount_total', $discount_total);
+
             if ($coupon_amount > $fee) {
                 $discount_total = $fee;
             }

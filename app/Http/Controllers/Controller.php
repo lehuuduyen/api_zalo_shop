@@ -512,8 +512,8 @@ class Controller extends BaseController
             $listProductSaleOff = $this->getPostMeta($coupon->ID, 'product_ids');
             $tempListProductSaleOff = explode(",",$listProductSaleOff);
             $check1 = false;
-            foreach($product as $products ){
-                if(in_array($products->ID,$tempListProductSaleOff)){
+            foreach($products as $product ){
+                if(in_array($product->ID,$tempListProductSaleOff)){
                     $check1 = true;
                 }
             }

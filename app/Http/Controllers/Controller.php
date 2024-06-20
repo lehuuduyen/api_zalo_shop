@@ -1183,7 +1183,6 @@ class Controller extends BaseController
         if(is_array($coupon['coupon'])){
             $listCoupon = [];
             $subtotal =$coupon['subtotal'];
-temp
             foreach($coupon['coupon'] as $key => $detailCoupon ){
                 $temp['coupon']=$detailCoupon;
                 if($key ==0){

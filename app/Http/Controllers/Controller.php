@@ -1191,11 +1191,8 @@ class Controller extends BaseController
                     $temp['subtotal']=$subtotal;
                     
                 }
-                echo '<pre>';
-            print_r($temp);
-            echo '</pre>';
-            die;
-                $coupon_amount_total = $this->calculateCoupon($temp, [], true);
+                
+                $coupon_amount_total = $this->calculateCoupon($user['id'],$temp, [], true);
                 $listDetail[]=array(
                     "coupon" => $detailCoupon,
                     "discount" => $coupon_amount_total,
@@ -1207,7 +1204,7 @@ class Controller extends BaseController
             
            
         }else{
-            $discounted_price = $this->calculateCoupon($coupon, []);
+            $discounted_price = $this->calculateCoupon($user['id'],$coupon, []);
         }
         
         $price['total'] -= $discounted_price;            

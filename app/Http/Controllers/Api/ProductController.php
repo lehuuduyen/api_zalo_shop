@@ -182,18 +182,44 @@ class ProductController extends Controller
                 $listProductId[] = $value['id'];
             }
             $products = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->whereIn('id', $listProductId)->get();
-            $coupon_amount_total = $this->calculateCoupon($data, $products, true);
-            if ($coupon_amount_total > 0) {
-                return $this->returnSuccess($coupon_amount_total);
-            } else {
-                return $this->returnError($coupon_amount_total, 'Mã khuyễn mãi không đúng');
+            
+            if(is_array($data['coupon'])){
+                $listCoupon = [];
+                $temp['subtotal']=0;
+                $subtotal =0;
+                foreach($data['coupon'] as $key=> $coupon ){
+                    $temp['coupon']=$coupon;
+                    if($key ==0){
+                        $temp['subtotal']=$data['subtotal'];
+                    }else{
+                        $temp['subtotal']=$subtotal;
+                        
+                    }
+                    $coupon_amount_total = $this->calculateCoupon($temp, $products, true);
+                    $subtotal = $data['subtotal'] - $coupon_amount_total;
+                    $listCoupon[]=[
+                        'coupon'=>$coupon,
+                        'discount'=>$coupon_amount_total
+                    ];
+                }
+                return $this->returnSuccess($listCoupon);
+                
+            }else{
+                $coupon_amount_total = $this->calculateCoupon($data, $products, true);
+                if ($coupon_amount_total > 0) {
+                    return $this->returnSuccess($coupon_amount_total);
+                } else {
+                    return $this->returnError($coupon_amount_total, 'Mã khuyễn mãi không đúng');
+                }
             }
+           
         } catch (\Throwable $th) {
             //throw $th;
             $this->woo_logs('checkCoupon', $th->getMessage());
             return $this->returnError(0, 'Mã khuyễn mãi không đúng');
         }
     }
+
     /**
      * Display the specified resource.
      *

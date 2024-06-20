@@ -687,6 +687,11 @@ class Controller extends BaseController
                         ),
                     );
                     }
+                    echo '<pre>';
+                    print_r($coupons);
+                    echo '</pre>';
+                    die;
+                    
                 }else{
                     $coupon = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->where('post_title', $data['used_coupon'])->where('post_status', 'publish')->where('post_type', 'shop_coupon')->first();
                     $coupon_amount = $this->getPostMeta($coupon->ID, 'coupon_amount');

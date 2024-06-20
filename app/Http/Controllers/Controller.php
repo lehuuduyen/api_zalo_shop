@@ -1117,10 +1117,7 @@ class Controller extends BaseController
         $data = $this->get_product_shipping_tax(['country' => $country, 'state' => $state, 'shipping_method' => (int)$shipping_method]);
         $coupon['subtotal'] = $price['total'];
         $discounted_price = $this->calculateCoupon($user['id'],$coupon, []);
-        echo '<pre>';
-        print_r($discounted_price);
-        echo '</pre>';
-        die;
+     
         
 
 
@@ -1136,6 +1133,10 @@ class Controller extends BaseController
 
         // $total['payment_meta'] = $this->payment_meta(compact('product_tax', 'shipping_cost', 'subtotal', 'total'));
         $total['coupon_discounted'] = $discounted_price;
+        echo '<pre>';
+        print_r($total);
+        echo '</pre>';
+        die;
         return $total;
     }
     private function payment_meta($data)

@@ -511,9 +511,16 @@ class Controller extends BaseController
         if ($coupon_type == "fixed_product") {
             $listProductSaleOff = $this->getPostMeta($coupon->ID, 'product_ids');
             $tempListProductSaleOff = explode(",",$listProductSaleOff);
-            if(!in_array($products->ID,$tempListProductSaleOff)){
+            $check1 = false;
+            foreach($product as $products ){
+                if(in_array($products->ID,$tempListProductSaleOff)){
+                    $check1 = true;
+                }
+            }
+            if(!$check1){
                 return 0;
             }
+            
         }
 
 
@@ -529,14 +536,6 @@ class Controller extends BaseController
 
             $phuong = $this->getUserMeta($userId, 'phuong');
             $fee = ($quan && $phuong)? $this->calFee($quan,$phuong):0;
-            echo '<pre>';
-            print_r($fee);
-            echo '<pre>';
-
-            print_r($discount_total);
-            echo '</pre>';
-            die;
-            
             if ($coupon_amount > $fee) {
                 $discount_total = $fee;
             }

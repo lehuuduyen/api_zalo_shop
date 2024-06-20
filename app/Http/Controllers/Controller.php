@@ -568,6 +568,15 @@ class Controller extends BaseController
         $formattedDate = strftime('%B %d, %Y @ %I:%M %p', $now);
         return $formattedDate;
     }
+    public function checkPriceDiscount($detail_voucher,$coupon)
+    {
+        foreach($detail_voucher as $voucher){
+            if($voucher['coupon'] == $coupon){
+                return $voucher['discount'] ;
+            }
+        }
+        return 0;
+    }
     public function createOrder($data, $user)
     {
 
@@ -1162,19 +1171,38 @@ class Controller extends BaseController
 
         $price = $totalPriceDetails;
         $coupon = ["coupon" => $validated_data['used_coupon'], "subtotal" => $price['total']];
-
-
-
+        
+        $discounted_price = 0;
+        
 
         $data = $this->get_product_shipping_tax(['country' => $country, 'state' => $state, 'shipping_method' => (int)$shipping_method]);
         $coupon['subtotal'] = $price['total'];
-        $discounted_price = $this->calculateCoupon($user['id'],$coupon, []);
-     
+        $listDetail =[];
+        if(is_array($coupon['coupon'])){
+            $listCoupon = [];
+            $subtotal =$coupon['subtotal'];
+            foreach($coupon['coupon'] as $key => $detailCoupon ){
+                $temp['coupon']=$detailCoupon;
+                if($key ==0){
+                    $temp['subtotal']=$coupon['subtotal'];
+                }else{
+                    $temp['subtotal']=$subtotal;
+                    
+                }
+               
+                $coupon_amount_total = $this->calculateCoupon($temp, [], true);
+                $listDetail[]=array(
+                    "coupon" => $detailCoupon,
+                    "discount" => $coupon_amount_total,
+                );
+                $subtotal = $subtotal -$coupon_amount_total;
+                $discounted_price += $coupon_amount_total;
+            }
+        }else{
+            $discounted_price = $this->calculateCoupon($coupon, []);
+        }
         
-
-
-
-        $price['total'] -= $discounted_price;
+        $price['total'] -= $discounted_price;            
 
         $product_tax = $data['product_tax'];
         $shipping_cost = $data['shipping_cost'];
@@ -1182,10 +1210,9 @@ class Controller extends BaseController
         $taxed_price = ($price['total'] * $product_tax) / 100;
         $subtotal = $price['total'] + $discounted_price;
         $total['total'] = $price['total'] + $taxed_price + $shipping_cost;
-
+        $total['detail_voucher']=$listDetail;
         // $total['payment_meta'] = $this->payment_meta(compact('product_tax', 'shipping_cost', 'subtotal', 'total'));
         $total['coupon_discounted'] = $discounted_price;
-       
         return $total;
     }
     private function payment_meta($data)

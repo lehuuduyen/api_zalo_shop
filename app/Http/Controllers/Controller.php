@@ -1105,7 +1105,7 @@ class Controller extends BaseController
 
         $data = $this->get_product_shipping_tax(['country' => $country, 'state' => $state, 'shipping_method' => (int)$shipping_method]);
         $coupon['subtotal'] = $price['total'];
-        $discounted_price = $this->calculateCoupon($user->ID,$coupon, []);
+        $discounted_price = $this->calculateCoupon($user['ID'],$coupon, []);
 
 
 

@@ -538,6 +538,7 @@ class Controller extends BaseController
             $fee = ($quan && $phuong)? $this->calFee($quan,$phuong):0;
             $this->woo_logs('fee', $fee);
             $this->woo_logs('discount_total', $discount_total);
+            $discount_total = $coupon_amount;
 
             if ($coupon_amount > $fee) {
                 $discount_total = $fee;

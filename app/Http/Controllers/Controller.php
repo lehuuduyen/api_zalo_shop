@@ -1133,10 +1133,7 @@ class Controller extends BaseController
 
         // $total['payment_meta'] = $this->payment_meta(compact('product_tax', 'shipping_cost', 'subtotal', 'total'));
         $total['coupon_discounted'] = $discounted_price;
-        echo '<pre>';
-        print_r($total);
-        echo '</pre>';
-        die;
+       
         return $total;
     }
     private function payment_meta($data)

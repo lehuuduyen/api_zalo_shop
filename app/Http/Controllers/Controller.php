@@ -1199,11 +1199,12 @@ class Controller extends BaseController
                 );
                 $subtotal = $subtotal -$coupon_amount_total;
                 $discounted_price += $coupon_amount_total;
-            }
-            echo '<pre>';
+                echo '<pre>';
             print_r($listDetail);
             echo '</pre>';
             die;
+            }
+            
            
         }else{
             $discounted_price = $this->calculateCoupon($coupon, []);

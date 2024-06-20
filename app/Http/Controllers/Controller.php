@@ -1183,10 +1183,7 @@ class Controller extends BaseController
         if(is_array($coupon['coupon'])){
             $listCoupon = [];
             $subtotal =$coupon['subtotal'];
-            echo '<pre>';
-            print_r($subtotal);
-            echo '</pre>';
-            die;
+temp
             foreach($coupon['coupon'] as $key => $detailCoupon ){
                 $temp['coupon']=$detailCoupon;
                 if($key ==0){
@@ -1195,7 +1192,10 @@ class Controller extends BaseController
                     $temp['subtotal']=$subtotal;
                     
                 }
-               
+                echo '<pre>';
+                print_r($temp);
+                echo '</pre>';
+                die;
                 $coupon_amount_total = $this->calculateCoupon($temp, [], true);
                 $listDetail[]=array(
                     "coupon" => $detailCoupon,

@@ -1200,6 +1200,10 @@ class Controller extends BaseController
                 $subtotal = $subtotal -$coupon_amount_total;
                 $discounted_price += $coupon_amount_total;
             }
+            echo '<pre>';
+            print_r($discounted_price);
+            echo '</pre>';
+            die;
         }else{
             $discounted_price = $this->calculateCoupon($coupon, []);
         }
@@ -1215,10 +1219,7 @@ class Controller extends BaseController
         $total['detail_voucher']=$listDetail;
         // $total['payment_meta'] = $this->payment_meta(compact('product_tax', 'shipping_cost', 'subtotal', 'total'));
         $total['coupon_discounted'] = $discounted_price;
-        echo '<pre>';
-        print_r($total);
-        echo '</pre>';
-        die;
+        
         return $total;
     }
     private function payment_meta($data)

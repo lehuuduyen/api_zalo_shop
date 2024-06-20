@@ -1172,10 +1172,7 @@ class Controller extends BaseController
 
         $price = $totalPriceDetails;
         $coupon = ["coupon" => $validated_data['used_coupon'], "subtotal" => $price['total']];
-        echo '<pre>';
-            print_r($coupon);
-            echo '</pre>';
-            die;
+       
 
         $discounted_price = 0;
         
@@ -1218,6 +1215,10 @@ class Controller extends BaseController
         $total['detail_voucher']=$listDetail;
         // $total['payment_meta'] = $this->payment_meta(compact('product_tax', 'shipping_cost', 'subtotal', 'total'));
         $total['coupon_discounted'] = $discounted_price;
+        echo '<pre>';
+        print_r($total);
+        echo '</pre>';
+        die;
         return $total;
     }
     private function payment_meta($data)

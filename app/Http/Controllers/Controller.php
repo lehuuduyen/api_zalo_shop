@@ -624,7 +624,10 @@ class Controller extends BaseController
             $finalDetails = $this->getFinalPriceDetails($user, $data, $totalPriceDetails);
 
 
-
+            echo '<pre>';
+            print_r($finalDetails);
+            echo '</pre>';
+            die;
 
 
 
@@ -673,10 +676,7 @@ class Controller extends BaseController
             }
             //wp_wc_order_product_lookup
             $totalQuantity = array_sum($totalPriceDetails['quantity']);
-            echo '<pre>';
-            print_r($totalQuantity);
-            echo '</pre>';
-            die;
+            
             
             foreach ($totalPriceDetails['products_id'] as $key  => $productId) {
                 $products = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->where('ID', $productId)->select('post_title')->first();

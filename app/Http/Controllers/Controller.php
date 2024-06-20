@@ -511,6 +511,11 @@ class Controller extends BaseController
         if ($coupon_type == "fixed_product") {
             $listProductSaleOff = $this->getPostMeta($coupon->ID, 'product_ids');
             $tempListProductSaleOff = explode(",",$listProductSaleOff);
+            echo '<pre>';
+            print_r($tempListProductSaleOff);
+            echo '</pre>';
+            die;
+            
             if(!in_array($products->ID,$tempListProductSaleOff)){
                 return 0;
             }

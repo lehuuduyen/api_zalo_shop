@@ -222,7 +222,19 @@ class Controller extends BaseController
                     $data[$key]->product->description = $this->getTextByLanguare($product->description);
                     $data[$key]->product->badge_id = $this->getBadge($product->badge_id, $store);
                     $data[$key]->product->category = $this->getCategoryByProduct($product->id, $store);
-                    $data[$key]->product->galleries = $this->getGalleries($product->id, $store);
+                    if($data[$key]->product->image_id){
+                        $listImgThumb =[
+                            'path'=>$data[$key]->product->image_id->path,
+                            'title'=>"",
+                            'alt'=>""
+                        ];
+                        $data[$key]->product->galleries = array_unshift($this->getGalleries($product->id, $store), $listImgThumb);
+                        
+
+                    }else{
+                        $data[$key]->product->galleries = $this->getGalleries($product->id, $store);
+                    }
+                    
                     $data[$key]->product->product_inventory = $this->getProductInventory($product->id);
                     $data[$key]->product->delivery_option = $this->getProductDeliveryOption($product->id);
                     $data[$key]->product->unit = $this->getUnit($product->id);

@@ -228,7 +228,10 @@ class Controller extends BaseController
                             'title'=>"",
                             'alt'=>""
                         ];
-                        $data[$key]->product->galleries = array_unshift($this->getGalleries($product->id, $store), $listImgThumb);
+                        
+                        $gale = $this->getGalleries($product->id, $store);
+                        array_unshift($gale, $listImgThumb);
+                        $data[$key]->product->galleries = $gale;
                         
 
                     }else{

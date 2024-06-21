@@ -981,7 +981,7 @@ class Controller extends BaseController
                     )
                 );
             }
-
+            $data['payment_gateway'] = 'zalopay';
             if($data['payment_gateway'] == 'cod'){
                 $paymentTitle  = 'Thanh toán khi giao hàng';
             } elseif($data['payment_gateway'] == 'zalopay'){

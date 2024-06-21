@@ -60,7 +60,21 @@ class FlashSaleController extends Controller
                 $data[$i]['product']['description'] = $product->post_content;
                 $data[$i]['product']['badge_id'] = [];
                 $data[$i]['product']['category'] = $this->getCategoryByProduct($product->ID, $store);
-                $data[$i]['product']['galleries'] = $this->getGalleries($product->ID, $store);
+                if($data[$i]['product']['image_id']){
+                    $listImgThumb =[
+                        'path'=>$data[$i]['product']['image_id']['path'],
+                        'title'=>"",
+                        'alt'=>""
+                    ];
+                    
+                    $gale = $this->getGalleries($product->ID, $store);
+                    array_unshift($gale, $listImgThumb);
+                    $data[$i]['product']['galleries'] = $gale;
+                    
+
+                }else{
+                    $data[$i]['product']['galleries'] = $this->getGalleries($product->ID, $store);
+                }
                 $data[$i]['product']['product_inventory'] = $this->getProductInventory($product->ID);
                 $data[$i]['product']['delivery_option'] = [];
                 $data[$i]['product']['unit'] = [];

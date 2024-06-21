@@ -128,7 +128,23 @@ class ProductController extends Controller
             $products[$key]->summary = $product->post_excerpt;
             $products[$key]->description = $product->post_content;
             $products[$key]->badge_id = [];
-            $products[$key]->galleries = $this->getGalleries($product->ID, $store);
+
+            if($products[$key]->image_id){
+                $listImgThumb =[
+                    'path'=>$products[$key]->image_id->path,
+                    'title'=>"",
+                    'alt'=>""
+                ];
+                
+                $gale = $this->getGalleries($product->ID, $store);
+                array_unshift($gale, $listImgThumb);
+                $products[$key]->galleries = $gale;
+                
+
+            }else{
+                $products[$key]->galleries = $this->getGalleries($product->ID, $store);
+            }
+            
             $products[$key]->delivery_option = [];
             // $products[$key]->delivery_option = $this->getProductDeliveryOption($product->id);
             $products[$key]->unit = [];

@@ -30,9 +30,7 @@ class OrdersController extends Controller
         $orders = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_wc_order_stats')->join( $this->_PRFIX_TABLE .'_posts', $this->_PRFIX_TABLE .'_posts.ID', $this->_PRFIX_TABLE .'_wc_order_stats.order_id')->where( $this->_PRFIX_TABLE .'_wc_order_stats.customer_id', $store->user_id)->where( $this->_PRFIX_TABLE .'_posts.post_status','!=', 'trash')->orderBy( $this->_PRFIX_TABLE .'_wc_order_stats.date_created', 'DESC')->get();
 
         foreach ($orders as $key => $order) {
-            if($orders[$key]->post_status =="wc-da-thanh-toan"){
-                $orders[$key]->post_status ="wc-processing";
-            }
+           
             $user = $this->info($order->customer_id);
             $orders[$key]->name = $user->name;
             $orders[$key]->id = $order->order_id;

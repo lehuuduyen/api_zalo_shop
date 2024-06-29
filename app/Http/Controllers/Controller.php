@@ -545,12 +545,7 @@ class Controller extends BaseController
             }
         } else { # =====
             $discount_total = $coupon_amount;
-            echo $discount_total;
-            echo "<pre>";
-            echo $coupon_amount;
-            echo "<pre>";
-            echo $data['subtotal'];
-            die;
+           
             if ($discount_total > $data['subtotal'] && $data['subtotal'] !=0) {
                 $discount_total = $data['subtotal'];
             }else{
@@ -1421,6 +1416,10 @@ class Controller extends BaseController
             'variants_id' => $variant_id,
             'quantity' => $quantity
         ];
+        echo '<pre>';
+        print_r($arr);
+        echo '</pre>';
+        die;
 
         return $arr;
     }

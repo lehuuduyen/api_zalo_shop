@@ -545,6 +545,12 @@ class Controller extends BaseController
             }
         } else { # =====
             $discount_total = $coupon_amount;
+            echo $discount_total;
+            echo "<pre>";
+            echo $coupon_amount;
+            echo "<pre>";
+            echo $data['subtotal'];
+            die;
             if ($discount_total > $data['subtotal'] && $data['subtotal'] !=0) {
                 $discount_total = $data['subtotal'];
             }else{

@@ -196,7 +196,7 @@ class ProductController extends Controller
                         
                     }
                     $coupon_amount_total = $this->calculateCoupon($store->user_id,$temp, $products, true);
-                    $subtotal = $data['subtotal'] - $coupon_amount_total;
+                    $subtotal = ($data['subtotal'] - $coupon_amount_total)>0?$data['subtotal'] - $coupon_amount_total:0;
                     $listCoupon[]=[
                         'coupon'=>$coupon,
                         'discount'=>$coupon_amount_total

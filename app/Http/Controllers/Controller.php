@@ -1416,10 +1416,7 @@ class Controller extends BaseController
             'variants_id' => $variant_id,
             'quantity' => $quantity
         ];
-        echo '<pre>';
-        print_r($arr);
-        echo '</pre>';
-        die;
+        
 
         return $arr;
     }

@@ -750,9 +750,17 @@ class Controller extends BaseController
             }
             //wp_wc_order_product_lookup
             $totalQuantity = array_sum($totalPriceDetails['quantity']);
+                $history = $this->getHistoryUser($user['id']);
+                $point = $this->checkRank($history);
+                $discount = 0;
 
-
+                if(isset($point->discount)){
+                    $discount = ($point->discount)?$point->discount:0;
+                    $url_rank = $point->imageurl;
+                }
+               
             foreach ($totalPriceDetails['products_id'] as $key  => $productId) {
+                
                 $products = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->where('ID', $productId)->select('post_title')->first();
                 if (!$products) {
                     throw new \Exception('Sản phẩm không tồn tại');
@@ -776,7 +784,7 @@ class Controller extends BaseController
                     }
                 }
                 $tongGiaGiam = $finalDetails['coupon_discounted'];
-                
+                $price = $this->calPriceDiscount($price ,$discount);
 
                 //wp_woocommerce_order_items
                 $orderItemId = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woocommerce_order_items')->insertGetId(

@@ -826,7 +826,7 @@ class Controller extends BaseController
                         array(
                             'order_item_id' => $orderItemId,
                             'meta_key' => '_line_subtotal',
-                            'meta_value' => $totalBanDau,
+                            'meta_value' => $this->calPriceDiscount($totalBanDau  ,$discount),
                         ),
                         array(
                             'order_item_id' => $orderItemId,

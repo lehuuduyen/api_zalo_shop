@@ -182,7 +182,13 @@ class ProductController extends Controller
                 $listProductId[] = $value['id'];
             }
             $products = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->whereIn('id', $listProductId)->get();
-            
+            $city = $this->getUserMeta($store->user_id, 'city');
+            $quan = $this->getUserMeta($store->user_id, 'quan');
+
+            $phuong = $this->getUserMeta($store->user_id, 'phuong');
+            $fee = ($quan && $phuong)? $this->calFee($quan,$phuong):0;
+
+            $data['subtotal'] = $data['subtotal'] + $fee;
             if(is_array($data['coupon'])){
                 $listCoupon = [];
                 $temp['subtotal']=0;

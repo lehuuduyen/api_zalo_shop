@@ -1023,6 +1023,16 @@ class Controller extends BaseController
                     ),
                     array(
                         'post_id' => $postId,
+                        'meta_key' => 'transId',
+                        'meta_value' => $data['transId'],
+                    ),
+                    array(
+                        'post_id' => $postId,
+                        'meta_key' => 'orderId',
+                        'meta_value' => $data['orderId'],
+                    ),
+                    array(
+                        'post_id' => $postId,
                         'meta_key' => '_customer_user',
                         'meta_value' => $user['id'],
                     ),

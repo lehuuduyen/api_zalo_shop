@@ -171,13 +171,16 @@ class ProductController extends Controller
     }
     public function getCategories(Request $request)
     {
+        
         $store = $request['data_reponse'];
+      
         $this->_PRFIX_TABLE = $store->prefixTable;
-        $categories = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_term_taxonomy')->join($this->_PRFIX_TABLE . '_terms', $this->_PRFIX_TABLE . '_terms.term_id', $this->_PRFIX_TABLE . '_term_taxonomy.term_id')->where($this->_PRFIX_TABLE . '_term_taxonomy.taxonomy', 'product_cat')->select($this->_PRFIX_TABLE . '_terms.*')->get();
-
+     
+        $categories = DB::table($this->_PRFIX_TABLE . '_term_taxonomy')->join($this->_PRFIX_TABLE . '_terms', $this->_PRFIX_TABLE . '_terms.term_id', $this->_PRFIX_TABLE . '_term_taxonomy.term_id')->where($this->_PRFIX_TABLE . '_term_taxonomy.taxonomy', 'product_cat')->select($this->_PRFIX_TABLE . '_terms.*')->get();
+        
         if ($categories) {
             foreach ($categories as $key => $val) {
-                $img = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_termmeta')->where($this->_PRFIX_TABLE . '_termmeta.meta_key', 'thumbnail_id')->where($this->_PRFIX_TABLE . '_termmeta.term_id', $val->term_id)->first();
+                $img = DB::table($this->_PRFIX_TABLE . '_termmeta')->where($this->_PRFIX_TABLE . '_termmeta.meta_key', 'thumbnail_id')->where($this->_PRFIX_TABLE . '_termmeta.term_id', $val->term_id)->first();
                 $categories[$key]->id =  $val->term_id;
                 $categories[$key]->image =  ($img) ? $this->getImage($img->meta_value, $store, true) : "";
             }
@@ -185,6 +188,52 @@ class ProductController extends Controller
 
 
         return $this->returnSuccess($categories);
+    }
+    public function getAttribute(Request $request)
+    {
+        
+        $store = $request['data_reponse'];
+      
+        $this->_PRFIX_TABLE = $store->prefixTable;
+     
+        $attribute = DB::table($this->_PRFIX_TABLE . '_postmeta')->where('post_id',587)->where('meta_key','tm_meta')->select('meta_value')->get();
+        $listTopping = [];
+        $listBigSize = [];
+        if ($attribute) {
+            $listAttribute = unserialize($attribute[0]->meta_value)['tmfbuilder'];
+            
+            $listTitleSize = $listAttribute['multiple_radiobuttons_options_value'][0];
+            $listPriceSize = $listAttribute['multiple_radiobuttons_options_price'][0];
+            $listSaleOffeSize = $listAttribute['multiple_radiobuttons_options_sale_price'][0];
+            
+            $listTitleTopping = $listAttribute['multiple_checkboxes_options_value'][0];
+            $listPriceTopping = $listAttribute['multiple_checkboxes_options_price'][0];
+            $listSaleOffTopping = $listAttribute['multiple_checkboxes_options_sale_price'][0];
+            foreach($listTitleSize as $key =>$value){
+                
+                $temp = [];
+                $temp['title']=$value;
+                $temp['price']=(int) $listPriceSize[$key];
+                $temp['priceSale']=($listSaleOffeSize[$key] != "")?(int) $listSaleOffeSize[$key] :"";
+                $listBigSize[]=$temp;
+              
+            }
+
+            foreach($listTitleTopping as $key =>$value){
+                
+                $temp = [];
+                $temp['title']=$value;
+                $temp['price']=(int) $listPriceTopping[$key];
+                $temp['priceSale']=($listSaleOffTopping[$key] != "")?(int) $listSaleOffTopping[$key] :"";
+                $listTopping[]=$temp;
+              
+            }
+        }
+        $result['size'] = $listBigSize;
+        $result['topping'] = $listTopping;
+
+
+        return $this->returnSuccess($result);
     }
     public function rewardPolicy(Request $request)
     {

@@ -95,12 +95,12 @@ class Controller extends BaseController
         $decryptedData = openssl_decrypt($encryptedData, 'aes-256-cbc', $key, OPENSSL_RAW_DATA, $iv);
         return $decryptedData;
     }
-    public function getToken($store, $sdt, $databaseStore, $domain, $name, $user_id)
+    public function getToken($store, $sdt, $databaseStore, $name, $user_id)
     {
         $minute = (env('EXPIRED_MINUTE')) ? env('EXPIRED_MINUTE') : "";
         try {
             $date = empty($minute) ? "" : strtotime(date('d-m-Y H:i:s', strtotime("+$minute min")));
-            $token = $this->encodeData(json_encode(['store' => $store, 'prefixTable' => $this->_PRFIX_TABLE, 'sdt' => $sdt, 'databaseStore' => $databaseStore, 'domain' => $domain, 'name' => $name, 'user_id' => $user_id, 'expired_in' => strtotime($date)]));
+            $token = $this->encodeData(json_encode(['store' => $store, 'prefixTable' => $this->_PRFIX_TABLE, 'sdt' => $sdt, 'databaseStore' => $databaseStore,  'name' => $name, 'user_id' => $user_id, 'expired_in' => strtotime($date)]));
             return $token;
         } catch (\Exception $e) {
             //throw $th;
@@ -112,12 +112,12 @@ class Controller extends BaseController
 
         $image = "";
         if (!$checkTerm) {
-            $postMeta = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_postmeta')->where('meta_key', '_thumbnail_id')->where('post_id', $id)->first();
+            $postMeta = DB::table($this->_PRFIX_TABLE . '_postmeta')->where('meta_key', '_thumbnail_id')->where('post_id', $id)->first();
             if ($postMeta) {
-                $image = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_postmeta')->where('meta_key', '_wp_attached_file')->where('post_id', $postMeta->meta_value)->first();
+                $image = DB::table($this->_PRFIX_TABLE . '_postmeta')->where('meta_key', '_wp_attached_file')->where('post_id', $postMeta->meta_value)->first();
             }
         } else {
-            $image = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_postmeta')->where('meta_key', '_wp_attached_file')->where('post_id', $id)->first();
+            $image = DB::table($this->_PRFIX_TABLE . '_postmeta')->where('meta_key', '_wp_attached_file')->where('post_id', $id)->first();
         }
 
 

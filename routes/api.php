@@ -22,6 +22,12 @@ Route::get('checkFollow', 'App\Http\Controllers\Api\GatewaveController@checkFoll
 Route::get('city', 'App\Http\Controllers\Api\StoreController@city')->middleware('CorsApi');
 Route::get('quan', 'App\Http\Controllers\Api\StoreController@quan')->middleware('CorsApi');
 Route::get('phuong', 'App\Http\Controllers\Api\StoreController@phuong')->middleware('CorsApi');
+Route::group([  'middleware' => ['GetData']], function()
+{
+    Route::get('product/categories', 'App\Http\Controllers\Api\ProductController@getCategories');
+    Route::get('product/attribute', 'App\Http\Controllers\Api\ProductController@getAttribute');
+    
+});
 
 Route::group([  'middleware' => ['CorsApi','CheckStore']], function()
 {
@@ -52,7 +58,6 @@ Route::post('change_xu_to_point', 'App\Http\Controllers\Api\StoreController@chan
     Route::get('blogs', 'App\Http\Controllers\Api\BlogController@index');
     Route::get('orders', 'App\Http\Controllers\Api\OrdersController@index');
     Route::get('campaigns', 'App\Http\Controllers\Api\FlashSaleController@index');
-    Route::get('categories', 'App\Http\Controllers\Api\ProductController@getCategories');
     Route::post('order', 'App\Http\Controllers\Api\OrdersController@store');
     Route::put('update_payment_method', 'App\Http\Controllers\Api\StoreController@update_payment_method');
     Route::post('withdraw', 'App\Http\Controllers\Api\StoreController@withdraw');

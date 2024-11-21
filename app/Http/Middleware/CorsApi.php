@@ -18,26 +18,13 @@ class CorsApi extends Controller
     public function handle(Request $request, Closure $next)
     {
         try {
-            $allowedReferers = [
-                'https://h5.zdn.vn/zapps/3709056269145890941',
-                'zbrowser://h5.zdn.vn/zapps/3709056269145890941'
-              ];
-              $referer = $request->header('referer');
-              $origin = $request->header('origin');
-             
-              $allowedCors = false;
+              $codeApp = $request->header('origin');
+            
+              if($codeApp == "GSMILKTEA"){
+                return $next($request);
+
+              }
               
-              foreach ($allowedReferers as $element) {
-                if (strpos($referer, $element) === 0) {
-                  $allowedCors = true;
-                  break;
-                }
-              }
-              if($allowedCors){
-                header('Access-Control-Allow-Origin: '.$origin );
-                header('Access-Control-Allow-Headers: Content-Type, Authorization');
-              }
-              return $next($request);
 
         } catch (\Throwable $th) {
             //throw $th;

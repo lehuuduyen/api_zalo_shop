@@ -25,7 +25,7 @@ class GetData extends Controller
             $host = $_SERVER['HTTP_HOST'];
 
             // Combine protocol and host to get the full domain
-            $fullDomain = $protocol . $host;
+            $fullDomain = $protocol . \env('APP_URL_BACKEND');
             $json =new stdClass();
             $json->domain = $fullDomain;
                 $json->prefixTable = 'wp';

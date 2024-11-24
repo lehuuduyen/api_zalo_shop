@@ -27,20 +27,10 @@ class ProductController extends Controller
     {
         $store = $request['data_reponse'];
         $this->_PRFIX_TABLE = $store->prefixTable;
-        $userId = $store->user_id;
         
         $discount = 0;
-        $url_rank = "";
-        if($store->sdt != "77777777" ){
-            $history = $this->getHistoryUser($userId);
-            $point = $this->checkRank($history);
-            if(isset($point->discount)){
-                $discount = ($point->discount)?$point->discount:0;
-                $url_rank = $point->imageurl;
-            }
-           
-        }
-        $products = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->where('post_type', 'product')->where('post_status', 'publish')->orderBy('post_modified', 'DESC')->get();
+        
+        $products = DB::table($this->_PRFIX_TABLE . '_posts')->where('post_type', 'product')->where('post_status', 'publish')->orderBy('post_modified', 'DESC')->get();
         if (isset($request['category'])) {
             $products = $this->getPostByCategoryId($request['category']);
         }
@@ -51,47 +41,48 @@ class ProductController extends Controller
         $listProducts = [];
         $listChildProducts = [];
         foreach ($products as $key => $product) {
-            $childProduct = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->where('post_parent', $product->ID)->where('post_type', 'product_variation')->where('post_status', 'publish')->get();
+            // $childProduct = DB::table($this->_PRFIX_TABLE . '_posts')->where('post_parent', $product->ID)->where('post_type', 'product_variation')->where('post_status', 'publish')->get();
+           
+            
             $products[$key]->product_inventory = $this->getProductInventory($product->ID);
             $products[$key]->category = $this->getCategoryByProduct($product->ID, $store);
             $products[$key]->image_id = $this->getImage($product->ID, $store);
             
-            foreach($childProduct as $keyChild =>  $child){
-             $postMetaGiaGoc = $this->getPostMeta($child->ID, '_regular_price');
-             $postMetaGiaKhuyenMai = $this->getPostMeta($child->ID, '_sale_price');
-             $_sale_price_dates_from = $this->getPostMeta($child->ID, '_sale_price_dates_from');
-             $_sale_price_dates_to = $this->getPostMeta($child->ID, '_sale_price_dates_to');
-             $childProduct[$keyChild]->price =  $postMetaGiaGoc;
-             $childProduct[$keyChild]->sale_price =  $postMetaGiaGoc;
+            // foreach($childProduct as $keyChild =>  $child){
+            //  $postMetaGiaGoc = $this->getPostMeta($child->ID, '_regular_price');
+            //  $postMetaGiaKhuyenMai = $this->getPostMeta($child->ID, '_sale_price');
+            //  $_sale_price_dates_from = $this->getPostMeta($child->ID, '_sale_price_dates_from');
+            //  $_sale_price_dates_to = $this->getPostMeta($child->ID, '_sale_price_dates_to');
+            //  $childProduct[$keyChild]->price =  $postMetaGiaGoc;
+            //  $childProduct[$keyChild]->sale_price =  $postMetaGiaGoc;
 
-             $childProduct[$keyChild]->price_discount =  $this->calPriceDiscount($childProduct[$keyChild]->price,$discount);
-             $childProduct[$keyChild]->discount =   $discount;
-             $childProduct[$keyChild]->url_rank =  $url_rank;
+            //  $childProduct[$keyChild]->price_discount =  $this->calPriceDiscount($childProduct[$keyChild]->price,$discount);
+            //  $childProduct[$keyChild]->discount =   $discount;
 
-             $childProduct[$keyChild]->is_campaign =  false;
+            //  $childProduct[$keyChild]->is_campaign =  false;
 
-             if ($postMetaGiaKhuyenMai && empty($_sale_price_dates_from) && empty($_sale_price_dates_to)) {
-                 $childProduct[$keyChild]->sale_price = $postMetaGiaKhuyenMai;
-                 $childProduct[$keyChild]->price_discount =  $this->calPriceDiscount($childProduct[$keyChild]->sale_price,$discount);
+            //  if ($postMetaGiaKhuyenMai && empty($_sale_price_dates_from) && empty($_sale_price_dates_to)) {
+            //      $childProduct[$keyChild]->sale_price = $postMetaGiaKhuyenMai;
+            //      $childProduct[$keyChild]->price_discount =  $this->calPriceDiscount($childProduct[$keyChild]->sale_price,$discount);
 
-             }
-             if ($postMetaGiaKhuyenMai && $time >= $_sale_price_dates_from && $time <= $_sale_price_dates_to) {
-                 $childProduct[$keyChild]->sale_price = $postMetaGiaKhuyenMai;
-                $childProduct[$keyChild]->price_discount =  $this->calPriceDiscount($childProduct[$keyChild]->sale_price,$discount);
+            //  }
+            //  if ($postMetaGiaKhuyenMai && $time >= $_sale_price_dates_from && $time <= $_sale_price_dates_to) {
+            //      $childProduct[$keyChild]->sale_price = $postMetaGiaKhuyenMai;
+            //     $childProduct[$keyChild]->price_discount =  $this->calPriceDiscount($childProduct[$keyChild]->sale_price,$discount);
 
-                 $childProduct[$keyChild]->is_campaign = true;
-                 $childProduct[$keyChild]->end_date = date('Y/m/d H:i:s', $_sale_price_dates_to);
-             }
-             $childProduct[$keyChild]->id = $child->ID;
-             $childProduct[$keyChild]->is_bien_the = true;
-             $childProduct[$keyChild]->product_inventory = $products[$key]->product_inventory;
-             $childProduct[$keyChild]->category = $products[$key]->category;
-             $childProduct[$keyChild]->review = $this->getreview($child->ID);
-             $imgChild = $this->getImage($child->ID, $store);
-             $childProduct[$keyChild]->image_id = ($imgChild)?$imgChild:$products[$key]->image_id;
+            //      $childProduct[$keyChild]->is_campaign = true;
+            //      $childProduct[$keyChild]->end_date = date('Y/m/d H:i:s', $_sale_price_dates_to);
+            //  }
+            //  $childProduct[$keyChild]->id = $child->ID;
+            //  $childProduct[$keyChild]->is_bien_the = true;
+            //  $childProduct[$keyChild]->product_inventory = $products[$key]->product_inventory;
+            //  $childProduct[$keyChild]->category = $products[$key]->category;
+            //  $childProduct[$keyChild]->review = $this->getreview($child->ID);
+            //  $imgChild = $this->getImage($child->ID, $store);
+            //  $childProduct[$keyChild]->image_id = ($imgChild)?$imgChild:$products[$key]->image_id;
              
-             $listChildProducts[]=$childProduct[$keyChild];
-            }
+            //  $listChildProducts[]=$childProduct[$keyChild];
+            // }
 
             $products[$key]->id = $product->ID;
             $products[$key]->product_id = $product->ID;
@@ -106,18 +97,13 @@ class ProductController extends Controller
             $postMetaStock = $this->getPostMeta($product->ID, '_stock');
             $products[$key]->is_campaign = false;
             $products[$key]->price =  $postMetaGiaGoc;
-            $products[$key]->price_discount =  $this->calPriceDiscount($products[$key]->price,$discount);
-            $products[$key]->discount =   $discount;
-            $products[$key]->url_rank =  $url_rank;
             $products[$key]->sale_price =  $postMetaGiaGoc;
             if ($postMetaGiaKhuyenMai && empty($_sale_price_dates_from) && empty($_sale_price_dates_to)) {
                 $products[$key]->sale_price = $postMetaGiaKhuyenMai;
-                $products[$key]->price_discount =  $this->calPriceDiscount($products[$key]->sale_price,$discount);
 
             }
             if ($postMetaGiaKhuyenMai && $time >= $_sale_price_dates_from && $time <= $_sale_price_dates_to) {
                 $products[$key]->sale_price = $postMetaGiaKhuyenMai;
-                $products[$key]->price_discount =  $this->calPriceDiscount($products[$key]->sale_price,$discount);
 
                 $products[$key]->is_campaign = true;
                 $products[$key]->end_date = date('Y/m/d H:i:s', $_sale_price_dates_to);
@@ -156,7 +142,6 @@ class ProductController extends Controller
 
             $products[$key]->review = $this->getreview($product->ID);
             $products[$key]->sold_count =  $products[$key]->product_inventory->sold_count;
-            $products[$key]->childProduct =  $childProduct;
             $products[$key]->is_bien_the = false;
 
             $listProducts[] = $products[$key];
@@ -166,7 +151,7 @@ class ProductController extends Controller
 
         }
         
-        $listProducts = array_merge($listProducts,$listChildProducts);
+        // $listProducts = array_merge($listProducts,$listChildProducts);
         return $this->returnSuccess($listProducts);
     }
     public function getCategories(Request $request)

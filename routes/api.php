@@ -26,10 +26,12 @@ Route::group([  'middleware' => ['GetData']], function()
 {
     Route::get('product/categories', 'App\Http\Controllers\Api\ProductController@getCategories');
     Route::get('product/attribute', 'App\Http\Controllers\Api\ProductController@getAttribute');
+    Route::get('products', 'App\Http\Controllers\Api\ProductController@index');
+    Route::get('blogs', 'App\Http\Controllers\Api\BlogController@index');
     
 });
 
-Route::group([  'middleware' => ['CorsApi','CheckStore']], function()
+Route::group([  'middleware' => ['CorsApi','GetData']], function()
 {
 Route::get('getFee', 'App\Http\Controllers\Api\StoreController@getFee')->middleware('CorsApi');
 Route::get('list_rotation', 'App\Http\Controllers\Api\StoreController@listRotation')->middleware('CorsApi');
@@ -46,7 +48,6 @@ Route::post('change_xu_to_point', 'App\Http\Controllers\Api\StoreController@chan
     Route::get('check_yeuthich', 'App\Http\Controllers\Api\ProductController@checkFavorite');
     Route::get('yeuthich', 'App\Http\Controllers\Api\ProductController@getFavorite');
     Route::post('yeuthich', 'App\Http\Controllers\Api\ProductController@addFavorite');
-    Route::get('products', 'App\Http\Controllers\Api\ProductController@index');
     Route::post('check_coupon', 'App\Http\Controllers\Api\ProductController@checkCoupon');
     Route::post('product/review', 'App\Http\Controllers\Api\ProductController@review');
     Route::post('product/reviewProductOrder', 'App\Http\Controllers\Api\ProductController@reviewProductOrder');
@@ -55,7 +56,6 @@ Route::post('change_xu_to_point', 'App\Http\Controllers\Api\StoreController@chan
     Route::get('brands', 'App\Http\Controllers\Api\BrandsController@index');
     Route::get('coupons', 'App\Http\Controllers\Api\CouponsController@index');
     Route::get('store', 'App\Http\Controllers\Api\StoreController@index');
-    Route::get('blogs', 'App\Http\Controllers\Api\BlogController@index');
     Route::get('orders', 'App\Http\Controllers\Api\OrdersController@index');
     Route::get('campaigns', 'App\Http\Controllers\Api\FlashSaleController@index');
     Route::post('order', 'App\Http\Controllers\Api\OrdersController@store');

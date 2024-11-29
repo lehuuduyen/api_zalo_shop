@@ -19,7 +19,7 @@ class StoreController extends Controller
     {
         $store = $request['data_reponse'];
         $this->_PRFIX_TABLE = $store->prefixTable;
-        $infor = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->where('post_name', 'lien-he')->where('post_status', 'publish')->where('post_type', 'page')->first();
+        $infor = DB::table($this->_PRFIX_TABLE . '_posts')->where('post_name', 'lien-he')->where('post_status', 'publish')->where('post_type', 'page')->first();
 
 
 
@@ -66,7 +66,7 @@ class StoreController extends Controller
     public function country(Request $request)
     {
 
-        $country = DB::connection('mysql_external')->table('countries')->where('status', 'publish')->get();
+        $country = DB::table('countries')->where('status', 'publish')->get();
         return $this->returnSuccess($country);
     }
     public function getShare(Request $request)
@@ -75,14 +75,14 @@ class StoreController extends Controller
         $this->_PRFIX_TABLE = $store->prefixTable;
 
 
-        $count = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_share_link')->where('user_parent', $store->user_id)->count();
+        $count = DB::table($this->_PRFIX_TABLE . '_woo_history_share_link')->where('user_parent', $store->user_id)->count();
         return $this->returnSuccess($count);
     }
     public function log(Request $request)
     {
         $store = $request['data_reponse'];
         $this->_PRFIX_TABLE = $store->prefixTable;
-        $log = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woocommerce_log')->insertGetId(
+        $log = DB::table($this->_PRFIX_TABLE . '_woocommerce_log')->insertGetId(
             array(
                 'timestamp' => date('Y-m-d H:i:s'),
                 'level' => 1,
@@ -99,20 +99,20 @@ class StoreController extends Controller
         $store = $request['data_reponse'];
         $this->_PRFIX_TABLE = $store->prefixTable;
         $result = [];
-        $cod = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_options')->where('option_name', 'woocommerce_cod_settings')->first();
+        $cod = DB::table($this->_PRFIX_TABLE . '_options')->where('option_name', 'woocommerce_cod_settings')->first();
         if ($cod) {
             $cod = unserialize($cod->option_value);
             if ($cod['enabled'] == 'yes') {
                 $result['cod'] = $cod;
             }
         }
-        $payment = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_options')->where('option_name', 'woocommerce_bacs_settings')->first();
+        $payment = DB::table($this->_PRFIX_TABLE . '_options')->where('option_name', 'woocommerce_bacs_settings')->first();
         if ($payment) {
             $payment = unserialize($payment->option_value);
             if ($payment['enabled'] == 'yes') {
                 $payment['account'] = [];
 
-                $paymentAccount = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_options')->where('option_name', 'woocommerce_bacs_accounts')->first();
+                $paymentAccount = DB::table($this->_PRFIX_TABLE . '_options')->where('option_name', 'woocommerce_bacs_accounts')->first();
                 if ($paymentAccount) {
                     $paymentAccount = unserialize($paymentAccount->option_value);
                     $payment['account'] = $paymentAccount;
@@ -132,7 +132,7 @@ class StoreController extends Controller
     {
         try {
             //code...
-            $state = DB::connection('mysql_external')->table('states')->where('status', 'publish')->where('country_id', $request['country_id'])->get();
+            $state = DB::table('states')->where('status', 'publish')->where('country_id', $request['country_id'])->get();
 
             return $this->returnSuccess($state);
         } catch (\Throwable $th) {
@@ -155,11 +155,11 @@ class StoreController extends Controller
             $userId = $store->user_id;
             $getUserParent = $this->getUserMeta($userId, 'user_parent');
             if (isset($data['user_parent']) && !empty($data['user_parent']) &&  !$getUserParent  &&  $data['user_parent'] != '77777777' &&  $userId != 0) {
-                $checkUserParent = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_users')->where('user_login', $data['user_parent'])->first();
+                $checkUserParent = DB::table($this->_PRFIX_TABLE . '_users')->where('user_login', $data['user_parent'])->first();
                 if ($checkUserParent && $store->sdt != $data['user_parent']) {
                     $this->woo_logs('user_parent_save', $checkUserParent->ID . '-' . $userId);
 
-                    $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->insert(
+                    $user = DB::table($this->_PRFIX_TABLE . '_usermeta')->insert(
                         array(
                             'user_id' => $userId, 'meta_key' => 'user_parent', 'meta_value' => $checkUserParent->ID
                         ),
@@ -170,7 +170,7 @@ class StoreController extends Controller
             }
 
             if (isset($data['address'])) {
-                $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
+                $user = DB::table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
                     array(
                         'user_id' => $userId, 'meta_key' => 'shipping_address_1'
                     ),
@@ -180,7 +180,7 @@ class StoreController extends Controller
                 );
             }
             if (isset($data['image'])) {
-                $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
+                $user = DB::table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
                     array(
                         'user_id' => $userId, 'meta_key' => 'image_user'
                     ),
@@ -189,7 +189,7 @@ class StoreController extends Controller
 
             }
             if (isset($data['city'])) {
-                $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
+                $user = DB::table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
                     array(
                         'user_id' => $userId, 'meta_key' => 'city'
                     ),
@@ -198,7 +198,7 @@ class StoreController extends Controller
 
             }
             if (isset($data['quan'])) {
-                $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
+                $user = DB::table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
                     array(
                         'user_id' => $userId, 'meta_key' => 'quan'
                     ),
@@ -206,7 +206,7 @@ class StoreController extends Controller
                 );
             }
             if (isset($data['phuong'])) {
-                $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
+                $user = DB::table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
                     array(
                         'user_id' => $userId, 'meta_key' => 'phuong'
                     ),
@@ -215,7 +215,7 @@ class StoreController extends Controller
             }
 
             if (isset($data['email'])) {
-                $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_users')->where('user_login', $store->sdt)->update(
+                $user = DB::table($this->_PRFIX_TABLE . '_users')->where('user_login', $store->sdt)->update(
                     array(
                         'user_email' => $data['email'],
                     )
@@ -238,7 +238,7 @@ class StoreController extends Controller
     {
         $store = $request['data_reponse'];
         $this->_PRFIX_TABLE = $store->prefixTable;
-        $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_users')->where('user_login', $store->sdt)->select('ID', 'display_name as name', 'user_email as email', 'user_login as mobile')
+        $user = DB::table($this->_PRFIX_TABLE . '_users')->where('user_login', $store->sdt)->select('ID', 'display_name as name', 'user_email as email', 'user_login as mobile')
             ->first();
 
         $address = $this->getUserMeta($user->ID, 'shipping_address_1');
@@ -314,7 +314,7 @@ class StoreController extends Controller
         $this->_PRFIX_TABLE = $store->prefixTable;
         $userId = $store->user_id;
 
-        $listUserChild = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->
+        $listUserChild = DB::table($this->_PRFIX_TABLE . '_woo_history_user_commission')->
         select($this->_PRFIX_TABLE . '_users.ID',
          $this->_PRFIX_TABLE . '_users.user_login as mobile'
          ,$this->_PRFIX_TABLE . '_users.display_name as name',
@@ -346,7 +346,7 @@ class StoreController extends Controller
         
 
         //----Get user click
-        // $listUserClick = DB::connection('mysql_external')->
+        // $listUserClick = DB::
         // table($this->_PRFIX_TABLE . '_woo_history_share_link')->
         // select($this->_PRFIX_TABLE . '_users.ID',$this->_PRFIX_TABLE . '_users.display_name as name', $this->_PRFIX_TABLE . '_users.user_login as mobile', $this->_PRFIX_TABLE . '_woo_history_share_link.create_at')->
         // join($this->_PRFIX_TABLE . '_users', $this->_PRFIX_TABLE . '_users.ID', $this->_PRFIX_TABLE . '_woo_history_share_link.user_id')->
@@ -395,7 +395,7 @@ class StoreController extends Controller
         }
     }
     public function loopChild($userParentId){
-        $userParentIsset = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')
+        $userParentIsset = DB::table($this->_PRFIX_TABLE . '_usermeta')
                 ->select($this->_PRFIX_TABLE . '_users.user_login as mobile'
                 ,$this->_PRFIX_TABLE . '_users.display_name as name',$this->_PRFIX_TABLE . '_usermeta.user_id')
                 ->leftJoin($this->_PRFIX_TABLE . '_users',  $this->_PRFIX_TABLE . '_users.ID',  $this->_PRFIX_TABLE . '_usermeta.user_id')
@@ -417,7 +417,7 @@ class StoreController extends Controller
         $store = $request['data_reponse'];
         $this->_PRFIX_TABLE = $store->prefixTable;
         $userId = $store->user_id;
-        $data = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->where('user_id', $userId)->whereIn('status', [2, 4, 5])->get();
+        $data = DB::table($this->_PRFIX_TABLE . '_woo_history_user_commission')->where('user_id', $userId)->whereIn('status', [2, 4, 5])->get();
 
         return $this->returnSuccess($data);
     }
@@ -428,7 +428,7 @@ class StoreController extends Controller
         $this->_PRFIX_TABLE = $store->prefixTable;
         $userId = $store->user_id;
 
-        $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
+        $user = DB::table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
             array(
                 'user_id' => $userId, 'meta_key' => 'is_affliate'
             ),
@@ -452,21 +452,21 @@ class StoreController extends Controller
             return $this->returnError(new \stdClass, $validator->errors()->first());
         } else {
             $userId = $store->user_id;
-            $userParent = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_users')->where('user_login', $data['user_parent'])->first();
+            $userParent = DB::table($this->_PRFIX_TABLE . '_users')->where('user_login', $data['user_parent'])->first();
             if ($data && $userParent && $data['user_parent'] != "77777777") {
-                DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_share_link')->insertGetId(
+                DB::table($this->_PRFIX_TABLE . '_woo_history_share_link')->insertGetId(
                     array(
                         'user_id' => $userId,
                         'user_parent' => $userParent->ID,
                         'product' => (isset($data['product'])) ? $data['product'] : NULL,
                     )
                 );
-                $userParentIsset = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')
+                $userParentIsset = DB::table($this->_PRFIX_TABLE . '_usermeta')
                 ->where('user_id', $userId)
                 ->where('meta_key', 'user_parent')
                 ->first();
                 if(!$userParentIsset ){
-                    DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->insert(
+                    DB::table($this->_PRFIX_TABLE . '_usermeta')->insert(
                         array(
                             'user_id' => $userId, 'meta_key' => 'user_parent', 'meta_value' => $userParent->ID
                         ),
@@ -498,7 +498,7 @@ class StoreController extends Controller
                 return $this->returnError(new \stdClass, $validator->errors()->first());
             } else {
                 $userId = $store->user_id;
-                $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
+                $user = DB::table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
                     array(
                         'user_id' => $userId, 'meta_key' => 'payment_method'
                     ),
@@ -550,7 +550,7 @@ class StoreController extends Controller
                     return $this->returnError(new \stdClass, "Tiền hoa hồng chỉ còn " . $hoa_hong);
                 }
                 $paymentMethod = json_encode(['name' => $data['name'], 'stk' => $data['stk'], 'bankname' => $data['bankname']]);
-                DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_commission')->insertGetId(
+                DB::table($this->_PRFIX_TABLE . '_woo_history_user_commission')->insertGetId(
                     array(
                         'user_id' => $userId,
                         'total_order' => 0,
@@ -620,7 +620,7 @@ class StoreController extends Controller
     public function banner(Request $request)
     {
         $store = $request['data_reponse'];
-        $banner = DB::connection('mysql_external')->table('badges')->where('status', 'active')
+        $banner = DB::table('badges')->where('status', 'active')
             ->get();
         foreach ($banner as $key =>   $value) {
             $banner[$key]->name = $this->getTextByLanguare($value->name);
@@ -672,7 +672,7 @@ class StoreController extends Controller
     }
     public function listRotation(Request $request)
     {
-        $rotation = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_list_rotations')->get();
+        $rotation = DB::table($this->_PRFIX_TABLE . '_woo_list_rotations')->get();
 
         return $this->returnSuccess($rotation);
     }
@@ -695,7 +695,7 @@ class StoreController extends Controller
         $userId = $store->user_id;
         $checkTurnDaily = $this->checkTurnDaily($userId);
         if(!$checkTurnDaily){
-            DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_user_turn_rotations')->insertGetId(
+            DB::table($this->_PRFIX_TABLE . '_woo_user_turn_rotations')->insertGetId(
                 array(
                     'user_id' => $userId,
                     'date' => date('Y/m/d'),
@@ -704,7 +704,7 @@ class StoreController extends Controller
             );
             $turn = $this->getUserMeta($userId, 'turn');
 
-            $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
+            $user = DB::table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
                 array(
                     'user_id' => $userId, 'meta_key' => 'turn'
                 ),
@@ -715,7 +715,7 @@ class StoreController extends Controller
         }else{
             return $this->returnError(false,'Bạn đã nhận hôm nay');
         }
-        // $rotation = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_list_rotations')->get();
+        // $rotation = DB::table($this->_PRFIX_TABLE . '_woo_list_rotations')->get();
 
     }
     public function checkApiTurnDaily(Request $request){
@@ -727,7 +727,7 @@ class StoreController extends Controller
 
     }
     public function checkTurnDaily($userId){
-        $checkTurnDaily = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_user_turn_rotations')->where('user_id',$userId)->where('date',date('Y/m/d'))->first();
+        $checkTurnDaily = DB::table($this->_PRFIX_TABLE . '_woo_user_turn_rotations')->where('user_id',$userId)->where('date',date('Y/m/d'))->first();
         return ($checkTurnDaily)?true:false;
 
     }
@@ -744,7 +744,7 @@ class StoreController extends Controller
             $tileXuPoint = $this->getOptionsMeta('woo_rotation_change_xu');
             $point =floor($xuChange/ $tileXuPoint) ;
             $xuTru = ($point * $tileXuPoint); 
-            $results = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_rotation')->insertGetId(
+            $results = DB::table($this->_PRFIX_TABLE . '_woo_history_user_rotation')->insertGetId(
                 array(
                     'user_id' => $userId,
                     'total_order' => 0,
@@ -755,7 +755,7 @@ class StoreController extends Controller
                     'status' => 2,
                 )
             );
-            $results = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_point')->insertGetId(
+            $results = DB::table($this->_PRFIX_TABLE . '_woo_history_user_point')->insertGetId(
                 array(
                     'user_id' => $userId,
                     'total_order' => 0,
@@ -799,7 +799,7 @@ class StoreController extends Controller
         $result =[];
         if($turnUser >0){
 
-            $getReward = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_list_rotations')->get();
+            $getReward = DB::table($this->_PRFIX_TABLE . '_woo_list_rotations')->get();
             $rates = [];
             $nameVongQuay = [];
             $pointVongQuay = [];
@@ -813,13 +813,13 @@ class StoreController extends Controller
             
             
             if($selected_rate){
-                $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
+                $user = DB::table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
                     array(
                         'user_id' => $userId, 'meta_key' => 'turn'
                     ),
                     array('meta_value' => $turnUser-1)
                 );
-                $results = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_woo_history_user_rotation')->insertGetId(
+                $results = DB::table($this->_PRFIX_TABLE . '_woo_history_user_rotation')->insertGetId(
                     array(
                         'user_id' => $userId,
                         'total_order' => 0,

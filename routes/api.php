@@ -28,6 +28,7 @@ Route::group([  'middleware' => ['GetData']], function()
     Route::get('product/attribute', 'App\Http\Controllers\Api\ProductController@getAttribute');
     Route::get('products', 'App\Http\Controllers\Api\ProductController@index');
     Route::get('blogs', 'App\Http\Controllers\Api\BlogController@index');
+    Route::get('get_payment_method', 'App\Http\Controllers\Api\StoreController@getPaymentMethod');
     
 });
 
@@ -64,7 +65,6 @@ Route::post('change_xu_to_point', 'App\Http\Controllers\Api\StoreController@chan
 
     Route::get('country', 'App\Http\Controllers\Api\StoreController@country');
     Route::get('state', 'App\Http\Controllers\Api\StoreController@state');
-    Route::get('get_payment_method', 'App\Http\Controllers\Api\StoreController@getPaymentMethod');
     Route::put('user', 'App\Http\Controllers\Api\StoreController@update');
     Route::get('user', 'App\Http\Controllers\Api\StoreController@info');
     Route::get('user_child', 'App\Http\Controllers\Api\StoreController@userChild');

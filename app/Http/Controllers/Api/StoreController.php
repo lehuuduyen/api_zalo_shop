@@ -106,25 +106,36 @@ class StoreController extends Controller
                 $result['cod'] = $cod;
             }
         }
-        $payment = DB::table($this->_PRFIX_TABLE . '_options')->where('option_name', 'woocommerce_bacs_settings')->first();
-        if ($payment) {
-            $payment = unserialize($payment->option_value);
-            if ($payment['enabled'] == 'yes') {
-                $payment['account'] = [];
-
-                $paymentAccount = DB::table($this->_PRFIX_TABLE . '_options')->where('option_name', 'woocommerce_bacs_accounts')->first();
-                if ($paymentAccount) {
-                    $paymentAccount = unserialize($paymentAccount->option_value);
-                    $payment['account'] = $paymentAccount;
+        $paymentMethod = $this->getOptionsMeta('ttqr');
+        if($paymentMethod ){
+            $paymentMethod = unserialize($paymentMethod);
+            if(isset($paymentMethod['bank_transfer_accounts'])){
+               foreach($paymentMethod['bank_transfer_accounts'] as $key => $value){
+                $bin = $this->getBinByShortName($key);
+                if(count($value)>0){
+                    $value[0]['bin'] = $bin;
+                    $result[$key] = $value[0];
                 }
 
-
-                $result['bacs'] = $payment;
+               } 
             }
         }
-
-
         return $this->returnSuccess($result);
+    }
+    public function getBinByShortName($shortName) {
+        // Read data from file.json
+        $data = json_decode(file_get_contents('bank.json'));
+        
+        // Search for the shortName
+        foreach ($data as $bank) {
+            if (strtolower($bank->shortName) == $shortName) {
+                return $bank->bin;
+            }
+        
+        }
+        
+        // Return null if no match found
+        return null;
     }
     // _transient_woocommerce_admin_payment_gateway_suggestions_specs
 

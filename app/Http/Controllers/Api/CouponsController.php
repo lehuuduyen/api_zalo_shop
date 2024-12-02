@@ -18,7 +18,7 @@ class CouponsController extends Controller
         $store = $request['data_reponse'];
         $this->_PRFIX_TABLE = $store->prefixTable;
 
-        $coupons = DB::connection('mysql_external')->table( $this->_PRFIX_TABLE .'_posts')->where('post_status','publish')->where('post_type','shop_coupon')->get();
+        $coupons = DB::table( $this->_PRFIX_TABLE .'_posts')->where('post_status','publish')->where('post_type','shop_coupon')->get();
         $listCoupons =[];
         $i =0;
         foreach($coupons as $key => $val){

@@ -187,6 +187,7 @@ class ProductController extends Controller
         if ($attribute) {
             $listAttribute = unserialize($attribute[0]->meta_value)['tmfbuilder'];
             
+            
             $listTitleSize = $listAttribute['multiple_radiobuttons_options_value'][0];
             $listPriceSize = $listAttribute['multiple_radiobuttons_options_price'][0];
             $listSaleOffeSize = $listAttribute['multiple_radiobuttons_options_sale_price'][0];
@@ -194,6 +195,9 @@ class ProductController extends Controller
             $listTitleTopping = $listAttribute['multiple_checkboxes_options_value'][0];
             $listPriceTopping = $listAttribute['multiple_checkboxes_options_price'][0];
             $listSaleOffTopping = $listAttribute['multiple_checkboxes_options_sale_price'][0];
+           
+            
+           
             foreach($listTitleSize as $key =>$value){
                 
                 $temp = [];
@@ -214,8 +218,25 @@ class ProductController extends Controller
               
             }
         }
-        $result['size'] = $listBigSize;
-        $result['topping'] = $listTopping;
+        $result['radio']['size'] = $listBigSize;
+        if(isset($listAttribute['multiple_radiobuttons_options_value'][1])){
+            $listTitleSuggar = $listAttribute['multiple_radiobuttons_options_value'][1];
+            $listPriceSuggar = $listAttribute['multiple_radiobuttons_options_price'][1];
+            $listSaleOffeSuggar = $listAttribute['multiple_radiobuttons_options_sale_price'][1];
+            foreach($listTitleSuggar as $key =>$value){
+            
+                $temp = [];
+                $temp['title']=$value;
+                $temp['price']=(int) $listPriceSuggar[$key];
+                $temp['priceSale']=($listSaleOffeSuggar[$key] != "")?(int) $listSaleOffeSuggar[$key] :"";
+                $listSuggar[]=$temp;
+              
+            }
+            $result['radio']['suggar'] = $listSuggar;
+          
+            
+        }
+        $result['checkbox']['topping'] = $listTopping;
 
 
         return $this->returnSuccess($result);

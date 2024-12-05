@@ -15,9 +15,10 @@ class OrdersController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function info($id){
-        $user = DB::table( $this->_PRFIX_TABLE .'_users')->where('ID', $id)->select('ID','display_name as name','user_email as email','user_login as mobile')
-        ->first();
+    public function info($id)
+    {
+        $user = DB::table($this->_PRFIX_TABLE . '_users')->where('ID', $id)->select('ID', 'display_name as name', 'user_email as email', 'user_login as mobile')
+            ->first();
         return $user;
     }
     public function index(Request $request)
@@ -27,35 +28,34 @@ class OrdersController extends Controller
 
         $store = $request['data_reponse'];
         $this->_PRFIX_TABLE = $store->prefixTable;
-        $orders = DB::table( $this->_PRFIX_TABLE .'_wc_order_stats')->join( $this->_PRFIX_TABLE .'_posts', $this->_PRFIX_TABLE .'_posts.ID', $this->_PRFIX_TABLE .'_wc_order_stats.order_id')->where( $this->_PRFIX_TABLE .'_wc_order_stats.customer_id', $store->user_id)->where( $this->_PRFIX_TABLE .'_posts.post_status','!=', 'trash')->orderBy( $this->_PRFIX_TABLE .'_wc_order_stats.date_created', 'DESC')->get();
+        $orders = DB::table($this->_PRFIX_TABLE . '_wc_order_stats')->join($this->_PRFIX_TABLE . '_posts', $this->_PRFIX_TABLE . '_posts.ID', $this->_PRFIX_TABLE . '_wc_order_stats.order_id')->where($this->_PRFIX_TABLE . '_wc_order_stats.customer_id', $store->user_id)->where($this->_PRFIX_TABLE . '_posts.post_status', '!=', 'trash')->orderBy($this->_PRFIX_TABLE . '_wc_order_stats.date_created', 'DESC')->get();
 
         foreach ($orders as $key => $order) {
-           
+
             $user = $this->info($order->customer_id);
             $orders[$key]->name = $user->name;
             $orders[$key]->id = $order->order_id;
             $orders[$key]->phone = $user->mobile;
-            $feeShipping = $this->getPostMeta($order->order_id,'_order_shipping');
-            $orders[$key]->fee_shipping = ($feeShipping)?$feeShipping:0;
+            $feeShipping = $this->getPostMeta($order->order_id, '_order_shipping');
+            $orders[$key]->fee_shipping = ($feeShipping) ? $feeShipping : 0;
 
-            $orders[$key]->address = $this->getPostMeta($order->order_id,'_shipping_address_index');
+            $orders[$key]->address = $this->getPostMeta($order->order_id, '_shipping_address_index');
 
             $orders[$key]->total_amount = $order->total_sales;
-            $ghichu = DB::table( $this->_PRFIX_TABLE .'_comments')->where('comment_post_ID',$order->order_id)->where('comment_type','order_note')->where('comment_author','!=','WooCommerce')->first();
-            if($ghichu){
+            $ghichu = DB::table($this->_PRFIX_TABLE . '_comments')->where('comment_post_ID', $order->order_id)->where('comment_type', 'order_note')->where('comment_author', '!=', 'WooCommerce')->first();
+            if ($ghichu) {
                 $ghichu = $ghichu->comment_content;
             }
             $orders[$key]->message = $ghichu;
             $orders[$key]->discount = 0;
             $orders[$key]->total_price = $order->total_sales;
 
-            $coupons = DB::table( $this->_PRFIX_TABLE .'_wc_order_coupon_lookup')->where('order_id',$order->order_id)->get();
-            if($coupons){
-                foreach($coupons as $coupon){
+            $coupons = DB::table($this->_PRFIX_TABLE . '_wc_order_coupon_lookup')->where('order_id', $order->order_id)->get();
+            if ($coupons) {
+                foreach ($coupons as $coupon) {
                     $orders[$key]->discount += $coupon->discount_amount;
                     $orders[$key]->total_price += $order->total_sales + $coupon->discount_amount;
                 }
-                
             }
 
             // $orders[$key]->state = $this->getState($order->state);
@@ -63,59 +63,56 @@ class OrdersController extends Controller
             $temp = new stdClass;
             $temp->shipping_cost = 0;
             $orders[$key]->payment_meta = $temp;
-            $history_user_point = DB::table( $this->_PRFIX_TABLE .'_woo_history_user_point')->where( 'order_id', $order->order_id)->where( 'user_id',$order->customer_id)->get();
+            $history_user_point = DB::table($this->_PRFIX_TABLE . '_woo_history_user_point')->where('order_id', $order->order_id)->where('user_id', $order->customer_id)->get();
             $pointUse =  0;
             $pointReceive =  0;
             $pointUseMoney =  0;
-            foreach($history_user_point as  $history){
-                if($history->status == 4){
+            foreach ($history_user_point as  $history) {
+                if ($history->status == 4) {
                     $pointUse = $history->point;
                     $pointUseMoney = $pointUse * $history->points_converted_to_money;
                 }
-                if($history->status == 1){
+                if ($history->status == 1) {
                     $pointReceive = $history->point;
                 }
             }
-            if($pointUseMoney!=0){
+            if ($pointUseMoney != 0) {
                 $orders[$key]->total_price = $orders[$key]->total_price + $pointUseMoney;
             }
             $orders[$key]->point_use = $pointUse;
             $orders[$key]->points_converted_to_money = $pointUseMoney;
 
             $orders[$key]->point_receive = $pointReceive;
-
         }
 
         return $this->returnSuccess($orders);
     }
     public function detailOrder($orderId, $store)
     {
-        $ordersDetail = DB::table( $this->_PRFIX_TABLE .'_wc_order_product_lookup')->join( $this->_PRFIX_TABLE .'_posts', $this->_PRFIX_TABLE .'_posts.ID', $this->_PRFIX_TABLE .'_wc_order_product_lookup.product_id')->where( $this->_PRFIX_TABLE .'_wc_order_product_lookup.order_id', $orderId)->select( $this->_PRFIX_TABLE .'_wc_order_product_lookup.*', $this->_PRFIX_TABLE .'_posts.post_title')->get();
+        $ordersDetail = DB::table($this->_PRFIX_TABLE . '_wc_order_product_lookup')->join($this->_PRFIX_TABLE . '_posts', $this->_PRFIX_TABLE . '_posts.ID', $this->_PRFIX_TABLE . '_wc_order_product_lookup.product_id')->where($this->_PRFIX_TABLE . '_wc_order_product_lookup.order_id', $orderId)->select($this->_PRFIX_TABLE . '_wc_order_product_lookup.*', $this->_PRFIX_TABLE . '_posts.post_title')->get();
         $products = [];
         foreach ($ordersDetail as $key => $value) {
             $checkReview = DB::table($this->_PRFIX_TABLE . '_comments')
-            ->where( $this->_PRFIX_TABLE .'_comments.comment_post_ID', $value->product_id)
-            ->where( $this->_PRFIX_TABLE .'_comments.comment_karma', $orderId)->first();
+                ->where($this->_PRFIX_TABLE . '_comments.comment_post_ID', $value->product_id)
+                ->where($this->_PRFIX_TABLE . '_comments.comment_karma', $orderId)->first();
             $image = $this->getImage($value->product_id, $store);
-            if(!$image){
-                $parentProduct = DB::table( $this->_PRFIX_TABLE .'_posts')->select('post_parent')->find($value->product_id);
-                
-                if($parentProduct){
+            if (!$image) {
+                $parentProduct = DB::table($this->_PRFIX_TABLE . '_posts')->select('post_parent')->find($value->product_id);
+
+                if ($parentProduct) {
                     $image = $this->getImage($parentProduct->post_parent, $store);
                 }
-                    
             }
-            $product[$key]['name']=$value->post_title;
+            $product[$key]['name'] = $value->post_title;
             $temp = new stdClass;
             $temp->image = $image;
-            $total = $this->getOrderMeta($value->order_item_id,'_line_subtotal');
-            $product[$key]['options']= $temp;
-            $product[$key]['qty']= $value->product_qty;
-            $product[$key]['price']= $total / $value->product_qty;
-            $product[$key]['subtotal']= $total;
-            $product[$key]['product_id']= $value->product_id;
-            $product[$key]['is_review']= ($checkReview)?1:0 ;
-
+            $total = $this->getOrderMeta($value->order_item_id, '_line_subtotal');
+            $product[$key]['options'] = $temp;
+            $product[$key]['qty'] = $value->product_qty;
+            $product[$key]['price'] = $total / $value->product_qty;
+            $product[$key]['subtotal'] = $total;
+            $product[$key]['product_id'] = $value->product_id;
+            $product[$key]['is_review'] = ($checkReview) ? 1 : 0;
         }
         return $product;
     }
@@ -152,12 +149,12 @@ class OrdersController extends Controller
                 $data = $request->all();
                 $store = $request['data_reponse'];
                 $data['sdt'] = $store->sdt;
-                $user = DB::table( $this->_PRFIX_TABLE .'_users')->where('user_login', $data['sdt'])->first();
+                $user = DB::table($this->_PRFIX_TABLE . '_users')->where('user_login', $data['sdt'])->first();
                 if (!$user) {
                     return $this->returnError([], "Số điện thoại chưa được đăng ký");
                 }
-                $data['country'] =1;
-                $data['state'] =1;
+                $data['country'] = 1;
+                $data['state'] = 1;
                 $data['city'] = (isset($data['city'])) ? $data['city'] : "Việt Nam";
                 $user = [
                     'id' => $user->ID,
@@ -180,6 +177,120 @@ class OrdersController extends Controller
 
             return $this->returnError(new \stdClass, $th->getMessage());
         }
+    }
+
+    public function storePos(Request $request)
+    {
+        $store = $request['data_reponse'];
+        $this->_PRFIX_TABLE = $store->prefixTable;
+        try {
+            $validator = Validator::make($request->all(), [
+                '*.payment_gateway' => 'required',
+                // '*.phone' => 'required',
+                '*.order' => 'required',
+
+            ], [
+                '*.payment_gateway.required' => "Vui lòng nhập phương thức thanh toán",
+                // '*.phone.required' => "Vui lòng nhập số điện thoại",
+                '*.order' => "Vui lòng nhập đơn hàng"
+            ]);
+            if ($validator->fails()) {
+                return $this->returnError(new \stdClass, $validator->errors()->first());
+            } else {
+                $listOrder = "";
+                foreach ($request->all() as $data) {
+                    $store = $request['data_reponse'];
+
+                    if (isset($data['phone'])) {
+                        $user = $this->addUserDefault($this->formatPhoneToInternational($data['phone']), "user_" . time() . "_" . rand(1, 10000000));
+                    } else {
+                        $user = $this->addUserDefault(88888888);
+                    }
+                    
+                    $data['country'] = 1;
+                    $data['state'] = 1;
+                    $data['used_coupon'] = "";
+
+                    $data['city'] = (isset($data['city'])) ? $data['city'] : "Việt Nam";
+                    $user = [
+                        'id' => $user->ID,
+                        'name' => $user->user_nicename,
+                        'mobile' => $user->user_login,
+                        'country' => $data['country'],
+                        'state' => $data['state'],
+                        'city' => $data['city'],
+                        'email' => $user->user_email,
+                        'address' => ""
+                    ];
+                    $order = $this->createOrderPos($data, $user);
+                    
+                    if (!$order) {
+                        $this->woo_logs('order', json_encode($data));
+
+                        // return $this->returnError(new \stdClass, $this->_messageError);
+                    }
+                    $listOrder .= $order.",";
+                }
+                return $this->returnSuccess($listOrder, "Thêm đơn hàng thành công");
+
+            }
+        } catch (\Throwable $th) {
+            $this->woo_logs('store', $th->getMessage());
+
+            return $this->returnError(new \stdClass, $th->getMessage());
+        }
+    }
+    public function addUserDefault($phone, $name = "Khách vãng lai")
+    {
+
+        $user = DB::table($this->_PRFIX_TABLE . '_users')->where('user_login', $phone)->first();
+        if ($user) {
+            return $user;
+        }
+        $email = $this->randomEmail();
+        $insertGetId = DB::table($this->_PRFIX_TABLE . '_users')->insertGetId(
+            array(
+                'user_login'     =>   $phone,
+                'user_pass'     =>   "appid",
+                'user_email'     =>   $email,
+                'user_nicename'     =>   $name,
+                'display_name'     =>   $name,
+                'user_registered'     =>   date('Y-m-d H:i:s'),
+            )
+        );
+
+        $insertMetaUser = DB::table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
+            array(
+                'user_id' => $insertGetId,
+                'meta_key' => 'last_name'
+            ),
+            array('meta_value' => $name)
+        );
+        $insertMetaUser = DB::table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
+            array(
+                'user_id' => $insertGetId,
+                'meta_key' => 'wp_capabilities'
+            ),
+            array('meta_value' => 'a:1:{s:10:"subscriber";b:1;}')
+        );
+        $customer = DB::table($this->_PRFIX_TABLE . '_wc_customer_lookup')->where('user_id', $insertGetId)->first();
+        if (!$customer) {
+            $insertCus = DB::table($this->_PRFIX_TABLE . '_wc_customer_lookup')->insert(
+                array(
+                    'customer_id'     =>   $insertGetId,
+                    'username'     =>   $phone,
+                    'first_name'     =>  '',
+                    'last_name'     =>  $name,
+                    'user_id'     =>   $insertGetId,
+                    'email'     =>   $email,
+
+
+                )
+            );
+        }
+        $user = DB::table($this->_PRFIX_TABLE . '_users')->where('ID', $insertGetId)->first();
+
+        return $user;
     }
 
     /**

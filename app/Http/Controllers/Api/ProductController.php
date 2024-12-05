@@ -181,7 +181,7 @@ class ProductController extends Controller
       
         $this->_PRFIX_TABLE = $store->prefixTable;
      
-        $attribute = DB::table($this->_PRFIX_TABLE . '_postmeta')->where('post_id',587)->where('meta_key','tm_meta')->select('meta_value')->get();
+        $attribute = DB::table($this->_PRFIX_TABLE . '_postmeta')->where('meta_key','tm_meta')->select('meta_value')->get();
         $listTopping = [];
         $listBigSize = [];
         if ($attribute) {

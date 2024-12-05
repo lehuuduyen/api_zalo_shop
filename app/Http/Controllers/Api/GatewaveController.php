@@ -15,17 +15,7 @@ class GatewaveController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function randomEmail($length = 5)
-    {
-        $time = time();
-        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        $charactersLength = strlen($characters);
-        $randomString = '';
-        for ($i = 0; $i < $length; $i++) {
-            $randomString .= $characters[random_int(0, $charactersLength - 1)];
-        }
-        return $randomString . "_" . $time . "@gmail.com";
-    }
+    
     public function checkFollow(Request $request)
     {
         try {
@@ -169,7 +159,66 @@ class GatewaveController extends Controller
             return $this->returnError(new \stdClass, $th->getMessage());
         }
     }
+    public function loginPos(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'sdt' => 'required',
+                'pass' => 'required'
+            ], [
+                'sdt.required' => "Vui lòng nhập sdt",
+                'pass.required' => "Vui lòng nhập pass"
+            ]);
+            if ($validator->fails()) {
+                return $this->returnError(new \stdClass, $validator->errors()->first());
+            } else {
 
+                $databaseStore = env('DB_DATABASE');
+                $this->connectDb($databaseStore);
+                $prefixTable = $this->getPrefixTableFirst();
+              
+                $this->_PRFIX_TABLE = $prefixTable;
+
+                var_dump($this->check_user_credentials($request['sdt'],$request['pass']));die;
+                $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_users')->where('user_login', $request['sdt'])->first();
+                // wp_wc_customer_lookup
+                
+                if (!$user) {
+                    return $this->returnError(new \stdClass, "Tài khoản nhân viên không đúng");
+                  
+                } 
+                $role = $this->getUserMeta($user->ID,'wp_capabilities');
+               
+                $nameRole = array_key_first(unserialize($role));
+                if($nameRole == "shop_manager" || $nameRole == "contributor" || $nameRole == "administrator"){
+                    $hash = $this->getToken($request['store'], $request['sdt'], $databaseStore, $request['name'], $user->ID, $prefixTable);
+                    $this->woo_logs('gateway', $hash, 3);
+    
+                    return $this->returnSuccess([
+                        'token' => $hash
+                    ]);
+                }
+                return $this->returnError(new \stdClass, "Không có quyền");
+              
+          
+            }
+        } catch (\Throwable $th) {
+            $this->woo_logs('gateway', $th->getMessage());
+
+            return $this->returnError(new \stdClass, $th->getMessage());
+        }
+    }
+    public function check_user_credentials($user_login, $user_pass) {
+        // Attempt to authenticate the user
+        $user = \wp_authenticate($user_login, $user_pass);
+    
+        // Check if authentication was successful
+        if (!$user) {
+            return false; // Invalid login or password
+        }
+    
+        return true; // Credentials are valid
+    }
     /**
      * Store a newly created resource in storage.
      *

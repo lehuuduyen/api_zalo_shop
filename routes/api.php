@@ -18,35 +18,37 @@ use Illuminate\Support\Facades\Route;
 //     return $request->user();
 // });
 Route::post('gatewave', 'App\Http\Controllers\Api\GatewaveController@index')->middleware('CorsApi');
+Route::post('loginPos', 'App\Http\Controllers\Api\GatewaveController@loginPos');
+
 Route::get('checkFollow', 'App\Http\Controllers\Api\GatewaveController@checkFollow')->middleware('CorsApi');
 Route::get('city', 'App\Http\Controllers\Api\StoreController@city')->middleware('CorsApi');
 Route::get('quan', 'App\Http\Controllers\Api\StoreController@quan')->middleware('CorsApi');
 Route::get('phuong', 'App\Http\Controllers\Api\StoreController@phuong')->middleware('CorsApi');
-Route::group([  'middleware' => ['GetData']], function()
-{
+Route::group(['middleware' => ['GetData']], function () {
     Route::get('product/categories', 'App\Http\Controllers\Api\ProductController@getCategories');
     Route::get('product/attribute', 'App\Http\Controllers\Api\ProductController@getAttribute');
     Route::get('products', 'App\Http\Controllers\Api\ProductController@index');
     Route::get('blogs', 'App\Http\Controllers\Api\BlogController@index');
     Route::get('get_payment_method', 'App\Http\Controllers\Api\StoreController@getPaymentMethod');
     Route::get('coupons', 'App\Http\Controllers\Api\CouponsController@index');
-    
+    Route::post('order_pos', 'App\Http\Controllers\Api\OrdersController@storePos');
 });
 
-Route::group([  'middleware' => ['CorsApi','GetData']], function()
-{
-Route::get('getFee', 'App\Http\Controllers\Api\StoreController@getFee')->middleware('CorsApi');
-Route::get('list_rotation', 'App\Http\Controllers\Api\StoreController@listRotation')->middleware('CorsApi');
-Route::get('get_turn', 'App\Http\Controllers\Api\StoreController@getTurn')->middleware('CorsApi');
-Route::post('add_turn', 'App\Http\Controllers\Api\StoreController@addTurn')->middleware('CorsApi');
-Route::post('active_rotation', 'App\Http\Controllers\Api\StoreController@activeRotation')->middleware('CorsApi');
-Route::get('check_turn_daily', 'App\Http\Controllers\Api\StoreController@checkApiTurnDaily');
-Route::get('get_xu', 'App\Http\Controllers\Api\StoreController@getXu');
-Route::post('change_xu_to_point', 'App\Http\Controllers\Api\StoreController@changeXuToPoint');
+Route::group(['middleware' => ['CorsApi', 'GetData']], function () {
+    Route::post('order_pos', 'App\Http\Controllers\Api\OrdersController@storePos');
+
+    Route::get('getFee', 'App\Http\Controllers\Api\StoreController@getFee')->middleware('CorsApi');
+    Route::get('list_rotation', 'App\Http\Controllers\Api\StoreController@listRotation')->middleware('CorsApi');
+    Route::get('get_turn', 'App\Http\Controllers\Api\StoreController@getTurn')->middleware('CorsApi');
+    Route::post('add_turn', 'App\Http\Controllers\Api\StoreController@addTurn')->middleware('CorsApi');
+    Route::post('active_rotation', 'App\Http\Controllers\Api\StoreController@activeRotation')->middleware('CorsApi');
+    Route::get('check_turn_daily', 'App\Http\Controllers\Api\StoreController@checkApiTurnDaily');
+    Route::get('get_xu', 'App\Http\Controllers\Api\StoreController@getXu');
+    Route::post('change_xu_to_point', 'App\Http\Controllers\Api\StoreController@changeXuToPoint');
 
     Route::get('getShare', 'App\Http\Controllers\Api\StoreController@getShare');
     Route::post('log', 'App\Http\Controllers\Api\StoreController@log');
-    
+
     Route::get('check_yeuthich', 'App\Http\Controllers\Api\ProductController@checkFavorite');
     Route::get('yeuthich', 'App\Http\Controllers\Api\ProductController@getFavorite');
     Route::post('yeuthich', 'App\Http\Controllers\Api\ProductController@addFavorite');
@@ -81,6 +83,4 @@ Route::post('change_xu_to_point', 'App\Http\Controllers\Api\StoreController@chan
         Route::get('banner', 'App\Http\Controllers\Api\StoreController@banner');
         Route::get('products', 'App\Http\Controllers\Api\ProductController@index');
     });
-
 });
-

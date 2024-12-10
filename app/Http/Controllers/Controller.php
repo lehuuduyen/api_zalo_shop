@@ -37,11 +37,11 @@ class Controller extends BaseController
             'message' => empty($data) ? "Dữ liệu rỗng" : $message /* Or optional success message */
         ]);
     }
-    public function returnError($data = [], $message = "Lấy dữ liệu thất bại")
+    public function returnError($data = [], $message = "Lấy dữ liệu thất bại",$code = 500)
     {
         return response()->json([
             'status' => 'error',
-            'code' => '500',
+            'code' => $code,
             'data' => $data,
             'message' => $message /* Or optional success message */
         ]);
@@ -111,7 +111,7 @@ class Controller extends BaseController
         $minute = (env('EXPIRED_MINUTE')) ? env('EXPIRED_MINUTE') : "";
         try {
             $date = empty($minute) ? "" : strtotime(date('d-m-Y H:i:s', strtotime("+$minute min")));
-            $token = $this->encodeData(json_encode(['store' => $store, 'prefixTable' => $this->_PRFIX_TABLE, 'sdt' => $sdt, 'databaseStore' => $databaseStore,  'name' => $name, 'user_id' => $user_id, 'expired_in' => strtotime($date)]));
+            $token = $this->encodeData(json_encode(['role' => $store,'store' => "", 'prefixTable' => $this->_PRFIX_TABLE, 'sdt' => $sdt, 'databaseStore' => $databaseStore,  'name' => $name, 'user_id' => $user_id, 'expired_in' => strtotime($date)]));
             return $token;
         } catch (\Exception $e) {
             //throw $th;
@@ -589,8 +589,18 @@ class Controller extends BaseController
         DB::beginTransaction();
 
         try {
+            //get note
+            $note = [];
+            foreach($data['order'] as $orderDetail){
+                $note[] = $orderDetail['title'] .": ".$orderDetail['note'];
+            }
+            if(count($note) >0 ){
+                $note = json_encode($note,JSON_UNESCAPED_UNICODE);
+            }else{
+                $note = "";
+            }
             // them wp_posts
-
+            
             $postId = DB::table($this->_PRFIX_TABLE . '_posts')->insertGetId(
                 array(
                     'post_date' => $timeNow,
@@ -601,10 +611,11 @@ class Controller extends BaseController
                     'post_status' => 'wc-completed',
                     'post_type' => 'shop_order',
                     'post_content' => 'Thanh toán pos',
-                    'post_excerpt' => '',
+                    'post_excerpt' => $note,
                     'to_ping' => '',
                     'pinged' => '',
                     'post_content_filtered' => '',
+                    'post_author' => $user['id'],
 
                     'comment_count' => '0',
                 )
@@ -750,7 +761,6 @@ class Controller extends BaseController
                     $tempSaveOrderItemMetaTmcartepo_data = $temp3;
                 }
                 $finalDetails['total'] = $finalDetails['total'] + ($price * $totalPriceDetails['quantity'][$key]);
-
                 DB::table($this->_PRFIX_TABLE . '_woocommerce_order_itemmeta')->insert(
                     array(
                         array(
@@ -967,6 +977,12 @@ class Controller extends BaseController
                         'meta_key' => '_billing_last_name',
                         'meta_value' => $user['name'],
                     ),
+
+                    array(
+                        'post_id' => $postId,
+                        'meta_key' => 'user_created',
+                        'meta_value' => $user['user_created'],
+                    ),
                     array(
                         'post_id' => $postId,
                         'meta_key' => '_shipping_first_name',
@@ -1121,7 +1137,7 @@ class Controller extends BaseController
                         'total_sales' => $finalDetails['total'] + $fee,
                         'returning_customer' => 1,
                         'customer_id' => $user['id'],
-                        'status' => 'wc-pending',
+                        'status' => 'wc-completed',
                     )
                 );
             } catch (\Throwable $th) {
@@ -1135,10 +1151,11 @@ class Controller extends BaseController
                         'total_sales' => $finalDetails['total'],
                         'returning_customer' => 1,
                         'customer_id' => $user['id'],
-                        'status' => 'wc-pending',
+                        'status' => 'wc-completed',
                     )
                 );
             }
+
             // //them lượt vòng quay 
             // $woo_rotation_price_from = $this->getOptionsMeta('woo_rotation_price_from');
             // $woo_rotation_price_to = $this->getOptionsMeta('woo_rotation_price_to');
@@ -1189,40 +1206,27 @@ class Controller extends BaseController
 
 
             // lưu lịch sử commission
-            $history = DB::table($this->_PRFIX_TABLE . '_woo_history_user_commission')
-                ->where('order_id', $postId)
-                ->where('status', '3')
-                ->first();
+            $traffic = DB::table($this->_PRFIX_TABLE . '_woo_history_share_link')
+            ->where('user_id', $user['id'])
+            ->where('status', '1')
+            ->orderBy('id', 'DESC')
+            ->first();
+        if (!empty($traffic)) {
 
-            if ($history) {
-                $userId = $history->user_id;
+            $trafficId = $traffic->id;
+            // Update status of previous traffic
+            DB::table($this->_PRFIX_TABLE . '_woo_history_share_link')
+                ->where('user_id', $user['id'])
+                ->where('status', '1')
+                ->update(['status' => 0]);
 
-                $traffic = DB::table($this->_PRFIX_TABLE . '_woo_history_share_link')
-                    ->where('user_id', $userId)
-                    ->where('status', '1')
-                    ->orderBy('id', 'DESC')
-                    ->first();
+            // Update status of current traffic
+            DB::table($this->_PRFIX_TABLE . '_woo_history_share_link')
+                ->where('id', $trafficId)
+                ->update(['status' => 2]);
 
-                if ($traffic) {
-                    $trafficId = $traffic->id;
-
-                    // Update status of previous traffic
-                    DB::table($this->_PRFIX_TABLE . '_woo_history_share_link')
-                        ->where('user_id', $userId)
-                        ->where('status', '1')
-                        ->update(['status' => 0]);
-
-                    // Update status of current traffic
-                    DB::table($this->_PRFIX_TABLE . '_woo_history_share_link')
-                        ->where('id', $trafficId)
-                        ->update(['status' => 2]);
-
-                    // Update status of commission history
-                    DB::table($this->_PRFIX_TABLE . '_woo_history_user_commission')
-                        ->where('id', $history->id)
-                        ->update(['status' => 1]);
-                }
-            }
+           
+        }
             //tính hoa hồng
 
             DB::commit();

@@ -21,9 +21,9 @@ Route::post('gatewave', 'App\Http\Controllers\Api\GatewaveController@index')->mi
 Route::post('loginPos', 'App\Http\Controllers\Api\GatewaveController@loginPos');
 
 Route::get('checkFollow', 'App\Http\Controllers\Api\GatewaveController@checkFollow')->middleware('CorsApi');
-Route::get('city', 'App\Http\Controllers\Api\StoreController@city')->middleware('CorsApi');
-Route::get('quan', 'App\Http\Controllers\Api\StoreController@quan')->middleware('CorsApi');
-Route::get('phuong', 'App\Http\Controllers\Api\StoreController@phuong')->middleware('CorsApi');
+Route::get('city', 'App\Http\Controllers\Api\StoreController@city');
+Route::get('quan', 'App\Http\Controllers\Api\StoreController@quan');
+Route::get('phuong', 'App\Http\Controllers\Api\StoreController@phuong');
 Route::group(['middleware' => ['GetData']], function () {
     Route::get('product/categories', 'App\Http\Controllers\Api\ProductController@getCategories');
     Route::get('product/attribute', 'App\Http\Controllers\Api\ProductController@getAttribute');
@@ -31,11 +31,13 @@ Route::group(['middleware' => ['GetData']], function () {
     Route::get('blogs', 'App\Http\Controllers\Api\BlogController@index');
     Route::get('get_payment_method', 'App\Http\Controllers\Api\StoreController@getPaymentMethod');
     Route::get('coupons', 'App\Http\Controllers\Api\CouponsController@index');
-    Route::post('order_pos', 'App\Http\Controllers\Api\OrdersController@storePos');
+    Route::get('update_status_shipper/{orderId}', 'App\Http\Controllers\Api\OrdersController@update_status_shipper');
+    Route::get('order_pos', 'App\Http\Controllers\Api\OrdersController@indexPos')->middleware('CheckStore');
+
+    Route::post('order_pos', 'App\Http\Controllers\Api\OrdersController@storePos')->middleware('CheckStore');
 });
 
 Route::group(['middleware' => ['CorsApi', 'GetData']], function () {
-    Route::post('order_pos', 'App\Http\Controllers\Api\OrdersController@storePos');
 
     Route::get('getFee', 'App\Http\Controllers\Api\StoreController@getFee')->middleware('CorsApi');
     Route::get('list_rotation', 'App\Http\Controllers\Api\StoreController@listRotation')->middleware('CorsApi');

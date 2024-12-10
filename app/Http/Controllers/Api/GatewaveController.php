@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
+use Hautelook\Phpass\PasswordHash;
 
 class GatewaveController extends Controller
 {
@@ -179,7 +180,6 @@ class GatewaveController extends Controller
               
                 $this->_PRFIX_TABLE = $prefixTable;
 
-                var_dump($this->check_user_credentials($request['sdt'],$request['pass']));die;
                 $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_users')->where('user_login', $request['sdt'])->first();
                 // wp_wc_customer_lookup
                 
@@ -187,11 +187,15 @@ class GatewaveController extends Controller
                     return $this->returnError(new \stdClass, "Tài khoản nhân viên không đúng");
                   
                 } 
+                $checkPass = $this->check_user_credentials($request['pass'],$user->user_pass);
+                if(!$checkPass){
+                    return $this->returnError(new \stdClass, "User hoặc mật khẩu không đúng");
+                }
                 $role = $this->getUserMeta($user->ID,'wp_capabilities');
                
                 $nameRole = array_key_first(unserialize($role));
                 if($nameRole == "shop_manager" || $nameRole == "contributor" || $nameRole == "administrator"){
-                    $hash = $this->getToken($request['store'], $request['sdt'], $databaseStore, $request['name'], $user->ID, $prefixTable);
+                    $hash = $this->getToken($nameRole, $request['sdt'], $databaseStore, $request['name'], $user->ID, $prefixTable);
                     $this->woo_logs('gateway', $hash, 3);
     
                     return $this->returnSuccess([
@@ -208,16 +212,26 @@ class GatewaveController extends Controller
             return $this->returnError(new \stdClass, $th->getMessage());
         }
     }
-    public function check_user_credentials($user_login, $user_pass) {
-        // Attempt to authenticate the user
-        $user = \wp_authenticate($user_login, $user_pass);
-    
-        // Check if authentication was successful
-        if (!$user) {
-            return false; // Invalid login or password
-        }
-    
-        return true; // Credentials are valid
+    public function check_user_credentials($user_pass,$hashedPassword) {
+        // Cấu hình giống WordPress
+        $hash_cost_log2 = 8; // Cost mặc định là 8
+        $portable_hashes = true; // Portable hashes để có định dạng $P$...
+
+        // Khởi tạo PasswordHash
+        $hasher = new PasswordHash($hash_cost_log2, $portable_hashes);
+
+        // Mật khẩu cần băm
+        $password = $user_pass;
+
+        // Băm mật khẩu
+            // Kiểm tra mật khẩu
+        $isMatch = $hasher->CheckPassword($password, $hashedPassword);
+
+        if ($isMatch) {
+            return true;
+        }     
+        return false;
+
     }
     /**
      * Store a newly created resource in storage.

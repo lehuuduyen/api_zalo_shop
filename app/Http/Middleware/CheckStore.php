@@ -20,10 +20,19 @@ class CheckStore extends Controller
         try {
             $token = request()->bearerToken();
             $dataToken = $this->decodeData($token);
+            
             $data = json_decode($dataToken);
             $timeNow = time();
             if ($data) {
                 if($data->expired_in >= $timeNow || empty($data->expired_in) )
+                $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+
+            // Get the host (domain)
+            $host = $_SERVER['HTTP_HOST'];
+
+            // Combine protocol and host to get the full domain
+            $fullDomain = $protocol . \env('APP_URL_BACKEND');
+            $data->domain = $fullDomain;
                 $request['data_reponse'] = $data;
                 $this->connectDb($data->databaseStore);
                 return $next($request);
@@ -32,6 +41,6 @@ class CheckStore extends Controller
             //throw $th;
 
         }
-        return $this->returnError(new \stdClass, "Token không đúng hoặc hết hạn");
+        return $this->returnError(new \stdClass, "Token không đúng hoặc hết hạn",401);
     }
 }

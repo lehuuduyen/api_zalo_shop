@@ -641,7 +641,7 @@ class StoreController extends Controller
     }
     public function city(Request $request)
     {
-        $city = file_get_contents('public/data/tinh_tp.json');
+        $city = file_get_contents('data/tinh_tp.json');
         $city = json_decode($city);
         $listCity = [];
         foreach ($city as $id => $val) {
@@ -664,7 +664,7 @@ class StoreController extends Controller
                 return $this->returnError(new \stdClass, $validator->errors()->first());
             } else {
                 $param = $data['parent'];
-                $quan = file_get_contents("public/data/quan-huyen/$param.json");
+                $quan = file_get_contents("data/quan-huyen/$param.json");
                 $quan = json_decode($quan);
                 $listQuan = [];
                 foreach ($quan as $id => $val) {
@@ -878,7 +878,7 @@ class StoreController extends Controller
                 return $this->returnError(new \stdClass, $validator->errors()->first());
             } else {
                 $param = $data['parent'];
-                $phuong = file_get_contents("public/data/xa-phuong/$param.json");
+                $phuong = file_get_contents("data/xa-phuong/$param.json");
                 $phuong = json_decode($phuong);
                 $listPhuong = [];
                 foreach ($phuong as $id => $val) {

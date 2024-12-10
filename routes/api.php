@@ -24,6 +24,8 @@ Route::get('checkFollow', 'App\Http\Controllers\Api\GatewaveController@checkFoll
 Route::get('city', 'App\Http\Controllers\Api\StoreController@city');
 Route::get('quan', 'App\Http\Controllers\Api\StoreController@quan');
 Route::get('phuong', 'App\Http\Controllers\Api\StoreController@phuong');
+Route::get('getFee', 'App\Http\Controllers\Api\StoreController@getFee');
+
 Route::group(['middleware' => ['GetData']], function () {
     Route::get('product/categories', 'App\Http\Controllers\Api\ProductController@getCategories');
     Route::get('product/attribute', 'App\Http\Controllers\Api\ProductController@getAttribute');
@@ -39,7 +41,6 @@ Route::group(['middleware' => ['GetData']], function () {
 
 Route::group(['middleware' => ['CorsApi', 'GetData']], function () {
 
-    Route::get('getFee', 'App\Http\Controllers\Api\StoreController@getFee')->middleware('CorsApi');
     Route::get('list_rotation', 'App\Http\Controllers\Api\StoreController@listRotation')->middleware('CorsApi');
     Route::get('get_turn', 'App\Http\Controllers\Api\StoreController@getTurn')->middleware('CorsApi');
     Route::post('add_turn', 'App\Http\Controllers\Api\StoreController@addTurn')->middleware('CorsApi');

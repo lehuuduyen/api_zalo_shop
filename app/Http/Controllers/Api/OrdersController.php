@@ -110,7 +110,7 @@ class OrdersController extends Controller
         $store = $request['data_reponse'];
         $this->_PRFIX_TABLE = $store->prefixTable;
         if($store->role =="administrator"){
-            $orders = DB::table($this->_PRFIX_TABLE . '_posts')->where( 'post_type', 'shop_order')->where( 'post_type', 'shop_order')->orderBy('post_date', 'DESC')->get();
+            $orders = DB::table($this->_PRFIX_TABLE . '_posts')->where( 'post_type', 'shop_order')->where( 'post_type', 'shop_order')->whereDate('post_date', '=', date("Y-m-d"))->get();
 
         }elseif($store->role == "shop_manager" || $store->role == "contributor"){
             $orders = DB::table($this->_PRFIX_TABLE . '_posts')->where( 'post_type', 'shop_order')->whereDate('post_date', '=', date("Y-m-d"))->get();
@@ -213,6 +213,11 @@ class OrdersController extends Controller
                     $image = $this->getImage($parentProduct->post_parent, $store);
                 }
             }
+            $qty = $this->getOrderMeta($value->order_item_id, '_qty');
+            if($qty ==0){
+                $qty = 1;
+            }
+
             $products[$key]['name'] = $value->order_item_name;
             $temp = new stdClass;
             $temp->image = $image;
@@ -220,7 +225,7 @@ class OrdersController extends Controller
             $products[$key]['options'] = $temp;
             $products[$key]['attribute'] = unserialize( $this->getOrderMeta($value->order_item_id, '_tmcartepo_data'));
             $products[$key]['qty'] = $this->getOrderMeta($value->order_item_id, '_qty');
-            $products[$key]['price'] = $total / $this->getOrderMeta($value->order_item_id, '_qty');
+            $products[$key]['price'] = $total / $qty;
             $products[$key]['subtotal'] = $total;
             $products[$key]['product_id'] = $productId;
             // $products[$key]['is_review'] = ($checkReview) ? 1 : 0;

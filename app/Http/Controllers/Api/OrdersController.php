@@ -186,7 +186,6 @@ class OrdersController extends Controller
             if ($pointUseMoney != 0) {
                 $orders[$key]->total_price = $orders[$key]->total_price + $pointUseMoney;
             }
-            $orders[$key]->point_use = $pointUse;
             $orders[$key]->discount = $this->getPostMeta($order->ID,'_cart_discount');
             $orders[$key]->point_use = $pointUse;
             $orders[$key]->points_converted_to_money = $pointUseMoney;
@@ -221,12 +220,16 @@ class OrdersController extends Controller
             $products[$key]['name'] = $value->order_item_name;
             $temp = new stdClass;
             $temp->image = $image;
-            $total = $this->getOrderMeta($value->order_item_id, '_line_total');
+            $total = $this->getOrderMeta($value->order_item_id, '_tm_epo_product_original_price');
+            if($total){
+                $total = unserialize($total)[0];
+            }
+            
             $products[$key]['options'] = $temp;
             $products[$key]['attribute'] = unserialize( $this->getOrderMeta($value->order_item_id, '_tmcartepo_data'));
             $products[$key]['qty'] = $this->getOrderMeta($value->order_item_id, '_qty');
-            $products[$key]['price'] = $total / $qty;
-            $products[$key]['subtotal'] = $total;
+            $products[$key]['price'] = $total ;
+            $products[$key]['subtotal'] = $total * $qty;
             $products[$key]['product_id'] = $productId;
             // $products[$key]['is_review'] = ($checkReview) ? 1 : 0;
         }

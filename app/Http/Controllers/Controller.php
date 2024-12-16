@@ -600,7 +600,7 @@ class Controller extends BaseController
                 $note = "";
             }
             // them wp_posts
-            
+         
             $postId = DB::table($this->_PRFIX_TABLE . '_posts')->insertGetId(
                 array(
                     'post_date' => $timeNow,
@@ -620,6 +620,8 @@ class Controller extends BaseController
                     'comment_count' => '0',
                 )
             );
+       
+            
 
 
 
@@ -667,7 +669,8 @@ class Controller extends BaseController
                 $attribute = DB::table($this->_PRFIX_TABLE . '_postmeta')->where('meta_key', 'tm_meta')->select('meta_value')->first();
                 $tempSaveOrderItemMetaTmdata = [];
                 $tempSaveOrderItemMetaTmcartepo_data = [];
-
+                $_tm_epo_product_original_price = [$price];
+               
                 if ($attribute  && isset($totalPriceDetails['variants'][$key])) {
                     $attribute = unserialize($attribute->meta_value)['tmfbuilder'];
                     $i = 0;
@@ -768,6 +771,12 @@ class Controller extends BaseController
                             'meta_key' => '_tm_epo',
                             'meta_value' => "a:1:{i:0;i:1;}",
                         ),
+                        array(
+                            'order_item_id' => $orderItemId,
+                            'meta_key' => '_tm_epo_product_original_price',
+                            'meta_value' => serialize($_tm_epo_product_original_price),
+                        ),
+                        
                         array(
                             'order_item_id' => $orderItemId,
                             'meta_key' => '_tmdata',

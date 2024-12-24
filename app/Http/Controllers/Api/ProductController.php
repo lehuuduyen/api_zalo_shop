@@ -30,9 +30,14 @@ class ProductController extends Controller
         
         $discount = 0;
         
-        $products = DB::table($this->_PRFIX_TABLE . '_posts')->where('post_type', 'product')->where('post_status', 'publish')->orderBy('post_modified', 'DESC')->get();
         if (isset($request['category'])) {
             $products = $this->getPostByCategoryId($request['category']);
+        }elseif (isset($request['s'])) {
+            $products = DB::table($this->_PRFIX_TABLE . '_posts')
+            ->where('post_title', 'LIKE', '%' . $request['s'] . '%')->where('post_type', 'product')->where('post_status', 'publish')->orderBy('post_modified', 'DESC')->get();
+        }else{
+            $products = DB::table($this->_PRFIX_TABLE . '_posts')->where('post_type', 'product')->where('post_status', 'publish')->orderBy('post_modified', 'DESC')->get();
+
         }
 
 

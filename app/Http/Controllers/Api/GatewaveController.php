@@ -16,7 +16,7 @@ class GatewaveController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    
+
     public function checkFollow(Request $request)
     {
         try {
@@ -82,10 +82,12 @@ class GatewaveController extends Controller
         try {
             $validator = Validator::make($request->all(), [
                 'sdt' => 'required',
-                'name' => 'required'
+                'name' => 'required',
+                'pass' => 'required'
             ], [
                 'sdt.required' => "Vui lòng nhập sdt",
-                'name.required' => "Vui lòng nhập name"
+                'name.required' => "Vui lòng nhập name",
+                'pass.required' => "Vui lòng nhập mật khẩu",
             ]);
             if ($validator->fails()) {
                 return $this->returnError(new \stdClass, $validator->errors()->first());
@@ -94,24 +96,24 @@ class GatewaveController extends Controller
                 $databaseStore = env('DB_DATABASE');
                 $this->connectDb($databaseStore);
                 $prefixTable = $this->getPrefixTableFirst();
-              
+
                 $this->_PRFIX_TABLE = $prefixTable;
                 $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_users')->where('user_login', $request['sdt'])->first();
                 // wp_wc_customer_lookup
-                
+
                 if (!$user) {
                     $email = $this->randomEmail();
                     $insertGetId = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_users')->insertGetId(
                         array(
                             'user_login'     =>   $request['sdt'],
-                            'user_pass'     =>   "appid",
+                            'user_pass'     =>   $this->createPass($request['pass']),
                             'user_email'     =>   $email,
                             'user_nicename'     =>   $request['name'],
                             'display_name'     =>   $request['name'],
                             'user_registered'     =>   date('Y-m-d H:i:s'),
                         )
                     );
-                   
+
                     $insertMetaUser = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
                         array(
                             'user_id' => $insertGetId,
@@ -127,11 +129,9 @@ class GatewaveController extends Controller
                         array('meta_value' => 'a:1:{s:10:"subscriber";b:1;}')
                     );
                 } else {
-                    $email = $user->user_email;
-                    $insertGetId = $user->ID;
-
+                    return $this->returnError(new \stdClass, "User đã tồn tại");
                 }
-            
+
                 $customer = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_wc_customer_lookup')->where('user_id', $insertGetId)->first();
                 if (!$customer) {
                     $insertCus = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_wc_customer_lookup')->insert(
@@ -177,34 +177,31 @@ class GatewaveController extends Controller
                 $databaseStore = env('DB_DATABASE');
                 $this->connectDb($databaseStore);
                 $prefixTable = $this->getPrefixTableFirst();
-              
+
                 $this->_PRFIX_TABLE = $prefixTable;
 
                 $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_users')->where('user_login', $request['sdt'])->first();
                 // wp_wc_customer_lookup
-                
+
                 if (!$user) {
                     return $this->returnError(new \stdClass, "Tài khoản nhân viên không đúng");
-                  
-                } 
-                $checkPass = $this->check_user_credentials($request['pass'],$user->user_pass);
-                if(!$checkPass){
+                }
+                $checkPass = $this->check_user_credentials($request['pass'], $user->user_pass);
+                if (!$checkPass) {
                     return $this->returnError(new \stdClass, "User hoặc mật khẩu không đúng");
                 }
-                $role = $this->getUserMeta($user->ID,'wp_capabilities');
-               
+                $role = $this->getUserMeta($user->ID, 'wp_capabilities');
+
                 $nameRole = array_key_first(unserialize($role));
-                if($nameRole == "shop_manager" || $nameRole == "contributor" || $nameRole == "administrator"){
+                if ($nameRole == "shop_manager" || $nameRole == "contributor" || $nameRole == "administrator") {
                     $hash = $this->getToken($nameRole, $request['sdt'], $databaseStore, $request['name'], $user->ID, $prefixTable);
                     $this->woo_logs('gateway', $hash, 3);
-    
+
                     return $this->returnSuccess([
                         'token' => $hash
                     ]);
                 }
                 return $this->returnError(new \stdClass, "Không có quyền");
-              
-          
             }
         } catch (\Throwable $th) {
             $this->woo_logs('gateway', $th->getMessage());
@@ -212,7 +209,55 @@ class GatewaveController extends Controller
             return $this->returnError(new \stdClass, $th->getMessage());
         }
     }
-    public function check_user_credentials($user_pass,$hashedPassword) {
+    public function login(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'sdt' => 'required',
+                'pass' => 'required'
+            ], [
+                'sdt.required' => "Vui lòng nhập sdt",
+                'pass.required' => "Vui lòng nhập pass"
+            ]);
+            if ($validator->fails()) {
+                return $this->returnError(new \stdClass, $validator->errors()->first());
+            } else {
+
+                $databaseStore = env('DB_DATABASE');
+                $this->connectDb($databaseStore);
+                $prefixTable = $this->getPrefixTableFirst();
+
+                $this->_PRFIX_TABLE = $prefixTable;
+
+                $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_users')->where('user_login', $request['sdt'])->first();
+                // wp_wc_customer_lookup
+
+                if (!$user) {
+                    return $this->returnError(new \stdClass, "Tài khoản nhân viên không đúng");
+                }
+                $checkPass = $this->check_user_credentials($request['pass'], $user->user_pass);
+                if (!$checkPass) {
+                    return $this->returnError(new \stdClass, "User hoặc mật khẩu không đúng");
+                }
+                $role = $this->getUserMeta($user->ID, 'wp_capabilities');
+
+                $nameRole = array_key_first(unserialize($role));
+                $hash = $this->getToken($nameRole, $request['sdt'], $databaseStore, $request['name'], $user->ID, $prefixTable);
+                $this->woo_logs('gateway', $hash, 3);
+
+                return $this->returnSuccess([
+                    'token' => $hash
+                ]);
+                return $this->returnError(new \stdClass, "Không có quyền");
+            }
+        } catch (\Throwable $th) {
+            $this->woo_logs('gateway', $th->getMessage());
+
+            return $this->returnError(new \stdClass, $th->getMessage());
+        }
+    }
+    public function createPass($user_pass)
+    {
         // Cấu hình giống WordPress
         $hash_cost_log2 = 8; // Cost mặc định là 8
         $portable_hashes = true; // Portable hashes để có định dạng $P$...
@@ -224,14 +269,32 @@ class GatewaveController extends Controller
         $password = $user_pass;
 
         // Băm mật khẩu
-            // Kiểm tra mật khẩu
+        // Kiểm tra mật khẩu
+        $passwordHash = $hasher->HashPassword($password);
+
+
+        return $passwordHash;
+    }
+    public function check_user_credentials($user_pass, $hashedPassword)
+    {
+        // Cấu hình giống WordPress
+        $hash_cost_log2 = 8; // Cost mặc định là 8
+        $portable_hashes = true; // Portable hashes để có định dạng $P$...
+
+        // Khởi tạo PasswordHash
+        $hasher = new PasswordHash($hash_cost_log2, $portable_hashes);
+
+        // Mật khẩu cần băm
+        $password = $user_pass;
+
+        // Băm mật khẩu
+        // Kiểm tra mật khẩu
         $isMatch = $hasher->CheckPassword($password, $hashedPassword);
 
         if ($isMatch) {
             return true;
-        }     
+        }
         return false;
-
     }
     /**
      * Store a newly created resource in storage.

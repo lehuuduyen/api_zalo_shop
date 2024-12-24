@@ -17,7 +17,9 @@ use Illuminate\Support\Facades\Route;
 // Route::middleware('auth:api')->get('/user', function (Request $request) {
 //     return $request->user();
 // });
-Route::post('gatewave', 'App\Http\Controllers\Api\GatewaveController@index')->middleware('CorsApi');
+Route::post('register', 'App\Http\Controllers\Api\GatewaveController@index')->middleware('CorsApi');
+Route::post('login', 'App\Http\Controllers\Api\GatewaveController@login')->middleware('CorsApi');
+
 Route::post('loginPos', 'App\Http\Controllers\Api\GatewaveController@loginPos');
 
 Route::get('checkFollow', 'App\Http\Controllers\Api\GatewaveController@checkFollow')->middleware('CorsApi');

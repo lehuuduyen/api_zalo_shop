@@ -147,7 +147,7 @@ class GatewaveController extends Controller
                         )
                     );
                 }
-                $hash = $this->getToken($request['store'], $request['sdt'], $databaseStore, $request['name'], $insertGetId, $prefixTable);
+                $hash = $this->getToken($request['store'], $request['sdt'], $databaseStore, $request['name'], $insertGetId,$email, $prefixTable);
                 $this->woo_logs('gateway', $hash, 3);
 
                 return $this->returnSuccess([
@@ -194,7 +194,7 @@ class GatewaveController extends Controller
 
                 $nameRole = array_key_first(unserialize($role));
                 if ($nameRole == "shop_manager" || $nameRole == "contributor" || $nameRole == "administrator") {
-                    $hash = $this->getToken($nameRole, $request['sdt'], $databaseStore, $request['name'], $user->ID, $prefixTable);
+                    $hash = $this->getToken($nameRole, $request['sdt'], $databaseStore, $request['name'], $user->ID, $user->user_email, $prefixTable);
                     $this->woo_logs('gateway', $hash, 3);
 
                     return $this->returnSuccess([
@@ -242,7 +242,7 @@ class GatewaveController extends Controller
                 $role = $this->getUserMeta($user->ID, 'wp_capabilities');
 
                 $nameRole = array_key_first(unserialize($role));
-                $hash = $this->getToken($nameRole, $request['sdt'], $databaseStore, $request['name'], $user->ID, $prefixTable);
+                $hash = $this->getToken($nameRole, $request['sdt'], $databaseStore, $request['name'], $user->ID,$user->user_email, $prefixTable);
                 $this->woo_logs('gateway', $hash, 3);
 
                 return $this->returnSuccess([

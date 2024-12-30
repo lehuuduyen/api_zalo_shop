@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+
 class CouponsController extends Controller
 {
     /**
@@ -18,48 +19,52 @@ class CouponsController extends Controller
         $store = $request['data_reponse'];
         $this->_PRFIX_TABLE = $store->prefixTable;
 
-        $coupons = DB::table( $this->_PRFIX_TABLE .'_posts')->where('post_status','publish')->where('post_type','shop_coupon')->get();
-        $listCoupons =[];
-        $i =0;
-        foreach($coupons as $key => $val){
-            $discount_type = $this->getPostMeta($val->ID,'discount_type');
-            $customer_user = $this->getPostMeta($val->ID,'customer_user');
-            
-            if($discount_type == "percent"){
+        $coupons = DB::table($this->_PRFIX_TABLE . '_posts')->where('post_status', 'publish')->where('post_type', 'shop_coupon')->get();
+        $listCoupons = [];
+        $i = 0;
+        foreach ($coupons as $key => $val) {
+
+            $discount_type = $this->getPostMeta($val->ID, 'discount_type');
+            $customer_user = $this->getPostMeta($val->ID, 'customer_email');
+
+            if ($discount_type == "percent") {
                 $discount_type = 'percentage';
             }
-            $discount = $this->getPostMeta($val->ID,'coupon_amount');
-            $date_expires = $this->getPostMeta($val->ID,'date_expires');
-            $usage_limit = $this->getPostMeta($val->ID,'usage_limit');
-            $usage_count = $this->getPostMeta($val->ID,'usage_count');
-            if($usage_limit <= $usage_count){
-                continue;            
+            $discount = $this->getPostMeta($val->ID, 'coupon_amount');
+            $date_expires = $this->getPostMeta($val->ID, 'date_expires');
+            $usage_limit = $this->getPostMeta($val->ID, 'usage_limit');
+            $usage_count = $this->getPostMeta($val->ID, 'usage_count');
+            if ($usage_limit <= $usage_count) {
+                continue;
             }
-            if($customer_user){
-               if($store->user_id == $customer_user){
-                $coupons[$key]->title=$val->post_excerpt;
-                $coupons[$key]->code=$val->post_title;
-                $coupons[$key]->discount_type=$discount_type;
-                $coupons[$key]->discount=$discount;
-                $coupons[$key]->expire_date=date('d/m/Y H:i:s', $date_expires);
-                $listCoupons[$i] = $coupons[$key];
-                $i++;
-               }
-            }else{
-                if($date_expires < time()){
+            if ($customer_user) {
+                if (isset($store->email)) {
+                    $listCus = unserialize($customer_user);
+
+                    $emailExists = in_array(strtolower($store->email), array_map('strtolower', $listCus));
+
+                    if ($emailExists) {
+                        $coupons[$key]->title = $val->post_excerpt;
+                        $coupons[$key]->code = $val->post_title;
+                        $coupons[$key]->discount_type = $discount_type;
+                        $coupons[$key]->discount = $discount;
+                        $coupons[$key]->expire_date = date('d/m/Y H:i:s', $date_expires);
+                        $listCoupons[$i] = $coupons[$key];
+                        $i++;
+                    }
+                }
+            } else {
+                if ($date_expires < time()) {
                     continue;
                 }
-                $coupons[$key]->title=$val->post_excerpt;
-                $coupons[$key]->code=$val->post_title;
-                $coupons[$key]->discount_type=$discount_type;
-                $coupons[$key]->discount=$discount;
-                $coupons[$key]->expire_date=date('d/m/Y H:i:s', $date_expires);
+                $coupons[$key]->title = $val->post_excerpt;
+                $coupons[$key]->code = $val->post_title;
+                $coupons[$key]->discount_type = $discount_type;
+                $coupons[$key]->discount = $discount;
+                $coupons[$key]->expire_date = date('d/m/Y H:i:s', $date_expires);
                 $listCoupons[$i] = $coupons[$key];
                 $i++;
             }
-           
-
-            
         }
 
 

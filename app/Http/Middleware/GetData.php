@@ -19,18 +19,38 @@ class GetData extends Controller
     public function handle(Request $request, Closure $next)
     {
         try {
-            $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+            $token = request()->bearerToken();
+            $dataToken = $this->decodeData($token);
 
-            // Get the host (domain)
-            $host = $_SERVER['HTTP_HOST'];
+            $data = json_decode($dataToken);
+            $timeNow = time();
+            if ($data) {
+                if ($data->expired_in >= $timeNow || empty($data->expired_in))
+                    $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
 
-            // Combine protocol and host to get the full domain
-            $fullDomain = $protocol . \env('APP_URL_BACKEND');
-            $json =new stdClass();
-            $json->domain = $fullDomain;
+                // Get the host (domain)
+                $host = $_SERVER['HTTP_HOST'];
+
+                // Combine protocol and host to get the full domain
+                $fullDomain = $protocol . \env('APP_URL_BACKEND');
+                $data->domain = $fullDomain;
+                $request['data_reponse'] = $data;
+                $this->connectDb($data->databaseStore);
+            } else {
+                $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+
+                // Get the host (domain)
+                $host = $_SERVER['HTTP_HOST'];
+
+                // Combine protocol and host to get the full domain
+                $fullDomain = $protocol . \env('APP_URL_BACKEND');
+                $json = new stdClass();
+                $json->domain = $fullDomain;
                 $json->prefixTable = 'wp';
-            
-            $request['data_reponse'] = $json;
+
+                $request['data_reponse'] = $json;
+            }
+
             return $next($request);
         } catch (\Throwable $th) {
             //throw $th;

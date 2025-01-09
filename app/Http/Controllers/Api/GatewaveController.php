@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 use Hautelook\Phpass\PasswordHash;
+use GuzzleHttp\Client;
 
 class GatewaveController extends Controller
 {
@@ -75,6 +76,47 @@ class GatewaveController extends Controller
             }
         } catch (\Throwable $th) {
             //throw $th;
+        }
+    }
+    public function call_otp(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'sdt' => 'required',
+            ], [
+                'sdt.required' => "Vui lòng nhập sdt",
+            ]);
+            if ($validator->fails()) {
+                return $this->returnError(new \stdClass, $validator->errors()->first());
+            } else {
+                $data = [
+                    "mode" => "development",
+                    "phone" => "84772232250",
+                    "template_id" => "398993",
+                    "template_data" => [
+                        "otp" => "241296"
+                    ],
+                    "tracking_id" => "123456"
+                ];
+                $client = new Client();
+                $response = $client->post('https://business.openapi.zalo.me/message/template', [
+                    'json' => $data, // Dữ liệu được gửi dưới dạng JSON
+                    'headers' => [
+                        'Content-Type' => 'application/json',
+                        'access_token' => \env('ACCESS_TOKEN_ZALO') // Thêm nếu cần token
+                    ]
+                ]);
+        
+                $statusCode = $response->getStatusCode();
+                $body = $response->getBody()->getContents();
+        
+               
+                return json_decode($bodrôy);
+            }
+        } catch (\Throwable $th) {
+            $this->woo_logs('gateway', $th->getMessage());
+
+            return $this->returnError(new \stdClass, $th->getMessage());
         }
     }
     public function index(Request $request)

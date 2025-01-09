@@ -18,6 +18,8 @@ use Illuminate\Support\Facades\Route;
 //     return $request->user();
 // });
 Route::post('register', 'App\Http\Controllers\Api\GatewaveController@index')->middleware('CorsApi');
+Route::post('call_otp', 'App\Http\Controllers\Api\GatewaveController@call_otp')->middleware('CorsApi');
+
 Route::post('login', 'App\Http\Controllers\Api\GatewaveController@login')->middleware('CorsApi');
 
 Route::post('loginPos', 'App\Http\Controllers\Api\GatewaveController@loginPos');

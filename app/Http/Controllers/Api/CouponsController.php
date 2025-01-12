@@ -23,6 +23,7 @@ class CouponsController extends Controller
         $listCoupons = [];
         $i = 0;
         foreach ($coupons as $key => $val) {
+            $coupons[$key]->id = $val->ID;
 
             $discount_type = $this->getPostMeta($val->ID, 'discount_type');
             $customer_user = $this->getPostMeta($val->ID, 'customer_email');

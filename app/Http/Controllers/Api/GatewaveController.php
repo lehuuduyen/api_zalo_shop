@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 use Hautelook\Phpass\PasswordHash;
 use GuzzleHttp\Client;
+use Illuminate\Support\Carbon;
 
 class GatewaveController extends Controller
 {
@@ -47,7 +48,7 @@ class GatewaveController extends Controller
                         ]);
                     } else {
                         $listFollow[] = $request['appid'];
-                        $option = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_options')->updateOrInsert(
+                        $option = DB::table($this->_PRFIX_TABLE . '_options')->updateOrInsert(
                             array(
                                 'option_name' => 'follow'
                             ),
@@ -61,7 +62,7 @@ class GatewaveController extends Controller
                     }
                 } else {
                     $arr[] = $request['appid'];
-                    $option = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_options')->updateOrInsert(
+                    $option = DB::table($this->_PRFIX_TABLE . '_options')->updateOrInsert(
                         array(
                             'option_name' => 'follow'
                         ),
@@ -89,12 +90,15 @@ class GatewaveController extends Controller
             if ($validator->fails()) {
                 return $this->returnError(new \stdClass, $validator->errors()->first());
             } else {
+                $param = $request->all();
+
+                $rand = rand(100000, 999999);
                 $data = [
-                    "mode" => "development",
-                    "phone" => "84772232250",
+                    "mode" => \env('MODE_ZALO'),
+                    "phone" => $param['sdt'],
                     "template_id" => "398993",
                     "template_data" => [
-                        "otp" => "241296"
+                        "otp" => $rand
                     ],
                     "tracking_id" => "123456"
                 ];
@@ -106,12 +110,21 @@ class GatewaveController extends Controller
                         'access_token' => \env('ACCESS_TOKEN_ZALO') // Thêm nếu cần token
                     ]
                 ]);
-        
-                $statusCode = $response->getStatusCode();
+
                 $body = $response->getBody()->getContents();
-        
-               
-                return json_decode($bodrôy);
+                $body = json_decode($body);
+                if ($body->message == "Success") {
+                    $insertGetId = DB::table($this->_PRFIX_TABLE . '_otp_code')->insertGetId(
+                        array(
+                            'sdt'     =>   $data['phone'],
+                            'otp'     =>   $rand,
+                            'time'     =>   $body->data->sent_time,
+
+                        )
+                    );
+                } else {
+                }
+                return $body;
             }
         } catch (\Throwable $th) {
             $this->woo_logs('gateway', $th->getMessage());
@@ -125,76 +138,93 @@ class GatewaveController extends Controller
             $validator = Validator::make($request->all(), [
                 'sdt' => 'required',
                 'name' => 'required',
-                'pass' => 'required'
+                'pass' => 'required',
+                'otp' => 'required',
             ], [
                 'sdt.required' => "Vui lòng nhập sdt",
                 'name.required' => "Vui lòng nhập name",
                 'pass.required' => "Vui lòng nhập mật khẩu",
+                'otp.required' => "Vui lòng nhập otp",
             ]);
             if ($validator->fails()) {
                 return $this->returnError(new \stdClass, $validator->errors()->first());
             } else {
+                //check otp 
+                $otpRecord = DB::table($this->_PRFIX_TABLE . '_otp_code')
+                    ->where('otp', $request['otp'])
+                    ->where('sdt', $request['sdt'])
+                    ->where('status', 1)
+                    ->where('time', '>=', Carbon::now()->subMinutes(10)->valueOf())
+                    ->first();
+                  
+                if ($otpRecord) {
+                    DB::table($this->_PRFIX_TABLE . '_otp_code')
+                        ->where('id', $otpRecord->id) // Dựa trên ID của OTP
+                        ->update(['status' => 2]);
+                        $databaseStore = env('DB_DATABASE');
+                    $this->connectDb($databaseStore);
+                    $prefixTable = $this->getPrefixTableFirst();
 
-                $databaseStore = env('DB_DATABASE');
-                $this->connectDb($databaseStore);
-                $prefixTable = $this->getPrefixTableFirst();
+                    $this->_PRFIX_TABLE = $prefixTable;
+                    $user = DB::table($this->_PRFIX_TABLE . '_users')->where('user_login', $request['sdt'])->first();
+                    // wp_wc_customer_lookup
 
-                $this->_PRFIX_TABLE = $prefixTable;
-                $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_users')->where('user_login', $request['sdt'])->first();
-                // wp_wc_customer_lookup
+                    if (!$user) {
+                        $email = $this->randomEmail();
+                        $insertGetId = DB::table($this->_PRFIX_TABLE . '_users')->insertGetId(
+                            array(
+                                'user_login'     =>   $request['sdt'],
+                                'user_pass'     =>   $this->createPass($request['pass']),
+                                'user_email'     =>   $email,
+                                'user_nicename'     =>   $request['name'],
+                                'display_name'     =>   $request['name'],
+                                'user_registered'     =>   date('Y-m-d H:i:s'),
+                            )
+                        );
 
-                if (!$user) {
-                    $email = $this->randomEmail();
-                    $insertGetId = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_users')->insertGetId(
-                        array(
-                            'user_login'     =>   $request['sdt'],
-                            'user_pass'     =>   $this->createPass($request['pass']),
-                            'user_email'     =>   $email,
-                            'user_nicename'     =>   $request['name'],
-                            'display_name'     =>   $request['name'],
-                            'user_registered'     =>   date('Y-m-d H:i:s'),
-                        )
-                    );
+                        $insertMetaUser = DB::table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
+                            array(
+                                'user_id' => $insertGetId,
+                                'meta_key' => 'last_name'
+                            ),
+                            array('meta_value' => $request['name'])
+                        );
+                        $insertMetaUser = DB::table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
+                            array(
+                                'user_id' => $insertGetId,
+                                'meta_key' => 'wp_capabilities'
+                            ),
+                            array('meta_value' => 'a:1:{s:10:"subscriber";b:1;}')
+                        );
+                    } else {
+                        return $this->returnError(new \stdClass, "User đã tồn tại");
+                    }
 
-                    $insertMetaUser = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
-                        array(
-                            'user_id' => $insertGetId,
-                            'meta_key' => 'last_name'
-                        ),
-                        array('meta_value' => $request['name'])
-                    );
-                    $insertMetaUser = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
-                        array(
-                            'user_id' => $insertGetId,
-                            'meta_key' => 'wp_capabilities'
-                        ),
-                        array('meta_value' => 'a:1:{s:10:"subscriber";b:1;}')
-                    );
+                    $customer = DB::table($this->_PRFIX_TABLE . '_wc_customer_lookup')->where('user_id', $insertGetId)->first();
+                    if (!$customer) {
+                        $insertCus = DB::table($this->_PRFIX_TABLE . '_wc_customer_lookup')->insert(
+                            array(
+                                'customer_id'     =>   $insertGetId,
+                                'username'     =>   $request['sdt'],
+                                'first_name'     =>  '',
+                                'last_name'     =>  $request['name'],
+                                'user_id'     =>   $insertGetId,
+                                'email'     =>   $email,
+
+
+                            )
+                        );
+                    }
+                    $hash = $this->getToken($request['store'], $request['sdt'], $databaseStore, $request['name'], $insertGetId, $email, $prefixTable);
+                    $this->woo_logs('gateway', $hash, 3);
+
+                    return $this->returnSuccess([
+                        'token' => $hash
+                    ]);
                 } else {
-                    return $this->returnError(new \stdClass, "User đã tồn tại");
+                    return $this->returnError(new \stdClass, "OTP không đúng hoặc đã hết hạn");
+
                 }
-
-                $customer = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_wc_customer_lookup')->where('user_id', $insertGetId)->first();
-                if (!$customer) {
-                    $insertCus = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_wc_customer_lookup')->insert(
-                        array(
-                            'customer_id'     =>   $insertGetId,
-                            'username'     =>   $request['sdt'],
-                            'first_name'     =>  '',
-                            'last_name'     =>  $request['name'],
-                            'user_id'     =>   $insertGetId,
-                            'email'     =>   $email,
-
-
-                        )
-                    );
-                }
-                $hash = $this->getToken($request['store'], $request['sdt'], $databaseStore, $request['name'], $insertGetId,$email, $prefixTable);
-                $this->woo_logs('gateway', $hash, 3);
-
-                return $this->returnSuccess([
-                    'token' => $hash
-                ]);
             }
         } catch (\Throwable $th) {
             $this->woo_logs('gateway', $th->getMessage());
@@ -222,7 +252,7 @@ class GatewaveController extends Controller
 
                 $this->_PRFIX_TABLE = $prefixTable;
 
-                $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_users')->where('user_login', $request['sdt'])->first();
+                $user = DB::table($this->_PRFIX_TABLE . '_users')->where('user_login', $request['sdt'])->first();
                 // wp_wc_customer_lookup
 
                 if (!$user) {
@@ -271,7 +301,7 @@ class GatewaveController extends Controller
 
                 $this->_PRFIX_TABLE = $prefixTable;
 
-                $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_users')->where('user_login', $request['sdt'])->first();
+                $user = DB::table($this->_PRFIX_TABLE . '_users')->where('user_login', $request['sdt'])->first();
                 // wp_wc_customer_lookup
 
                 if (!$user) {
@@ -284,7 +314,7 @@ class GatewaveController extends Controller
                 $role = $this->getUserMeta($user->ID, 'wp_capabilities');
 
                 $nameRole = array_key_first(unserialize($role));
-                $hash = $this->getToken($nameRole, $request['sdt'], $databaseStore, $request['name'], $user->ID,$user->user_email, $prefixTable);
+                $hash = $this->getToken($nameRole, $request['sdt'], $databaseStore, $request['name'], $user->ID, $user->user_email, $prefixTable);
                 $this->woo_logs('gateway', $hash, 3);
 
                 return $this->returnSuccess([

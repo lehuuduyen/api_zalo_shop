@@ -2435,7 +2435,7 @@ class Controller extends BaseController
         return $arr;
     }
     public function getHistoryUser($userId)
-    {
+    {   
         $data = DB::table($this->_PRFIX_TABLE . '_woo_history_user_point')->where('user_id', $userId)->orderBy('id', 'DESC')->get();
         return $data;
     }

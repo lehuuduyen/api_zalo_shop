@@ -161,6 +161,7 @@ class StoreController extends Controller
     {
         try {
             $data = $request->all();
+           
             $store = $request['data_reponse'];
             $this->_PRFIX_TABLE = $store->prefixTable;
             $userId = $store->user_id;
@@ -181,6 +182,7 @@ class StoreController extends Controller
             }
 
             if (isset($data['address'])) {
+                
                 $user = DB::table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
                     array(
                         'user_id' => $userId, 'meta_key' => 'shipping_address_1'
@@ -189,6 +191,7 @@ class StoreController extends Controller
                         'meta_value' => $data['address'],
                     )
                 );
+                
             }
             if (isset($data['image'])) {
                 $user = DB::table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
@@ -259,6 +262,7 @@ class StoreController extends Controller
         $phuong = $this->getUserMeta($user->ID, 'phuong');
         $user->address = $address;
         $user->user_parent = $this->getUserMeta($user->ID, 'user_parent');
+        
         $user->company = $company;
         $user->city = $city;
         $user->quan = $quan;
@@ -266,13 +270,15 @@ class StoreController extends Controller
         $user->xu = 10000;
         $paymentMethod = $this->getUserMeta($user->ID, 'payment_method');
         $user->payment_method = ($paymentMethod) ? json_decode($paymentMethod) : "";
+        
         $user->history = $this->getHistoryUser($user->ID);
+        
         $user->point = $this->getPointUser($user->history);
         $is_affliate = $this->getUserMeta($user->ID, 'is_affliate');
         $user->is_affliate = $is_affliate;
         $user->store = $store->store;
 
-
+        
 
         $user->cho_doi_soat = $this->choDoiSoat($user->ID);
         $user->thuc_nhan = $this->thucNhan($user->ID);

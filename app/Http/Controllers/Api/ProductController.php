@@ -23,6 +23,13 @@ class ProductController extends Controller
         }
         return 0;
     }
+    function checkEven($number) {
+        if ($number % 2 == 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
     public function index(Request $request)
     {
         $store = $request['data_reponse'];
@@ -52,7 +59,7 @@ class ProductController extends Controller
             $products[$key]->product_inventory = $this->getProductInventory($product->ID);
             $products[$key]->category = $this->getCategoryByProduct($product->ID, $store);
             $products[$key]->image_id = $this->getImage($product->ID, $store);
-            
+            $products[$key]->is_specical = $this->checkEven($product->ID);
             // foreach($childProduct as $keyChild =>  $child){
             //  $postMetaGiaGoc = $this->getPostMeta($child->ID, '_regular_price');
             //  $postMetaGiaKhuyenMai = $this->getPostMeta($child->ID, '_sale_price');

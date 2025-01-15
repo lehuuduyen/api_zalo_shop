@@ -107,33 +107,32 @@ class StoreController extends Controller
             }
         }
         $paymentMethod = $this->getOptionsMeta('ttqr');
-        if($paymentMethod ){
+        if ($paymentMethod) {
             $paymentMethod = unserialize($paymentMethod);
-            if(isset($paymentMethod['bank_transfer_accounts'])){
-               foreach($paymentMethod['bank_transfer_accounts'] as $key => $value){
-                $bin = $this->getBinByShortName($key);
-                if(count($value)>0){
-                    $value[0]['bin'] = $bin;
-                    $result[$key] = $value[0];
+            if (isset($paymentMethod['bank_transfer_accounts'])) {
+                foreach ($paymentMethod['bank_transfer_accounts'] as $key => $value) {
+                    $bin = $this->getBinByShortName($key);
+                    if (count($value) > 0) {
+                        $value[0]['bin'] = $bin;
+                        $result[$key] = $value[0];
+                    }
                 }
-
-               } 
             }
         }
         return $this->returnSuccess($result);
     }
-    public function getBinByShortName($shortName) {
+    public function getBinByShortName($shortName)
+    {
         // Read data from file.json
         $data = json_decode(file_get_contents('bank.json'));
-        
+
         // Search for the shortName
         foreach ($data as $bank) {
             if (strtolower($bank->shortName) == $shortName) {
                 return $bank->bin;
             }
-        
         }
-        
+
         // Return null if no match found
         return null;
     }
@@ -161,7 +160,7 @@ class StoreController extends Controller
     {
         try {
             $data = $request->all();
-           
+
             $store = $request['data_reponse'];
             $this->_PRFIX_TABLE = $store->prefixTable;
             $userId = $store->user_id;
@@ -173,7 +172,9 @@ class StoreController extends Controller
 
                     $user = DB::table($this->_PRFIX_TABLE . '_usermeta')->insert(
                         array(
-                            'user_id' => $userId, 'meta_key' => 'user_parent', 'meta_value' => $checkUserParent->ID
+                            'user_id' => $userId,
+                            'meta_key' => 'user_parent',
+                            'meta_value' => $checkUserParent->ID
                         ),
                     );
                 } else {
@@ -182,39 +183,40 @@ class StoreController extends Controller
             }
 
             if (isset($data['address'])) {
-                
+
                 $user = DB::table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
                     array(
-                        'user_id' => $userId, 'meta_key' => 'shipping_address_1'
+                        'user_id' => $userId,
+                        'meta_key' => 'shipping_address_1'
                     ),
                     array(
                         'meta_value' => $data['address'],
                     )
                 );
-                
             }
             if (isset($data['image'])) {
                 $user = DB::table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
                     array(
-                        'user_id' => $userId, 'meta_key' => 'image_user'
+                        'user_id' => $userId,
+                        'meta_key' => 'image_user'
                     ),
                     array('meta_value' => $data['image'])
                 );
-
             }
             if (isset($data['city'])) {
                 $user = DB::table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
                     array(
-                        'user_id' => $userId, 'meta_key' => 'city'
+                        'user_id' => $userId,
+                        'meta_key' => 'city'
                     ),
                     array('meta_value' => $data['city'])
                 );
-
             }
             if (isset($data['quan'])) {
                 $user = DB::table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
                     array(
-                        'user_id' => $userId, 'meta_key' => 'quan'
+                        'user_id' => $userId,
+                        'meta_key' => 'quan'
                     ),
                     array('meta_value' => $data['quan'])
                 );
@@ -222,7 +224,8 @@ class StoreController extends Controller
             if (isset($data['phuong'])) {
                 $user = DB::table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
                     array(
-                        'user_id' => $userId, 'meta_key' => 'phuong'
+                        'user_id' => $userId,
+                        'meta_key' => 'phuong'
                     ),
                     array('meta_value' => $data['phuong'])
                 );
@@ -248,8 +251,10 @@ class StoreController extends Controller
         $request->file('photo')->storeAs('', $path, 'uploads');
         return $this->returnSuccess('/storage/app/' . $path, 'Cập nhật thành công');
     }
+   
     public function info(Request $request)
     {
+        echo $this->code_verifier();die;
         $store = $request['data_reponse'];
         $this->_PRFIX_TABLE = $store->prefixTable;
         $user = DB::table($this->_PRFIX_TABLE . '_users')->where('user_login', $store->sdt)->select('ID', 'display_name as name', 'user_email as email', 'user_login as mobile')
@@ -262,7 +267,7 @@ class StoreController extends Controller
         $phuong = $this->getUserMeta($user->ID, 'phuong');
         $user->address = $address;
         $user->user_parent = $this->getUserMeta($user->ID, 'user_parent');
-        
+
         $user->company = $company;
         $user->city = $city;
         $user->quan = $quan;
@@ -270,15 +275,15 @@ class StoreController extends Controller
         $user->xu = 10000;
         $paymentMethod = $this->getUserMeta($user->ID, 'payment_method');
         $user->payment_method = ($paymentMethod) ? json_decode($paymentMethod) : "";
-        
+
         $user->history = $this->getHistoryUser($user->ID);
-        
+
         $user->point = $this->getPointUser($user->history);
         $is_affliate = $this->getUserMeta($user->ID, 'is_affliate');
         $user->is_affliate = $is_affliate;
         $user->store = $store->store;
 
-        
+
 
         $user->cho_doi_soat = $this->choDoiSoat($user->ID);
         $user->thuc_nhan = $this->thucNhan($user->ID);
@@ -328,106 +333,110 @@ class StoreController extends Controller
         try {
             //code...
             $store = $request['data_reponse'];
-        $this->_PRFIX_TABLE = $store->prefixTable;
-        $userId = $store->user_id;
+            $this->_PRFIX_TABLE = $store->prefixTable;
+            $userId = $store->user_id;
 
-        $listUserChild = DB::table($this->_PRFIX_TABLE . '_woo_history_user_commission')->
-        select($this->_PRFIX_TABLE . '_users.ID',
-         $this->_PRFIX_TABLE . '_users.user_login as mobile'
-         ,$this->_PRFIX_TABLE . '_users.display_name as name',
-         
-         DB::raw("SUM(".$this->_PRFIX_TABLE."_woo_history_user_commission.commission) as total_commission") ,
-         DB::raw("SUM(".$this->_PRFIX_TABLE."_woo_history_user_commission.total_order) as total_order") ,
-         $this->_PRFIX_TABLE . '_woo_history_user_commission.create_at')
-        ->join($this->_PRFIX_TABLE . '_users', $this->_PRFIX_TABLE . '_users.ID', $this->_PRFIX_TABLE . '_woo_history_user_commission.user_id')
-        ->where('user_parent', $userId)->where('status', 1);
+            $listUserChild = DB::table($this->_PRFIX_TABLE . '_woo_history_user_commission')->select(
+                    $this->_PRFIX_TABLE . '_users.ID',
+                    $this->_PRFIX_TABLE . '_users.user_login as mobile',
+                    $this->_PRFIX_TABLE . '_users.display_name as name',
 
-
-        if (isset($request['search'])) {
-            $listUserChild = $listUserChild->where('user_login', 'like', '%' . $request['search'] . '%');
-        }
-        if (isset($request['order'])) {
-            $listUserChild = $listUserChild->orderBy('ID', $request['order']);
-        }
-        $listUserChild = $listUserChild
-        ->groupBy($this->_PRFIX_TABLE . '_users.ID',$this->_PRFIX_TABLE . '_users.display_name',$this->_PRFIX_TABLE . '_users.user_login',$this->_PRFIX_TABLE . '_woo_history_user_commission.create_at')
-        ->get();
+                    DB::raw("SUM(" . $this->_PRFIX_TABLE . "_woo_history_user_commission.commission) as total_commission"),
+                    DB::raw("SUM(" . $this->_PRFIX_TABLE . "_woo_history_user_commission.total_order) as total_order"),
+                    $this->_PRFIX_TABLE . '_woo_history_user_commission.create_at'
+                )
+                ->join($this->_PRFIX_TABLE . '_users', $this->_PRFIX_TABLE . '_users.ID', $this->_PRFIX_TABLE . '_woo_history_user_commission.user_id')
+                ->where('user_parent', $userId)->where('status', 1);
 
 
+            if (isset($request['search'])) {
+                $listUserChild = $listUserChild->where('user_login', 'like', '%' . $request['search'] . '%');
+            }
+            if (isset($request['order'])) {
+                $listUserChild = $listUserChild->orderBy('ID', $request['order']);
+            }
+            $listUserChild = $listUserChild
+                ->groupBy($this->_PRFIX_TABLE . '_users.ID', $this->_PRFIX_TABLE . '_users.display_name', $this->_PRFIX_TABLE . '_users.user_login', $this->_PRFIX_TABLE . '_woo_history_user_commission.create_at')
+                ->get();
 
 
-        $tempIds =[];
-        foreach($listUserChild as $key => $child){
-        $tempIds[]= $child->ID;
-        }
-        
-
-        //----Get user click
-        // $listUserClick = DB::
-        // table($this->_PRFIX_TABLE . '_woo_history_share_link')->
-        // select($this->_PRFIX_TABLE . '_users.ID',$this->_PRFIX_TABLE . '_users.display_name as name', $this->_PRFIX_TABLE . '_users.user_login as mobile', $this->_PRFIX_TABLE . '_woo_history_share_link.create_at')->
-        // join($this->_PRFIX_TABLE . '_users', $this->_PRFIX_TABLE . '_users.ID', $this->_PRFIX_TABLE . '_woo_history_share_link.user_id')->
-        // where('user_parent', $userId)->where('user_id','!=', $userId)->where('status','!=', 2)->whereNotIn('user_id', $tempIds);
-
-        // if (isset($request['search'])) {
-        //     $listUserClick = $listUserClick->where('user_login', 'like', '%' . $request['search'] . '%');
-        // }
-        // if (isset($request['order'])) {
-        //     $listUserClick = $listUserClick->orderBy('ID', $request['order']);
-        // }
 
 
-        // $listUserClick = $listUserClick->groupBy($this->_PRFIX_TABLE . '_users.ID',$this->_PRFIX_TABLE . '_users.display_name',$this->_PRFIX_TABLE . '_users.user_login',$this->_PRFIX_TABLE . '_woo_history_share_link.create_at')->get();
-        // $tempClick =[];
-        // $listUserClickNew =[];
-        // foreach($listUserClick as $val){
-        //     if(!in_array($val->ID,$tempClick)){
-        //         $tempClick[]=$val->ID;
-        //         $listUserClickNew[]=$val;
-        //     }
-        // }
+            $tempIds = [];
+            foreach ($listUserChild as $key => $child) {
+                $tempIds[] = $child->ID;
+            }
 
-        // $mergedData = $listUserChild->merge($listUserClickNew);
-        // $sortedData = $mergedData->sortByDesc('create_at');
 
-        //----Get user click
+            //----Get user click
+            // $listUserClick = DB::
+            // table($this->_PRFIX_TABLE . '_woo_history_share_link')->
+            // select($this->_PRFIX_TABLE . '_users.ID',$this->_PRFIX_TABLE . '_users.display_name as name', $this->_PRFIX_TABLE . '_users.user_login as mobile', $this->_PRFIX_TABLE . '_woo_history_share_link.create_at')->
+            // join($this->_PRFIX_TABLE . '_users', $this->_PRFIX_TABLE . '_users.ID', $this->_PRFIX_TABLE . '_woo_history_share_link.user_id')->
+            // where('user_parent', $userId)->where('user_id','!=', $userId)->where('status','!=', 2)->whereNotIn('user_id', $tempIds);
 
-        $sortedData = $listUserChild->sortByDesc('create_at');
-        $userParent = $this->loopChild($userId);
-        
-        $stt=0;
-        $result =[];
-        foreach ($sortedData as $key => $user) {
-            $result[$stt]=$user;
-            $result[$stt]->tong_hoa_hong = (isset($user->total_commission))?$user->total_commission:0;
-            $result[$stt]->tong_doanh_thu = (isset($user->total_order))?$user->total_order:0;
-            $result[$stt]->level = "Cấp 1";
-            $result[$stt]->image = $this->getUserMeta($user->ID,'image_user');
-            $stt++;
-        }
-        $result = array_merge($userParent,$result);
-        return $this->returnSuccess($result);
+            // if (isset($request['search'])) {
+            //     $listUserClick = $listUserClick->where('user_login', 'like', '%' . $request['search'] . '%');
+            // }
+            // if (isset($request['order'])) {
+            //     $listUserClick = $listUserClick->orderBy('ID', $request['order']);
+            // }
+
+
+            // $listUserClick = $listUserClick->groupBy($this->_PRFIX_TABLE . '_users.ID',$this->_PRFIX_TABLE . '_users.display_name',$this->_PRFIX_TABLE . '_users.user_login',$this->_PRFIX_TABLE . '_woo_history_share_link.create_at')->get();
+            // $tempClick =[];
+            // $listUserClickNew =[];
+            // foreach($listUserClick as $val){
+            //     if(!in_array($val->ID,$tempClick)){
+            //         $tempClick[]=$val->ID;
+            //         $listUserClickNew[]=$val;
+            //     }
+            // }
+
+            // $mergedData = $listUserChild->merge($listUserClickNew);
+            // $sortedData = $mergedData->sortByDesc('create_at');
+
+            //----Get user click
+
+            $sortedData = $listUserChild->sortByDesc('create_at');
+            $userParent = $this->loopChild($userId);
+
+            $stt = 0;
+            $result = [];
+            foreach ($sortedData as $key => $user) {
+                $result[$stt] = $user;
+                $result[$stt]->tong_hoa_hong = (isset($user->total_commission)) ? $user->total_commission : 0;
+                $result[$stt]->tong_doanh_thu = (isset($user->total_order)) ? $user->total_order : 0;
+                $result[$stt]->level = "Cấp 1";
+                $result[$stt]->image = $this->getUserMeta($user->ID, 'image_user');
+                $stt++;
+            }
+            $result = array_merge($userParent, $result);
+            return $this->returnSuccess($result);
         } catch (\Throwable $th) {
             return $this->returnError($th->getMessage());
         }
     }
-    public function loopChild($userParentId){
+    public function loopChild($userParentId)
+    {
         $userParentIsset = DB::table($this->_PRFIX_TABLE . '_usermeta')
-                ->select($this->_PRFIX_TABLE . '_users.user_login as mobile'
-                ,$this->_PRFIX_TABLE . '_users.display_name as name',$this->_PRFIX_TABLE . '_usermeta.user_id')
-                ->leftJoin($this->_PRFIX_TABLE . '_users',  $this->_PRFIX_TABLE . '_users.ID',  $this->_PRFIX_TABLE . '_usermeta.user_id')
-                ->where($this->_PRFIX_TABLE . '_usermeta.meta_value', $userParentId)
-                ->where($this->_PRFIX_TABLE . '_usermeta.meta_key', 'user_parent')
-                ->get();
+            ->select(
+                $this->_PRFIX_TABLE . '_users.user_login as mobile',
+                $this->_PRFIX_TABLE . '_users.display_name as name',
+                $this->_PRFIX_TABLE . '_usermeta.user_id'
+            )
+            ->leftJoin($this->_PRFIX_TABLE . '_users',  $this->_PRFIX_TABLE . '_users.ID',  $this->_PRFIX_TABLE . '_usermeta.user_id')
+            ->where($this->_PRFIX_TABLE . '_usermeta.meta_value', $userParentId)
+            ->where($this->_PRFIX_TABLE . '_usermeta.meta_key', 'user_parent')
+            ->get();
         $userParents = [];
 
-        foreach($userParentIsset as $val){
+        foreach ($userParentIsset as $val) {
             $val->parent = $this->loopChild($val->user_id);
-            $val->image = $this->getUserMeta($val->user_id,'image_user');
+            $val->image = $this->getUserMeta($val->user_id, 'image_user');
             $userParents[] = $val;
         }
         return $userParents;
-
     }
     public function historyWithdraw(Request $request)
     {
@@ -447,7 +456,8 @@ class StoreController extends Controller
 
         $user = DB::table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
             array(
-                'user_id' => $userId, 'meta_key' => 'is_affliate'
+                'user_id' => $userId,
+                'meta_key' => 'is_affliate'
             ),
             array(
                 'meta_value' => true,
@@ -479,17 +489,18 @@ class StoreController extends Controller
                     )
                 );
                 $userParentIsset = DB::table($this->_PRFIX_TABLE . '_usermeta')
-                ->where('user_id', $userId)
-                ->where('meta_key', 'user_parent')
-                ->first();
-                if(!$userParentIsset ){
+                    ->where('user_id', $userId)
+                    ->where('meta_key', 'user_parent')
+                    ->first();
+                if (!$userParentIsset) {
                     DB::table($this->_PRFIX_TABLE . '_usermeta')->insert(
                         array(
-                            'user_id' => $userId, 'meta_key' => 'user_parent', 'meta_value' => $userParent->ID
+                            'user_id' => $userId,
+                            'meta_key' => 'user_parent',
+                            'meta_value' => $userParent->ID
                         ),
                     );
                 }
-                
             }
 
             return $this->returnSuccess($userId, 'Cập nhật thành công');
@@ -517,7 +528,8 @@ class StoreController extends Controller
                 $userId = $store->user_id;
                 $user = DB::table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
                     array(
-                        'user_id' => $userId, 'meta_key' => 'payment_method'
+                        'user_id' => $userId,
+                        'meta_key' => 'payment_method'
                     ),
                     array(
                         'meta_value' => json_encode(['name' => $data['name'], 'stk' => $data['stk'], 'bankname' => $data['bankname']]),
@@ -695,15 +707,14 @@ class StoreController extends Controller
     }
     public function getTurn(Request $request)
     {
-       
+
         $store = $request['data_reponse'];
         $this->_PRFIX_TABLE = $store->prefixTable;
         $userId = $store->user_id;
         $this->woo_logs('getTurn', $userId);
 
         $turn = $this->getUserMeta($userId, 'turn');
-        return $this->returnSuccess(($turn)?$turn:0);
-
+        return $this->returnSuccess(($turn) ? $turn : 0);
     }
     public function addTurn(Request $request)
     {
@@ -711,56 +722,55 @@ class StoreController extends Controller
         $this->_PRFIX_TABLE = $store->prefixTable;
         $userId = $store->user_id;
         $checkTurnDaily = $this->checkTurnDaily($userId);
-        if(!$checkTurnDaily){
+        if (!$checkTurnDaily) {
             DB::table($this->_PRFIX_TABLE . '_woo_user_turn_rotations')->insertGetId(
                 array(
                     'user_id' => $userId,
                     'date' => date('Y/m/d'),
-    
+
                 )
             );
             $turn = $this->getUserMeta($userId, 'turn');
 
             $user = DB::table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
                 array(
-                    'user_id' => $userId, 'meta_key' => 'turn'
+                    'user_id' => $userId,
+                    'meta_key' => 'turn'
                 ),
-                array('meta_value' => ($turn)?$turn+1:1)
+                array('meta_value' => ($turn) ? $turn + 1 : 1)
             );
-            return $this->returnSuccess(true,'Đăng nhập nhận xu thành công');
-
-        }else{
-            return $this->returnError(false,'Bạn đã nhận hôm nay');
+            return $this->returnSuccess(true, 'Đăng nhập nhận xu thành công');
+        } else {
+            return $this->returnError(false, 'Bạn đã nhận hôm nay');
         }
         // $rotation = DB::table($this->_PRFIX_TABLE . '_woo_list_rotations')->get();
 
     }
-    public function checkApiTurnDaily(Request $request){
+    public function checkApiTurnDaily(Request $request)
+    {
         $store = $request['data_reponse'];
         $this->_PRFIX_TABLE = $store->prefixTable;
         $userId = $store->user_id;
         return $this->returnSuccess($this->checkTurnDaily($userId));
-
-
     }
-    public function checkTurnDaily($userId){
-        $checkTurnDaily = DB::table($this->_PRFIX_TABLE . '_woo_user_turn_rotations')->where('user_id',$userId)->where('date',date('Y/m/d'))->first();
-        return ($checkTurnDaily)?true:false;
-
+    public function checkTurnDaily($userId)
+    {
+        $checkTurnDaily = DB::table($this->_PRFIX_TABLE . '_woo_user_turn_rotations')->where('user_id', $userId)->where('date', date('Y/m/d'))->first();
+        return ($checkTurnDaily) ? true : false;
     }
-    public function changeXuToPoint(Request $request){
+    public function changeXuToPoint(Request $request)
+    {
         $store = $request['data_reponse'];
         $this->_PRFIX_TABLE = $store->prefixTable;
         $userId = $store->user_id;
         $xuChange = $request['xu'];
         $xuNow = $this->getXuUser($userId);
-        if($xuChange > $xuNow){
-            return $this->returnError($userId ,'Số xu còn lại '.$xuNow);
-            
-        }else{
+        if ($xuChange > $xuNow) {
+            return $this->returnError($userId, 'Số xu còn lại ' . $xuNow);
+        } else {
             $tileXuPoint = $this->getOptionsMeta('woo_rotation_change_xu');
-            $point =floor($xuChange/ $tileXuPoint) ;
-            $xuTru = ($point * $tileXuPoint); 
+            $point = floor($xuChange / $tileXuPoint);
+            $xuTru = ($point * $tileXuPoint);
             $results = DB::table($this->_PRFIX_TABLE . '_woo_history_user_rotation')->insertGetId(
                 array(
                     'user_id' => $userId,
@@ -781,19 +791,17 @@ class StoreController extends Controller
                     'points_converted_to_money' => 0,
                 )
             );
-            return $this->returnSuccess($userId.'-'.$xuTru,'Số điểm nhận được '.$point);
+            return $this->returnSuccess($userId . '-' . $xuTru, 'Số điểm nhận được ' . $point);
         }
-        
-
-
     }
-    function weighted_random($values) {
+    function weighted_random($values)
+    {
         // Tính tổng phần trăm của tất cả các giá trị
         $total_percentage = array_sum($values);
-        
+
         // Tạo một số ngẫu nhiên từ 0 đến tổng phần trăm
         $random = mt_rand(1, $total_percentage);
-        
+
         // Lặp qua mảng và tăng dần tổng phần trăm cho đến khi tổng phần trăm vượt qua số ngẫu nhiên
         $cumulative_percentage = 0;
         foreach ($values as $key => $percentage) {
@@ -813,28 +821,29 @@ class StoreController extends Controller
         $turnUser = $this->getUserMeta($userId, 'turn');
         $this->woo_logs('activeRotation turn', $turnUser);
 
-        $result =[];
-        if($turnUser >0){
+        $result = [];
+        if ($turnUser > 0) {
 
             $getReward = DB::table($this->_PRFIX_TABLE . '_woo_list_rotations')->get();
             $rates = [];
             $nameVongQuay = [];
             $pointVongQuay = [];
-            foreach($getReward as $value){
+            foreach ($getReward as $value) {
                 $tile = $value->rate;
-                $rates[$value->id] =$tile;
-                $nameVongQuay[$value->id] =$value->name;
-                $pointVongQuay[$value->id] =$value->point;
+                $rates[$value->id] = $tile;
+                $nameVongQuay[$value->id] = $value->name;
+                $pointVongQuay[$value->id] = $value->point;
             }
             $selected_rate = $this->weighted_random($rates);
-            
-            
-            if($selected_rate){
+
+
+            if ($selected_rate) {
                 $user = DB::table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
                     array(
-                        'user_id' => $userId, 'meta_key' => 'turn'
+                        'user_id' => $userId,
+                        'meta_key' => 'turn'
                     ),
-                    array('meta_value' => $turnUser-1)
+                    array('meta_value' => $turnUser - 1)
                 );
                 $results = DB::table($this->_PRFIX_TABLE . '_woo_history_user_rotation')->insertGetId(
                     array(
@@ -845,19 +854,16 @@ class StoreController extends Controller
                         'month' => date('m'),
                         'year' => date('Y'),
                         'create_at' => date('Y-m-d  H:i:s'),
-                        
+
                     )
                 );
-                return $this->returnSuccess($selected_rate,"Chúc mừng bạn nhận được ".$nameVongQuay[$selected_rate]);
-
-            }else{
-                return $this->returnError($userId,"Không có thông tin");
+                return $this->returnSuccess($selected_rate, "Chúc mừng bạn nhận được " . $nameVongQuay[$selected_rate]);
+            } else {
+                return $this->returnError($userId, "Không có thông tin");
             }
-            
-        }else{
-            return $this->returnError($userId,"Bạn đã hết lượt quay");
+        } else {
+            return $this->returnError($userId, "Bạn đã hết lượt quay");
         }
-
     }
     public function getXu(Request $request)
     {
@@ -865,11 +871,10 @@ class StoreController extends Controller
         $this->_PRFIX_TABLE = $store->prefixTable;
         $userId = $store->user_id;
         return $this->returnSuccess([
-            'so_xu'=>$this->getXuUser($userId),
-            'rate_xu'=>$this->getOptionsMeta('woo_rotation_change_xu'),
-            'to_point'=>$this->getOptionsMeta('woo_rotation_to_point'),
+            'so_xu' => $this->getXuUser($userId),
+            'rate_xu' => $this->getOptionsMeta('woo_rotation_change_xu'),
+            'to_point' => $this->getOptionsMeta('woo_rotation_to_point'),
         ]);
-
     }
     public function phuong(Request $request)
     {
@@ -901,7 +906,8 @@ class StoreController extends Controller
             return $this->returnError([], "Lỗi hệ thống");
         }
     }
-    public function getFee(Request $request){
+    public function getFee(Request $request)
+    {
         try {
             $data = $request->all();
             $validator = Validator::make($request->all(), [
@@ -915,7 +921,7 @@ class StoreController extends Controller
                 return $this->returnError(new \stdClass, $validator->errors()->first());
             } else {
 
-                $fee = $this->calFee($data['quan'],$data['phuong']);
+                $fee = $this->calFee($data['quan'], $data['phuong']);
 
                 return $this->returnSuccess($fee);
             }

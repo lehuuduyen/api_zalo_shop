@@ -24,6 +24,8 @@ Route::post('login', 'App\Http\Controllers\Api\GatewaveController@login')->middl
 
 Route::post('loginPos', 'App\Http\Controllers\Api\GatewaveController@loginPos');
 
+Route::view('/', 'home');
+
 Route::get('checkFollow', 'App\Http\Controllers\Api\GatewaveController@checkFollow')->middleware('CorsApi');
 Route::get('city', 'App\Http\Controllers\Api\StoreController@city');
 Route::get('quan', 'App\Http\Controllers\Api\StoreController@quan');

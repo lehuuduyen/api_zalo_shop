@@ -1322,15 +1322,14 @@ class Controller extends BaseController
             }
 
 
-            $totalPriceDetails =  $this->getTotalPriceDetails($data['order'], $postId, $user['id']);
+            $totalPriceDetails =  $this->getTotalPriceDetailsPos($data['order'], $postId, $user['id']);
             if (!$totalPriceDetails) {
                 throw new \Exception('Không đủ số lượng trong kho');
             }
             $totalOrderBanDau = $totalPriceDetails['total'];
-            $finalDetails = $this->getFinalPriceDetails($user, $data, $totalPriceDetails);
+            $finalDetails = $this->getFinalPriceDetailsPos($user, $data, $totalPriceDetails);
 
-
-
+           
 
 
 

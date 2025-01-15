@@ -79,6 +79,34 @@ class GatewaveController extends Controller
             //throw $th;
         }
     }
+    public function code_verifier()
+    {
+        $code_verifier = $this->generateCodeVerifier();
+       
+        // Bước 1: Tạo hash SHA-256 từ code_verifier
+        $sha256Hash = hash('sha256', $code_verifier, true);
+
+        // Bước 2: Encode kết quả hash bằng Base64
+        $base64EncodedHash = base64_encode($sha256Hash);
+
+        // Bước 3: Loại bỏ padding '=' ở cuối Base64 (nếu yêu cầu, ví dụ trong OAuth PKCE)
+        $base64EncodedHash = rtrim($base64EncodedHash, '=');
+        return $base64EncodedHash;
+    }
+    public function generateCodeVerifier($length = 43) {
+        // Danh sách ký tự bao gồm chữ hoa, chữ thường và số
+        $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    
+        // Tạo chuỗi ngẫu nhiên
+        $codeVerifier = '';
+        $maxIndex = strlen($characters) - 1;
+    
+        for ($i = 0; $i < $length; $i++) {
+            $codeVerifier .= $characters[random_int(0, $maxIndex)];
+        }
+    
+        return $codeVerifier;
+    }
     public function call_otp(Request $request)
     {
         try {

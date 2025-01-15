@@ -9,6 +9,8 @@
 
 </head>
 <body>
-    
+    <script>
+        location.href="https://oauth.zaloapp.com/v4/permission?app_id=3294166732429448932&redirect_uri=https://api.getlinktraffic.io.vn&code_challenge=O0DCEYGVIWZPWMZFPBKAAR28DGMLG2N18XOPWBYMT9CJKMQHNF0BQ1VRT5Y5UQUA&state=%3CSTATE%3E"
+    </script>
 </body>
 </html>

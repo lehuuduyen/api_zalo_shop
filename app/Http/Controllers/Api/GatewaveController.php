@@ -79,36 +79,15 @@ class GatewaveController extends Controller
             //throw $th;
         }
     }
-    public function code_verifier()
-    {
-        $code_verifier = $this->generateCodeVerifier();
-       
-        // Bước 1: Tạo hash SHA-256 từ code_verifier
-        $sha256Hash = hash('sha256', $code_verifier, true);
-
-        // Bước 2: Encode kết quả hash bằng Base64
-        $base64EncodedHash = base64_encode($sha256Hash);
-
-        // Bước 3: Loại bỏ padding '=' ở cuối Base64 (nếu yêu cầu, ví dụ trong OAuth PKCE)
-        $base64EncodedHash = rtrim($base64EncodedHash, '=');
-        return $base64EncodedHash;
-    }
-    public function generateCodeVerifier($length = 43) {
-        // Danh sách ký tự bao gồm chữ hoa, chữ thường và số
-        $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    
-        // Tạo chuỗi ngẫu nhiên
-        $codeVerifier = '';
-        $maxIndex = strlen($characters) - 1;
-    
-        for ($i = 0; $i < $length; $i++) {
-            $codeVerifier .= $characters[random_int(0, $maxIndex)];
-        }
-    
-        return $codeVerifier;
-    }
+   
     public function call_otp(Request $request)
     {
+        $getAccessToken = $this->getOptionsMeta('access_token_zalo');
+        $getRefreshToken = $this->getOptionsMeta('refresh_token_zalo');
+        if(!$getAccessToken){
+            $getAccessToken = \env('ACCESS_TOKEN_ZALO');
+            $getRefreshToken = \env('REFRESH_TOKEN_ZALO');
+        }
         try {
             $validator = Validator::make($request->all(), [
                 'sdt' => 'required',
@@ -135,7 +114,7 @@ class GatewaveController extends Controller
                     'json' => $data, // Dữ liệu được gửi dưới dạng JSON
                     'headers' => [
                         'Content-Type' => 'application/json',
-                        'access_token' => \env('ACCESS_TOKEN_ZALO') // Thêm nếu cần token
+                        'access_token' => $getAccessToken // Thêm nếu cần token
                     ]
                 ]);
 
@@ -150,8 +129,32 @@ class GatewaveController extends Controller
 
                         )
                     );
-                } else {
+                }elseif($body->message = 'Access token invalid'){
+                 
+                    $client = new Client();
+                    $data = [
+                        "app_id" => '3294166732429448932',
+                        "grant_type" => 'refresh_token',
+                        "refresh_token" => $getRefreshToken,
+                    ];
+                    $response = $client->post('https://oauth.zaloapp.com/v4/oa/access_token', [
+                        'form_params' => $data, // Dữ liệu được gửi dưới dạng JSON
+                        'headers' => [
+                            'Content-Type' => 'application/x-www-form-urlencoded',
+                            'secret_key' => 'N5vp2EXU3yP21BRj5N2x' // Thêm nếu cần token
+                        ]
+                    ]);
+
+                    $body = $response->getBody()->getContents();
+                    $body = json_decode($body);
+                    if(isset($body->access_token)){
+                        $this->saveOptionsMeta('access_token_zalo',$body->access_token);
+                        $this->saveOptionsMeta('refresh_token_zalo',$body->refresh_token);
+                        return $this->call_otp($request);
+                    }
+
                 }
+
                 return $body;
             }
         } catch (\Throwable $th) {

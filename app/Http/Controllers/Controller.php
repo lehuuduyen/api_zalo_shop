@@ -2559,6 +2559,17 @@ class Controller extends BaseController
         }
         return $data;
     }
+    public function saveOptionsMeta($option_name,$option_value)
+    {
+        $option = DB::table($this->_PRFIX_TABLE . '_options')->updateOrInsert(
+            array(
+                'option_name' => $option_name),
+                array(
+                    'option_value' => $option_value
+                )
+        );
+    }
+    
     public function getOrderMeta($orderId, $meta)
     {
         $data = DB::table($this->_PRFIX_TABLE . '_woocommerce_order_itemmeta')->where('order_item_id', $orderId)->where('meta_key', $meta)->first();

@@ -460,7 +460,7 @@ class ProductController extends Controller
             $order = $data['order'];
             $listProductId = [];
             foreach ($order as $value) {
-                $listProductId[] = $value['id'];
+                $listProductId[] = $value['productId'];
             }
             $products = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->whereIn('id', $listProductId)->get();
             
@@ -497,7 +497,7 @@ class ProductController extends Controller
         } catch (\Throwable $th) {
             //throw $th;
             $this->woo_logs('checkCoupon', $th->getMessage());
-            return $this->returnError(0, 'Mã khuyễn mãi không đúng');
+            return $this->returnError(0, $th->getMessage());
         }
     }
     /**

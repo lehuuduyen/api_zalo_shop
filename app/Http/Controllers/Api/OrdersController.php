@@ -235,14 +235,10 @@ class OrdersController extends Controller
         }
         return $products;
     }
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
+  
     public function store(Request $request)
     {
+     
         $store = $request['data_reponse'];
         $this->_PRFIX_TABLE = $store->prefixTable;
         try {

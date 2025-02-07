@@ -170,17 +170,20 @@ class GatewaveController extends Controller
                 'sdt' => 'required',
                 'name' => 'required',
                 'pass' => 'required',
-                'otp' => 'required',
+                // 'otp' => 'required',
             ], [
                 'sdt.required' => "Vui lòng nhập sdt",
                 'name.required' => "Vui lòng nhập name",
                 'pass.required' => "Vui lòng nhập mật khẩu",
-                'otp.required' => "Vui lòng nhập otp",
+                // 'otp.required' => "Vui lòng nhập otp",
             ]);
             if ($validator->fails()) {
                 return $this->returnError(new \stdClass, $validator->errors()->first());
             } else {
                 //check otp 
+                if(!isset($request['otp'])){
+                    return $this->returnError(new \stdClass, "User đã tồn tại");
+                }
                 $otpRecord = DB::table($this->_PRFIX_TABLE . '_otp_code')
                     ->where('otp', $request['otp'])
                     ->where('sdt', $request['sdt'])

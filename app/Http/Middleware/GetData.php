@@ -20,24 +20,26 @@ class GetData extends Controller
     {
         try {
             $token = request()->bearerToken();
+
             $dataToken = $this->decodeData($token);
-
             $data = json_decode($dataToken);
+
             $timeNow = time();
+            $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+
             if ($data) {
-                if ($data->expired_in >= $timeNow || empty($data->expired_in))
-                    $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+                if ($data->expired_in >= $timeNow || empty($data->expired_in)) {
+                    // Get the host (domain)
+                    $host = $_SERVER['HTTP_HOST'];
 
-                // Get the host (domain)
-                $host = $_SERVER['HTTP_HOST'];
+                    // Combine protocol and host to get the full domain
+                    $fullDomain = $protocol . \env('APP_URL_BACKEND');
 
-                // Combine protocol and host to get the full domain
-                $fullDomain = $protocol . \env('APP_URL_BACKEND');
-                $data->domain = $fullDomain;
-                $request['data_reponse'] = $data;
-                $this->connectDb($data->databaseStore);
+                    $data->domain = $fullDomain;
+                    $request['data_reponse'] = $data;
+                    $this->connectDb($data->databaseStore);
+                }
             } else {
-                $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
 
                 // Get the host (domain)
                 $host = $_SERVER['HTTP_HOST'];

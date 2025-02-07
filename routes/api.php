@@ -45,7 +45,7 @@ Route::group(['middleware' => ['GetData']], function () {
     Route::post('order_pos', 'App\Http\Controllers\Api\OrdersController@storePos')->middleware('CheckStore');
 });
 
-Route::group(['middleware' => ['CorsApi', 'GetData']], function () {
+Route::group(['middleware' => [ 'GetData']], function () {
 
     Route::get('list_rotation', 'App\Http\Controllers\Api\StoreController@listRotation')->middleware('CorsApi');
     Route::get('get_turn', 'App\Http\Controllers\Api\StoreController@getTurn')->middleware('CorsApi');

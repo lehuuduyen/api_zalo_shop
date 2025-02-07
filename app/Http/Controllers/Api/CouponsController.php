@@ -35,6 +35,7 @@ class CouponsController extends Controller
             $date_expires = $this->getPostMeta($val->ID, 'date_expires');
             $usage_limit = $this->getPostMeta($val->ID, 'usage_limit');
             $usage_count = $this->getPostMeta($val->ID, 'usage_count');
+            $minimum_amount = $this->getPostMeta($val->ID, 'minimum_amount');
             if ($usage_limit <= $usage_count) {
                 continue;
             }
@@ -49,6 +50,8 @@ class CouponsController extends Controller
                         $coupons[$key]->code = $val->post_title;
                         $coupons[$key]->discount_type = $discount_type;
                         $coupons[$key]->discount = $discount;
+                        $coupons[$key]->minimum_amount = $minimum_amount;
+
                         $coupons[$key]->expire_date = date('d/m/Y H:i:s', $date_expires);
                         $listCoupons[$i] = $coupons[$key];
                         $i++;
@@ -62,6 +65,8 @@ class CouponsController extends Controller
                 $coupons[$key]->code = $val->post_title;
                 $coupons[$key]->discount_type = $discount_type;
                 $coupons[$key]->discount = $discount;
+                $coupons[$key]->minimum_amount = $minimum_amount;
+
                 $coupons[$key]->expire_date = date('d/m/Y H:i:s', $date_expires);
                 $listCoupons[$i] = $coupons[$key];
                 $i++;

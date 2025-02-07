@@ -254,7 +254,6 @@ class StoreController extends Controller
    
     public function info(Request $request)
     {
-        echo $this->code_verifier();die;
         $store = $request['data_reponse'];
         $this->_PRFIX_TABLE = $store->prefixTable;
         $user = DB::table($this->_PRFIX_TABLE . '_users')->where('user_login', $store->sdt)->select('ID', 'display_name as name', 'user_email as email', 'user_login as mobile')

@@ -263,6 +263,7 @@ class OrdersController extends Controller
             } else {
                 $data = $request->all();
                 $store = $request['data_reponse'];
+                
                 $data['sdt'] = $store->sdt;
                 $user = DB::table($this->_PRFIX_TABLE . '_users')->where('user_login', $data['sdt'])->first();
                 if (!$user) {

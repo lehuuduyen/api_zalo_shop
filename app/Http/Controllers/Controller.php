@@ -530,6 +530,9 @@ class Controller extends BaseController
         $date_expires = $this->getPostMeta($coupon->ID, 'date_expires');
         if (!$checkPoint) {
             if ($date_expires < time()) {
+            
+                throw new Exception("voucher hết hạn");
+
                 return $discount_total;
             }
         }
@@ -808,7 +811,7 @@ class Controller extends BaseController
                         array(
                             'order_item_id' => $orderItemId,
                             'meta_key' => '_line_total',
-                            'meta_value' => $price * $totalPriceDetails['quantity'][$key],
+                            'meta_value' => ($price * $totalPriceDetails['quantity'][$key]) - ($data['discount'])?:0,
                         ),
                         array(
                             'order_item_id' => $orderItemId,
@@ -818,7 +821,7 @@ class Controller extends BaseController
                         array(
                             'order_item_id' => $orderItemId,
                             'meta_key' => '_line_subtotal',
-                            'meta_value' => $this->calPriceDiscount($totalBanDau, 0),
+                            'meta_value' => ($price * $totalPriceDetails['quantity'][$key]),
                         ),
                         array(
                             'order_item_id' => $orderItemId,
@@ -864,7 +867,6 @@ class Controller extends BaseController
                     )
                 );
             }
-            $finalDetails['total'] = $finalDetails['total'] - $data['discount'];
             $city = $this->getUserMeta($user['id'], 'city');
             $quan = $this->getUserMeta($user['id'], 'quan');
 
@@ -1069,7 +1071,7 @@ class Controller extends BaseController
                     array(
                         'post_id' => $postId,
                         'meta_key' => '_order_total',
-                        'meta_value' => $finalDetails['total'] + $fee,
+                        'meta_value' => $finalDetails['total'] + $fee - ($data['discount'])?:0,
                     ),
                     array(
                         'post_id' => $postId,
@@ -1129,7 +1131,7 @@ class Controller extends BaseController
                     array(
                         'post_id' => $postId,
                         'meta_key' => '_wc_order_attribution_utm_source',
-                        'meta_value' => 'Zalo App',
+                        'meta_value' => 'Store',
                     )
 
                 )
@@ -1619,7 +1621,7 @@ class Controller extends BaseController
                         array(
                             'order_item_id' => $orderItemId,
                             'meta_key' => '_line_total',
-                            'meta_value' => $price * $totalPriceDetails['quantity'][$key],
+                            'meta_value' => $price * $totalPriceDetails['quantity'][$key] - ( $finalDetails['coupon_discounted'])?:0,
                         ),
                         array(
                             'order_item_id' => $orderItemId,
@@ -1629,7 +1631,7 @@ class Controller extends BaseController
                         array(
                             'order_item_id' => $orderItemId,
                             'meta_key' => '_line_subtotal',
-                            'meta_value' => $this->calPriceDiscount($totalBanDau, 0),
+                            'meta_value' => $price * $totalPriceDetails['quantity'][$key],
                         ),
                         array(
                             'order_item_id' => $orderItemId,
@@ -1933,7 +1935,7 @@ class Controller extends BaseController
                     array(
                         'post_id' => $postId,
                         'meta_key' => '_order_total',
-                        'meta_value' => $finalDetails['total'] + $fee,
+                        'meta_value' => $finalDetails['total'] + $fee - ( $finalDetails['coupon_discounted'])?:0,
                     ),
                     array(
                         'post_id' => $postId,
@@ -1993,7 +1995,7 @@ class Controller extends BaseController
                     array(
                         'post_id' => $postId,
                         'meta_key' => '_wc_order_attribution_utm_source',
-                        'meta_value' => 'Zalo App',
+                        'meta_value' => 'App',
                     )
 
                 )
@@ -2225,12 +2227,16 @@ class Controller extends BaseController
                 $subtotal = $subtotal - $coupon_amount_total;
                 $discounted_price += $coupon_amount_total;
             }
+        } else if(!empty($validated_data['discount'])){
+            $discounted_price = $validated_data['discount'];
+
         } else {
             $discounted_price = $this->calculateCoupon($coupon, []);
         }
-
+        
+        
         $price['total'] -= $discounted_price;
-
+        
         $product_tax = $data['product_tax'];
         $shipping_cost = $data['shipping_cost'];
 
@@ -2240,6 +2246,8 @@ class Controller extends BaseController
         $total['detail_voucher'] = $listDetail;
         // $total['payment_meta'] = $this->payment_meta(compact('product_tax', 'shipping_cost', 'subtotal', 'total'));
         $total['coupon_discounted'] = $discounted_price;
+
+        
         return $total;
     }
     public function getFinalPriceDetails($user, $validated_data, $totalPriceDetails)

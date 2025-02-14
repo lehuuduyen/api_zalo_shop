@@ -194,6 +194,18 @@ class StoreController extends Controller
                     )
                 );
             }
+            if (isset($data['birthday'])) {
+
+                $user = DB::table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
+                    array(
+                        'user_id' => $userId,
+                        'meta_key' => 'birthday'
+                    ),
+                    array(
+                        'meta_value' => $data['birthday'],
+                    )
+                );
+            }
             if (isset($data['image'])) {
                 $user = DB::table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
                     array(
@@ -264,6 +276,8 @@ class StoreController extends Controller
         $city = $this->getUserMeta($user->ID, 'city');
         $quan = $this->getUserMeta($user->ID, 'quan');
         $phuong = $this->getUserMeta($user->ID, 'phuong');
+        $birthday = $this->getUserMeta($user->ID, 'birthday');
+
         $user->address = $address;
         $user->user_parent = $this->getUserMeta($user->ID, 'user_parent');
 
@@ -271,7 +285,9 @@ class StoreController extends Controller
         $user->city = $city;
         $user->quan = $quan;
         $user->phuong = $phuong;
-        $user->xu = 10000;
+        $user->birthday = $birthday;
+        // $user->xu = 10000;e/
+        
         $paymentMethod = $this->getUserMeta($user->ID, 'payment_method');
         $user->payment_method = ($paymentMethod) ? json_decode($paymentMethod) : "";
 

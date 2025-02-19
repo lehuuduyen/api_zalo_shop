@@ -181,8 +181,13 @@ class GatewaveController extends Controller
                 return $this->returnError(new \stdClass, $validator->errors()->first());
             } else {
                 //check otp 
+                $user = DB::table($this->_PRFIX_TABLE . '_users')->where('user_login', $request['sdt'])->first();
+
                 if(!isset($request['otp'])){
-                    return $this->returnError(new \stdClass, "User đã tồn tại");
+                    if($user){
+                        return $this->returnError(new \stdClass, "User đã tồn tại");
+                    }
+                    return true;
                 }
                 $otpRecord = DB::table($this->_PRFIX_TABLE . '_otp_code')
                     ->where('otp', $request['otp'])
@@ -200,7 +205,6 @@ class GatewaveController extends Controller
                     $prefixTable = $this->getPrefixTableFirst();
 
                     $this->_PRFIX_TABLE = $prefixTable;
-                    $user = DB::table($this->_PRFIX_TABLE . '_users')->where('user_login', $request['sdt'])->first();
                     // wp_wc_customer_lookup
 
                     if (!$user) {

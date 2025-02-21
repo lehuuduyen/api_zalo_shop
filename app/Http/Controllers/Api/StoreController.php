@@ -250,7 +250,13 @@ class StoreController extends Controller
                     )
                 );
             }
-
+            if (isset($data['display_name'])) {
+                $user = DB::table($this->_PRFIX_TABLE . '_users')->where('user_login', $store->sdt)->update(
+                    array(
+                        'display_name' => $data['display_name'],
+                    )
+                );
+            }
             return $this->returnSuccess($userId, 'Cập nhật thành công');
         } catch (\Throwable $th) {
             $this->woo_logs('update', $th->getMessage());

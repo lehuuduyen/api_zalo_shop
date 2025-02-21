@@ -79,12 +79,12 @@ class GatewaveController extends Controller
             //throw $th;
         }
     }
-   
+
     public function call_otp(Request $request)
     {
         $getAccessToken = $this->getOptionsMeta('access_token_zalo');
         $getRefreshToken = $this->getOptionsMeta('refresh_token_zalo');
-        if(!$getAccessToken){
+        if (!$getAccessToken) {
             $getAccessToken = \env('ACCESS_TOKEN_ZALO');
             $getRefreshToken = \env('REFRESH_TOKEN_ZALO');
         }
@@ -120,6 +120,7 @@ class GatewaveController extends Controller
 
                 $body = $response->getBody()->getContents();
                 $body = json_decode($body);
+
                 if ($body->message == "Success") {
                     $insertGetId = DB::table($this->_PRFIX_TABLE . '_otp_code')->insertGetId(
                         array(
@@ -129,8 +130,8 @@ class GatewaveController extends Controller
 
                         )
                     );
-                }elseif($body->message = 'Access token invalid'){
-                 
+                } elseif ($body->message = 'Access token invalid') {
+
                     $client = new Client();
                     $data = [
                         "app_id" => '3294166732429448932',
@@ -147,12 +148,13 @@ class GatewaveController extends Controller
 
                     $body = $response->getBody()->getContents();
                     $body = json_decode($body);
-                    if(isset($body->access_token)){
-                        $this->saveOptionsMeta('access_token_zalo',$body->access_token);
-                        $this->saveOptionsMeta('refresh_token_zalo',$body->refresh_token);
+
+                    if (isset($body->access_token)) {
+                        $this->saveOptionsMeta('access_token_zalo', $body->access_token);
+                        $this->saveOptionsMeta('refresh_token_zalo', $body->refresh_token);
+
                         return $this->call_otp($request);
                     }
-
                 }
 
                 return $body;
@@ -183,8 +185,8 @@ class GatewaveController extends Controller
                 //check otp 
                 $user = DB::table($this->_PRFIX_TABLE . '_users')->where('user_login', $request['sdt'])->first();
 
-                if(!isset($request['otp'])){
-                    if($user){
+                if (!isset($request['otp'])) {
+                    if ($user) {
                         return $this->returnError(new \stdClass, "User đã tồn tại");
                     }
                     return true;
@@ -195,12 +197,12 @@ class GatewaveController extends Controller
                     ->where('status', 1)
                     ->where('time', '>=', Carbon::now()->subMinutes(10)->valueOf())
                     ->first();
-                  
+
                 if ($otpRecord) {
                     DB::table($this->_PRFIX_TABLE . '_otp_code')
                         ->where('id', $otpRecord->id) // Dựa trên ID của OTP
                         ->update(['status' => 2]);
-                        $databaseStore = env('DB_DATABASE');
+                    $databaseStore = env('DB_DATABASE');
                     $this->connectDb($databaseStore);
                     $prefixTable = $this->getPrefixTableFirst();
 
@@ -261,7 +263,64 @@ class GatewaveController extends Controller
                     ]);
                 } else {
                     return $this->returnError(new \stdClass, "OTP không đúng hoặc đã hết hạn");
+                }
+            }
+        } catch (\Throwable $th) {
+            $this->woo_logs('gateway', $th->getMessage());
 
+            return $this->returnError(new \stdClass, $th->getMessage());
+        }
+    }
+    public function reset_pass(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'sdt' => 'required',
+                'pass' => 'required',
+                'otp' => 'required',
+            ], [
+                'sdt.required' => "Vui lòng nhập sdt",
+                'pass.required' => "Vui lòng nhập mật khẩu",
+                'otp.required' => "Vui lòng nhập otp",
+            ]);
+            if ($validator->fails()) {
+                return $this->returnError(new \stdClass, $validator->errors()->first());
+            } else {
+                //check otp 
+                $user = DB::table($this->_PRFIX_TABLE . '_users')->where('user_login', $request['sdt'])->first();
+
+                if (!$user) {
+                    return $this->returnError(new \stdClass, "User đã tồn tại");
+                }
+                
+                $otpRecord = DB::table($this->_PRFIX_TABLE . '_otp_code')
+                    ->where('otp', $request['otp'])
+                    ->where('sdt', $request['sdt'])
+                    ->where('status', 1)
+                    ->where('time', '>=', Carbon::now()->subMinutes(10)->valueOf())
+                    ->first();
+
+                if ($otpRecord) {
+                    DB::table($this->_PRFIX_TABLE . '_otp_code')
+                        ->where('id', $otpRecord->id) // Dựa trên ID của OTP
+                        ->update(['status' => 2]);
+                    $databaseStore = env('DB_DATABASE');
+                    $this->connectDb($databaseStore);
+                    $prefixTable = $this->getPrefixTableFirst();
+
+                    $this->_PRFIX_TABLE = $prefixTable;
+                    // wp_wc_customer_lookup
+
+                    DB::table($this->_PRFIX_TABLE . '_users')
+                        ->where('id', $user->ID) // Dựa trên ID của OTP
+                        ->update(['user_pass' =>  $this->createPass($request['pass'])]);
+                    $hash = $this->getToken($request['store'], $request['sdt'], $databaseStore, $request['name'], $user->ID, $user->user_email, $prefixTable);
+                    $this->woo_logs('gateway', $hash, 3);
+                    return $this->returnSuccess([
+                        'token' => $hash
+                    ]);
+                } else {
+                    return $this->returnError(new \stdClass, "OTP không đúng hoặc đã hết hạn");
                 }
             }
         } catch (\Throwable $th) {

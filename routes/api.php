@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Route;
 //     return $request->user();
 // });
 Route::post('register', 'App\Http\Controllers\Api\GatewaveController@index')->middleware('CorsApi');
+Route::post('reset_pass', 'App\Http\Controllers\Api\GatewaveController@reset_pass')->middleware('CorsApi');
 Route::post('call_otp', 'App\Http\Controllers\Api\GatewaveController@call_otp')->middleware('CorsApi');
 
 Route::post('login', 'App\Http\Controllers\Api\GatewaveController@login')->middleware('CorsApi');
@@ -71,6 +72,7 @@ Route::group(['middleware' => [ 'GetData']], function () {
     Route::get('orders', 'App\Http\Controllers\Api\OrdersController@index');
     Route::get('campaigns', 'App\Http\Controllers\Api\FlashSaleController@index');
     Route::post('order', 'App\Http\Controllers\Api\OrdersController@store');
+    Route::delete('order/cancel/{orderId}', 'App\Http\Controllers\Api\OrdersController@cancel_order');
     Route::put('update_payment_method', 'App\Http\Controllers\Api\StoreController@update_payment_method');
     Route::post('withdraw', 'App\Http\Controllers\Api\StoreController@withdraw');
 

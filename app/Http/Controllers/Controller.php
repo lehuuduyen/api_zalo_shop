@@ -948,8 +948,8 @@ class Controller extends BaseController
 
             if ($data['payment_gateway'] == 'cod') {
                 $paymentTitle  = 'Thanh toán khi giao hàng';
-            } elseif ($data['payment_gateway'] == 'zalopay') {
-                $paymentTitle  = 'Thanh toán zalopay';
+            } elseif ($data['payment_gateway'] == 'momo') {
+                $paymentTitle  = 'Thanh toán momo';
             } else {
                 $paymentTitle  = 'Chuyển khoản ngân hàng';
             }
@@ -1815,11 +1815,11 @@ class Controller extends BaseController
                     )
                 );
             }
-            $data['payment_gateway'] = 'zalopay';
+            $data['payment_gateway'] = 'momo';
             if ($data['payment_gateway'] == 'cod') {
                 $paymentTitle  = 'Thanh toán khi giao hàng';
-            } elseif ($data['payment_gateway'] == 'zalopay') {
-                $paymentTitle  = 'Thanh toán zalopay';
+            } elseif ($data['payment_gateway'] == 'momo') {
+                $paymentTitle  = 'Thanh toán momo';
             } else {
                 $paymentTitle  = 'Chuyển khoản ngân hàng';
             }

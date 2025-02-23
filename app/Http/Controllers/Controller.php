@@ -112,8 +112,10 @@ class Controller extends BaseController
     {
         $minute = (env('EXPIRED_MINUTE')) ? env('EXPIRED_MINUTE') : "";
         try {
+           
             $date = empty($minute) ? "" : strtotime(date('d-m-Y H:i:s', strtotime("+$minute min")));
-            $token = $this->encodeData(json_encode(['role' => $store, 'store' => "", 'prefixTable' => $this->_PRFIX_TABLE, 'sdt' => $sdt, 'databaseStore' => $databaseStore,  'name' => $name, 'user_id' => $user_id, 'email' => $email, 'expired_in' => strtotime($date)]));
+        
+            $token = $this->encodeData(json_encode(['role' => $store, 'store' => "", 'prefixTable' => $this->_PRFIX_TABLE, 'sdt' => $sdt, 'databaseStore' => $databaseStore,  'name' => $name, 'user_id' => $user_id, 'email' => $email, 'expired_in' => $date]));
             return $token;
         } catch (\Exception $e) {
             //throw $th;

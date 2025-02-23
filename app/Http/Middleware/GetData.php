@@ -26,33 +26,35 @@ class GetData extends Controller
 
             $timeNow = time();
             $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
-
-            if ($data) {
-                if ($data->expired_in >= $timeNow || empty($data->expired_in)) {
+            if(isset($data->sdt)){
+                if ($data) {
+                    if ($data->expired_in >= $timeNow || empty($data->expired_in)) {
+                        // Get the host (domain)
+                        $host = $_SERVER['HTTP_HOST'];
+    
+                        // Combine protocol and host to get the full domain
+                        $fullDomain = $protocol . \env('APP_URL_BACKEND');
+    
+                        $data->domain = $fullDomain;
+                        $request['data_reponse'] = $data;
+                        $this->connectDb($data->databaseStore);
+                    }
+                } else {
+    
                     // Get the host (domain)
                     $host = $_SERVER['HTTP_HOST'];
-
+    
                     // Combine protocol and host to get the full domain
                     $fullDomain = $protocol . \env('APP_URL_BACKEND');
-
-                    $data->domain = $fullDomain;
-                    $request['data_reponse'] = $data;
-                    $this->connectDb($data->databaseStore);
+                    $json = new stdClass();
+                    $json->domain = $fullDomain;
+                    $json->prefixTable = 'wp';
+    
+                    $request['data_reponse'] = $json;
                 }
-            } else {
-
-                // Get the host (domain)
-                $host = $_SERVER['HTTP_HOST'];
-
-                // Combine protocol and host to get the full domain
-                $fullDomain = $protocol . \env('APP_URL_BACKEND');
-                $json = new stdClass();
-                $json->domain = $fullDomain;
-                $json->prefixTable = 'wp';
-
-                $request['data_reponse'] = $json;
+    
             }
-
+           
             return $next($request);
         } catch (\Throwable $th) {
             //throw $th;

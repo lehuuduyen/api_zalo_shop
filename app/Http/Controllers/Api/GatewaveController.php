@@ -289,7 +289,7 @@ class GatewaveController extends Controller
                 //check otp 
                 $user = DB::table($this->_PRFIX_TABLE . '_users')->where('user_login', $request['sdt'])->first();
 
-                if (!$user) {
+                if ($user) {
                     return $this->returnError(new \stdClass, "User đã tồn tại");
                 }
                 

@@ -454,7 +454,7 @@ class StoreController extends Controller
             //----Get user click
 
             $sortedData = $listUserChild->sortByDesc('create_at');
-            $userParent = $this->loopChild($userId);
+            // $userParent = $this->loopChild($userId);
 
             $stt = 0;
             $result = [];
@@ -466,7 +466,7 @@ class StoreController extends Controller
                 $result[$stt]->image = $this->getUserMeta($user->ID, 'image_user');
                 $stt++;
             }
-            $result = array_merge($userParent, $result);
+            // $result = array_merge($userParent, $result);
             return $this->returnSuccess($result);
         } catch (\Throwable $th) {
             return $this->returnError($th->getMessage());

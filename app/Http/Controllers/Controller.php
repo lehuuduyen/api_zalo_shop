@@ -935,8 +935,8 @@ class Controller extends BaseController
                         'order_id' => $postId,
                         'total_order' => $finalDetails['total'],
                         'user_id' => $user['id'],
-                        'user_parent' => $getUserParent->user_parent,
-                        'product_id' => $getUserParent->product,
+                        'user_parent' => $getUserParent,
+                        'product_id' => 1,
                         'commission' => $commissions,
                         'commission_level2' => 0,
                         'minimum_spending' => $totalOrderBanDau,
@@ -1797,7 +1797,9 @@ class Controller extends BaseController
             }
             //them hoa hồng
             $getUserParent = $this->getUserParentLastes($user['id']);
+          
             $configAff = $this->getOptionsMeta('woo_aff_setting');
+           
             if ($getUserParent && $configAff) {
                 $commissions = $finalDetails['total'] * $configAff / 100;
                 DB::table($this->_PRFIX_TABLE . '_woo_history_user_commission')->insertGetId(
@@ -1805,8 +1807,8 @@ class Controller extends BaseController
                         'order_id' => $postId,
                         'total_order' => $finalDetails['total'],
                         'user_id' => $user['id'],
-                        'user_parent' => $getUserParent->user_parent,
-                        'product_id' => $getUserParent->product,
+                        'user_parent' => $getUserParent,
+                        'product_id' => 1,
                         'commission' => $commissions,
                         'commission_level2' => 0,
                         'minimum_spending' => $totalOrderBanDau,
@@ -2140,6 +2142,7 @@ class Controller extends BaseController
                     DB::insert($sqlAddMeta);
                 }
             }
+           
             // lưu lịch sử commission
             $history = DB::table($this->_PRFIX_TABLE . '_woo_history_user_commission')
                 ->where('order_id', $postId)
@@ -2788,7 +2791,7 @@ class Controller extends BaseController
     }
     public function getUserParentLastes($userChild)
     {
-        $data = DB::table($this->_PRFIX_TABLE . '_woo_history_share_link')->where('user_id', $userChild)->where('status', 1)->latest('id')->first();
+        $data = $this->getUserMeta($userChild,'user_parent');
 
         return $data;
     }

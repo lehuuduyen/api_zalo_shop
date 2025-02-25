@@ -650,7 +650,9 @@ class Controller extends BaseController
 
             //wp_wc_order_product_lookup
             $history = $this->getHistoryUser($user['id']);
+            $totalQuantity = array_sum($totalPriceDetails['quantity']);
 
+            $priceDiscountOneSP =  $data['discount'] / $totalQuantity ;
 
             foreach ($totalPriceDetails['products_id'] as $key  => $productId) {
 
@@ -661,9 +663,8 @@ class Controller extends BaseController
 
                 $price = $this->getSellPrice($productId);
 
-                $totalBanDau = $price * $totalPriceDetails['quantity'][$key];
 
-                $tongGiaGiam = $data['discount'];
+          
 
 
                 //wp_woocommerce_order_items
@@ -813,7 +814,7 @@ class Controller extends BaseController
                         array(
                             'order_item_id' => $orderItemId,
                             'meta_key' => '_line_total',
-                            'meta_value' => ($price * $totalPriceDetails['quantity'][$key]) - ($data['discount'])?:0,
+                            'meta_value' => $price * $totalPriceDetails['quantity'][$key] -  ($priceDiscountOneSP * $totalPriceDetails['quantity'][$key] )?:0,
                         ),
                         array(
                             'order_item_id' => $orderItemId,
@@ -1150,7 +1151,7 @@ class Controller extends BaseController
                         'date_paid' => null,
                         'shipping_total' => $fee,
                         'num_items_sold' => array_sum($totalPriceDetails['quantity']),
-                        'net_total' => $finalDetails['total'],
+                        'net_total' => $finalDetails['total']  + $fee - $data['discount'],
                         'total_sales' => $finalDetails['total'] + $fee,
                         'returning_customer' => 1,
                         'customer_id' => $user['id'],
@@ -1335,10 +1336,11 @@ class Controller extends BaseController
                 throw new \Exception('Không đủ số lượng trong kho');
             }
             
+            $totalQuantity = array_sum($totalPriceDetails['quantity']);
+          
             $totalOrderBanDau = $totalPriceDetails['totalPriceTopping'];
 
             $finalDetails = $this->getFinalPriceDetailsPos($user, $data, $totalPriceDetails);
-
           
 
             //them wp_wc_order_coupon_lookup && wp_woocommerce_order_items
@@ -1435,10 +1437,9 @@ class Controller extends BaseController
                     );
                 }
             }
-
+        
             //wp_wc_order_product_lookup
-            $totalQuantity = array_sum($totalPriceDetails['quantity']);
-
+            $priceDiscountOneSP = $finalDetails['coupon_discounted'] / $totalQuantity ;
             $history = $this->getHistoryUser($user['id']);
 
             $point = $this->checkRank($history);
@@ -1447,7 +1448,7 @@ class Controller extends BaseController
                 $discount = ($point->discount) ? $point->discount : 0;
                 $url_rank = $point->imageurl;
             }
-
+            $totalPriceAndVoucher = 0;
             foreach ($totalPriceDetails['products_id'] as $key  => $productId) {
 
                 $products = DB::table($this->_PRFIX_TABLE . '_posts')->where('ID', $productId)->select('post_title')->first();
@@ -1582,6 +1583,7 @@ class Controller extends BaseController
                     $tempSaveOrderItemMetaTmcartepo_data = $temp3;
                 }
                 $finalDetails['total'] = $finalDetails['total'] + ($price * $totalPriceDetails['quantity'][$key]);
+                $totalPriceAndVoucher += $price * $totalPriceDetails['quantity'][$key] - ( $finalDetails['coupon_discounted'])?:0;
                 DB::table($this->_PRFIX_TABLE . '_woocommerce_order_itemmeta')->insert(
                     array(
                         array(
@@ -1623,7 +1625,7 @@ class Controller extends BaseController
                         array(
                             'order_item_id' => $orderItemId,
                             'meta_key' => '_line_total',
-                            'meta_value' => $price * $totalPriceDetails['quantity'][$key] - ( $finalDetails['coupon_discounted'])?:0,
+                            'meta_value' => $price * $totalPriceDetails['quantity'][$key] -  ($priceDiscountOneSP * $totalPriceDetails['quantity'][$key] )?:0,
                         ),
                         array(
                             'order_item_id' => $orderItemId,
@@ -1782,7 +1784,7 @@ class Controller extends BaseController
                     throw new \Exception('Vượt quá số điểm hiện có');
                 }
 
-                $convertMoneyToPoint = ($money_converted_to_point) > 0 ? floor($finalDetails['total'] / $money_converted_to_point) : 0;
+                $convertMoneyToPoint = ($money_converted_to_point) > 0 ? floor($totalPriceAndVoucher / $money_converted_to_point) : 0;
                 DB::table($this->_PRFIX_TABLE . '_woo_history_user_point')->insertGetId(
                     array(
                         'order_id' => $postId,
@@ -1797,15 +1799,15 @@ class Controller extends BaseController
             }
             //them hoa hồng
             $getUserParent = $this->getUserParentLastes($user['id']);
-          
+            
             $configAff = $this->getOptionsMeta('woo_aff_setting');
            
             if ($getUserParent && $configAff) {
-                $commissions = $finalDetails['total'] * $configAff / 100;
+                $commissions = ($totalPriceAndVoucher) * $configAff / 100;
                 DB::table($this->_PRFIX_TABLE . '_woo_history_user_commission')->insertGetId(
                     array(
                         'order_id' => $postId,
-                        'total_order' => $finalDetails['total'],
+                        'total_order' => $totalPriceAndVoucher,
                         'user_id' => $user['id'],
                         'user_parent' => $getUserParent,
                         'product_id' => 1,
@@ -2016,7 +2018,7 @@ class Controller extends BaseController
                         'date_paid' => null,
                         'shipping_total' => $fee,
                         'num_items_sold' => array_sum($totalPriceDetails['quantity']),
-                        'net_total' => $finalDetails['total'],
+                        'net_total' => $finalDetails['total'] + $fee - $finalDetails['coupon_discounted'],
                         'total_sales' => $finalDetails['total'] + $fee,
                         'returning_customer' => 1,
                         'customer_id' => $user['id'],

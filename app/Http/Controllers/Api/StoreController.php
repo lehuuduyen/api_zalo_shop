@@ -496,9 +496,18 @@ class StoreController extends Controller
     public function historyWithdraw(Request $request)
     {
         $store = $request['data_reponse'];
+
         $this->_PRFIX_TABLE = $store->prefixTable;
         $userId = $store->user_id;
-        $data = DB::table($this->_PRFIX_TABLE . '_woo_history_user_commission')->where('user_id', $userId)->whereIn('status', [2, 4, 5])->get();
+        if(isset($_GET['status']) && !empty($_GET['status'])){
+            $status = explode(',',$_GET['status']);
+          
+            $data = DB::table($this->_PRFIX_TABLE . '_woo_history_user_commission')->where('user_id', $userId)->whereIn('status', $status)->get();
+
+        }else{
+            $data = DB::table($this->_PRFIX_TABLE . '_woo_history_user_commission')->where('user_id', $userId)->whereIn('status', [2, 4, 5])->get();
+
+        }
 
         return $this->returnSuccess($data);
     }

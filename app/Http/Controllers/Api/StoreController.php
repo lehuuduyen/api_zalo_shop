@@ -177,6 +177,13 @@ class StoreController extends Controller
                             'meta_value' => $checkUserParent->ID
                         ),
                     );
+                    $user = DB::table($this->_PRFIX_TABLE . '_usermeta')->insert(
+                        array(
+                            'user_id' => $userId,
+                            'meta_key' => 'user_parent_created',
+                            'meta_value' => date("d/m/Y")
+                        ),
+                    );
                 } else {
                     return $this->returnError(new \stdClass, 'Mã giới thiệu không tồn tại');
                 }
@@ -316,6 +323,7 @@ class StoreController extends Controller
         $user->address = $address;
         $user->avt = $image;
         $user->user_parent = $this->getUserMeta($user->ID, 'user_parent');
+        $user->user_parent_created = $this->getUserMeta($user->ID, 'user_parent_created');
 
         $user->company = $company;
         $user->city = $city;

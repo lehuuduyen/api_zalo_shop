@@ -944,7 +944,7 @@ class Controller extends BaseController
                         'date' => date('d'),
                         'month' => date('m'),
                         'year' => date('Y'),
-                        'status' => 1,
+                        'status' => 6,
                     )
                 );
             }
@@ -2829,6 +2829,14 @@ class Controller extends BaseController
             $data = DB::table($this->_PRFIX_TABLE . '_woo_history_user_commission')->whereIn('user_parent', $userParent)->where('status', 1)->sum('commission');
             $total = $data;
         }
+        return $total;
+    }
+    public function tongHoaHongChuaNhan($userParent, $userChild2, $date = null, $month = null, $year = null)
+    {
+       
+            $data = DB::table($this->_PRFIX_TABLE . '_woo_history_user_commission')->whereIn('user_parent', $userParent)->where('status', 6)->sum('commission');
+            $total = $data;
+        
         return $total;
     }
     public function tongDoanhThu($userParent, $userChild2, $date = null, $month = null, $year = null)

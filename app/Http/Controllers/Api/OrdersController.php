@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use DateTime;
+use DateTimeZone;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -23,19 +25,52 @@ class OrdersController extends Controller
     }
     public function cancel_order(Request $request, $id)
     {
-        $store = $request['data_reponse'];
+        try {
+            //code...
+            $store = $request['data_reponse'];
 
-        $order = DB::table($this->_PRFIX_TABLE . '_wc_order_stats')->join($this->_PRFIX_TABLE . '_posts', $this->_PRFIX_TABLE . '_posts.ID', $this->_PRFIX_TABLE . '_wc_order_stats.order_id')->where($this->_PRFIX_TABLE . '_wc_order_stats.customer_id', $store->user_id)->where($this->_PRFIX_TABLE . '_wc_order_stats.order_id', '=',  $id)->first();
-        if (!$order) {
-            return $this->returnError([], 'Đơn hàng không tồn tại');
+            $order = DB::table($this->_PRFIX_TABLE . '_wc_order_stats')->join($this->_PRFIX_TABLE . '_posts', $this->_PRFIX_TABLE . '_posts.ID', $this->_PRFIX_TABLE . '_wc_order_stats.order_id')->where($this->_PRFIX_TABLE . '_wc_order_stats.customer_id', $store->user_id)->where($this->_PRFIX_TABLE . '_wc_order_stats.order_id', '=',  $id)->first();
+            if (!$order) {
+                return $this->returnError([], 'Đơn hàng không tồn tại');
+            }
+            if ($order->post_status == "wc-pending" || $order->post_status == "wc-processing") {
+                DB::table('wp_posts')
+                    ->where('ID', $order->ID)
+                    ->update(['post_status' => 'wc-cancelled']);
+
+                //ghi chú
+                $content = "Trạng thái đơn hàng đã được chuyển từ " . $order->post_status . " sang Đã hủy.";
+                if (!empty($request->all()['content'])) {
+                    $content .= $content . " - " . $request->all()['content'];
+                }
+                $date = new DateTime('now', new DateTimeZone('GMT'));
+                $date->modify('-7 hours');
+                $insertGetId = DB::table($this->_PRFIX_TABLE . '_comments')->insertGetId(
+                    array(
+                        'comment_post_ID'     =>   $order->order_id,
+                        'comment_author'     =>   $store->name,
+                        'comment_author_email'     =>   $store->email,
+                        'comment_content'     =>   $content,
+                        'comment_date_gmt'     =>   $date->format('Y-m-d H:i:s'),
+                        'comment_date'     =>   date('Y-m-d H:i:s'),
+                    )
+                );
+                $insertMetaUser = DB::table($this->_PRFIX_TABLE . '_wc_orders_meta')->updateOrInsert(
+                    array(
+                        'order_id' => $order->order_id,
+                        'meta_key' => 'comment'
+                    ),
+                    array('meta_value' => $content)
+                );
+                return $this->returnSuccess([$order->ID], 'Hủy đơn hàng thành công');
+            }
+            return $this->returnError([], 'Đơn này không được hủy');
+        } catch (\Throwable $th) {
+            //throw $th;
+            $this->woo_logs('cancel_order', $th->getMessage());
+
+            return $this->returnError([], 'Đơn này không được hủy');
         }
-        if ($order->post_status == "wc-pending" || $order->post_status == "wc-processing") {
-            DB::table('wp_posts')
-                ->where('ID', $order->ID)
-                ->update(['post_status' => 'wc-cancelled']);
-            return $this->returnSuccess([$order->ID], 'Hủy đơn hàng thành công');
-        }
-        return $this->returnError([], 'Đơn này không được hủy');
     }
     public function index(Request $request)
     {
@@ -86,22 +121,19 @@ class OrdersController extends Controller
             $temp->shipping_cost = 0;
             $orders[$key]->payment_meta = $temp;
             $history_user_point = DB::table($this->_PRFIX_TABLE . '_woo_history_user_point')->where('order_id', $order->order_id)->where('user_id', $order->customer_id)->get();
-            $pointUse =  0;
+            $pointUse =  1000000;
             $pointReceive =  0;
             $pointUseMoney =  0;
-            foreach ($history_user_point as  $history) {
-                if ($history->status == 4) {
-                    $pointUse = $history->point;
-                    $pointUseMoney = $pointUse * $history->points_converted_to_money;
-                }
-                if ($history->status == 1) {
-                    $pointReceive = $history->point;
-                }
-            }
+            // lý do hủy
+            $ly_do = DB::table($this->_PRFIX_TABLE . '_wc_orders_meta')->where('order_id', $order->order_id)
+            ->where('meta_key', 'comment')->orderBy('id',"DESC")->first();
+            $orders[$key]->ly_do = ($ly_do)?$ly_do->meta_value:"";
+           
             if ($pointUseMoney != 0) {
                 $orders[$key]->total_price = $orders[$key]->total_price + $pointUseMoney;
             }
             $orders[$key]->point_use = $pointUse;
+            
             $orders[$key]->points_converted_to_money = $pointUseMoney;
 
             $orders[$key]->point_receive = $pointReceive;

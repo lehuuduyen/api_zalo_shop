@@ -343,6 +343,8 @@ class StoreController extends Controller
         $user->cho_doi_soat = $this->choDoiSoat($user->ID);
         $user->thuc_nhan = $this->thucNhan($user->ID);
         $user->tong_hoa_hong = $this->tongHoaHong([$user->ID], []);
+        $user->tong_hoa_hong_chua_nhan = $this->tongHoaHongChuaNhan([$user->ID], []);
+
         $user->hoa_hong = $user->tong_hoa_hong - $user->thuc_nhan - $user->cho_doi_soat;
         $user->hoa_hong_da_rut = $user->thuc_nhan;
         $user->tong_doanh_thu = $this->tongDoanhThu([$user->ID], []);
@@ -397,8 +399,8 @@ class StoreController extends Controller
                 $this->_PRFIX_TABLE . '_users.display_name as name',
 
                 DB::raw("SUM(" . $this->_PRFIX_TABLE . "_woo_history_user_commission.commission) as total_commission"),
-                DB::raw("SUM(" . $this->_PRFIX_TABLE . "_woo_history_user_commission.total_order) as total_order"),
-                $this->_PRFIX_TABLE . '_woo_history_user_commission.create_at'
+                DB::raw("SUM(" . $this->_PRFIX_TABLE . "_woo_history_user_commission.total_order) as total_order")
+                // , $this->_PRFIX_TABLE . '_woo_history_user_commission.create_at'
             )
                 ->join($this->_PRFIX_TABLE . '_users', $this->_PRFIX_TABLE . '_users.ID', $this->_PRFIX_TABLE . '_woo_history_user_commission.user_id')
                 ->where('user_parent', $userId)->where('status', 1);
@@ -411,11 +413,8 @@ class StoreController extends Controller
                 $listUserChild = $listUserChild->orderBy('ID', $request['order']);
             }
             $listUserChild = $listUserChild
-                ->groupBy($this->_PRFIX_TABLE . '_users.ID', $this->_PRFIX_TABLE . '_users.display_name', $this->_PRFIX_TABLE . '_users.user_login', $this->_PRFIX_TABLE . '_woo_history_user_commission.create_at')
+                ->groupBy($this->_PRFIX_TABLE . '_users.ID', $this->_PRFIX_TABLE . '_users.display_name', $this->_PRFIX_TABLE . '_users.user_login')
                 ->get();
-
-
-
 
             $tempIds = [];
             foreach ($listUserChild as $key => $child) {
@@ -455,7 +454,7 @@ class StoreController extends Controller
 
             $sortedData = $listUserChild->sortByDesc('create_at');
             // $userParent = $this->loopChild($userId);
-
+        
             $stt = 0;
             $result = [];
             foreach ($sortedData as $key => $user) {
@@ -525,6 +524,23 @@ class StoreController extends Controller
             ),
             array(
                 'meta_value' => true,
+            )
+        );
+        return $this->returnSuccess($userId, 'Cập nhật thành công');
+    }
+    public function receiver_aff(Request $request)
+    {
+        $data = $request->all();
+        $store = $request['data_reponse'];
+        $this->_PRFIX_TABLE = $store->prefixTable;
+        $userId = $store->user_id;
+
+        $user = DB::table($this->_PRFIX_TABLE . '_woo_history_user_commission')
+        ->where('user_parent', $userId)
+        ->where('status', 6)
+        ->update(
+            array(
+                'status' => 1,
             )
         );
         return $this->returnSuccess($userId, 'Cập nhật thành công');

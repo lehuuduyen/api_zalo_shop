@@ -411,7 +411,7 @@ class GatewaveController extends Controller
                 $role = $this->getUserMeta($user->ID, 'wp_capabilities');
 
                 $nameRole = array_key_first(unserialize($role));
-                $hash = $this->getToken($nameRole, $request['sdt'], $databaseStore, $request['name'], $user->ID, $user->user_email, $prefixTable);
+                $hash = $this->getToken($nameRole, $request['sdt'], $databaseStore, $user->display_name, $user->ID, $user->user_email, $prefixTable);
                 $this->woo_logs('gateway', $hash, 3);
 
                 return $this->returnSuccess([

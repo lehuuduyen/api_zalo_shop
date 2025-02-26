@@ -87,6 +87,7 @@ Route::group(['middleware' => [ 'GetData']], function () {
 
     Route::post('storeImage', 'App\Http\Controllers\Api\StoreController@storeImage');
     Route::put('register_aff', 'App\Http\Controllers\Api\StoreController@register_aff');
+    Route::post('receiver_aff', 'App\Http\Controllers\Api\StoreController@receiver_aff');
     Route::post('history_share_link', 'App\Http\Controllers\Api\StoreController@history_share_link');
 
     Route::prefix('booking')->group(function () {

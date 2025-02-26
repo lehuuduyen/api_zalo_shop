@@ -471,6 +471,7 @@ class StoreController extends Controller
                 $result[$stt]->tong_doanh_thu = (isset($user->total_order)) ? $user->total_order : 0;
                 $result[$stt]->level = "Cấp 1";
                 $result[$stt]->image = $this->getUserMeta($user->ID, 'image_user');
+                $result[$stt]->date = $this->getUserMeta($user->ID, 'user_parent_created');
                 $stt++;
             }
             // $result = array_merge($userParent, $result);

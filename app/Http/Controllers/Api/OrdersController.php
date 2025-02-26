@@ -28,15 +28,13 @@ class OrdersController extends Controller
         try {
             //code...
             $store = $request['data_reponse'];
-
+           
             $order = DB::table($this->_PRFIX_TABLE . '_wc_order_stats')->join($this->_PRFIX_TABLE . '_posts', $this->_PRFIX_TABLE . '_posts.ID', $this->_PRFIX_TABLE . '_wc_order_stats.order_id')->where($this->_PRFIX_TABLE . '_wc_order_stats.customer_id', $store->user_id)->where($this->_PRFIX_TABLE . '_wc_order_stats.order_id', '=',  $id)->first();
             if (!$order) {
                 return $this->returnError([], 'Đơn hàng không tồn tại');
             }
             if ($order->post_status == "wc-pending" || $order->post_status == "wc-processing") {
-                DB::table('wp_posts')
-                    ->where('ID', $order->ID)
-                    ->update(['post_status' => 'wc-cancelled']);
+              
 
                 //ghi chú
                 $content = "Trạng thái đơn hàng đã được chuyển từ " . $order->post_status . " sang Đã hủy.";
@@ -62,6 +60,9 @@ class OrdersController extends Controller
                     ),
                     array('meta_value' => $content)
                 );
+                DB::table('wp_posts')
+                ->where('ID', $order->ID)
+                ->update(['post_status' => 'wc-cancelled']);
                 return $this->returnSuccess([$order->ID], 'Hủy đơn hàng thành công');
             }
             return $this->returnError([], 'Đơn này không được hủy');

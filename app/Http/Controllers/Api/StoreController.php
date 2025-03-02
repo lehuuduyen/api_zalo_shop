@@ -251,14 +251,14 @@ class StoreController extends Controller
             }
 
             if (isset($data['email'])) {
-                $user = DB::table($this->_PRFIX_TABLE . '_users')->where('user_login', $store->sdt)->update(
+                $user = DB::table($this->_PRFIX_TABLE . '_users')->where('user_login', "$store->sdt")->update(
                     array(
                         'user_email' => $data['email'],
                     )
                 );
             }
             if (isset($data['display_name'])) {
-                $user = DB::table($this->_PRFIX_TABLE . '_users')->where('user_login', $store->sdt)->update(
+                $user = DB::table($this->_PRFIX_TABLE . '_users')->where('user_login', "$store->sdt")->update(
                     array(
                         'display_name' => $data['display_name'],
                     )

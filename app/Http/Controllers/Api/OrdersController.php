@@ -121,6 +121,8 @@ class OrdersController extends Controller
             $temp = new stdClass;
             $temp->shipping_cost = 0;
             $orders[$key]->payment_meta = $temp;
+            $orders[$key]->payment_gateway = $this->getPostMeta($order->order_id, '_payment_method');
+
             $history_user_point = DB::table($this->_PRFIX_TABLE . '_woo_history_user_point')->where('order_id', $order->order_id)->where('user_id', $order->customer_id)->get();
             $pointUse =  1000000;
             $pointReceive =  0;

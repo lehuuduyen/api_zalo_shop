@@ -112,9 +112,9 @@ class Controller extends BaseController
     {
         $minute = (env('EXPIRED_MINUTE')) ? env('EXPIRED_MINUTE') : "";
         try {
-           
+
             $date = empty($minute) ? "" : strtotime(date('d-m-Y H:i:s', strtotime("+$minute min")));
-        
+
             $token = $this->encodeData(json_encode(['role' => $store, 'store' => "", 'prefixTable' => $this->_PRFIX_TABLE, 'sdt' => $sdt, 'databaseStore' => $databaseStore,  'name' => $name, 'user_id' => $user_id, 'email' => $email, 'expired_in' => $date]));
             return $token;
         } catch (\Exception $e) {
@@ -532,7 +532,7 @@ class Controller extends BaseController
         $date_expires = $this->getPostMeta($coupon->ID, 'date_expires');
         if (!$checkPoint) {
             if ($date_expires < time()) {
-            
+
                 throw new Exception("voucher hết hạn");
 
                 return $discount_total;
@@ -551,8 +551,8 @@ class Controller extends BaseController
             $coupon_type = 'percentage';
         }
 
-        if($minimum_amount > $data['subtotal']){
-            throw new Exception("Tổng hóa đơn phải lớn hơn ".$minimum_amount);
+        if ($minimum_amount > $data['subtotal']) {
+            throw new Exception("Tổng hóa đơn phải lớn hơn " . $minimum_amount);
         }
         // calculate based on coupon type
         if ($coupon_type === 'percentage') {
@@ -644,15 +644,15 @@ class Controller extends BaseController
 
             $totalOrderBanDau = $totalPriceDetails['total'];
             $finalDetails = $this->getFinalPriceDetailsPos($user, $data, $totalPriceDetails);
-            
-           
+
+
 
 
             //wp_wc_order_product_lookup
             $history = $this->getHistoryUser($user['id']);
             $totalQuantity = array_sum($totalPriceDetails['quantity']);
 
-            $priceDiscountOneSP =  $data['discount'] / $totalQuantity ;
+            $priceDiscountOneSP =  $data['discount'] / $totalQuantity;
 
             foreach ($totalPriceDetails['products_id'] as $key  => $productId) {
 
@@ -664,7 +664,7 @@ class Controller extends BaseController
                 $price = $this->getSellPrice($productId);
 
 
-          
+
 
 
                 //wp_woocommerce_order_items
@@ -814,7 +814,7 @@ class Controller extends BaseController
                         array(
                             'order_item_id' => $orderItemId,
                             'meta_key' => '_line_total',
-                            'meta_value' => $price * $totalPriceDetails['quantity'][$key] -  ($priceDiscountOneSP * $totalPriceDetails['quantity'][$key] )?:0,
+                            'meta_value' => $price * $totalPriceDetails['quantity'][$key] -  ($priceDiscountOneSP * $totalPriceDetails['quantity'][$key]) ?: 0,
                         ),
                         array(
                             'order_item_id' => $orderItemId,
@@ -1074,7 +1074,7 @@ class Controller extends BaseController
                     array(
                         'post_id' => $postId,
                         'meta_key' => '_order_total',
-                        'meta_value' => $finalDetails['total'] + $fee - ($data['discount'])?:0,
+                        'meta_value' => $finalDetails['total'] + $fee - ($data['discount']) ?: 0,
                     ),
                     array(
                         'post_id' => $postId,
@@ -1335,13 +1335,13 @@ class Controller extends BaseController
             if (!$totalPriceDetails) {
                 throw new \Exception('Không đủ số lượng trong kho');
             }
-            
+
             $totalQuantity = array_sum($totalPriceDetails['quantity']);
-          
+
             $totalOrderBanDau = $totalPriceDetails['totalPriceTopping'];
 
             $finalDetails = $this->getFinalPriceDetailsPos($user, $data, $totalPriceDetails);
-          
+
 
             //them wp_wc_order_coupon_lookup && wp_woocommerce_order_items
             if ($finalDetails['coupon_discounted'] && $finalDetails['coupon_discounted'] > 0) {
@@ -1437,9 +1437,9 @@ class Controller extends BaseController
                     );
                 }
             }
-        
+
             //wp_wc_order_product_lookup
-            $priceDiscountOneSP = $finalDetails['coupon_discounted'] / $totalQuantity ;
+            $priceDiscountOneSP = $finalDetails['coupon_discounted'] / $totalQuantity;
             $history = $this->getHistoryUser($user['id']);
 
             $point = $this->checkRank($history);
@@ -1475,7 +1475,7 @@ class Controller extends BaseController
                 //     }
                 // }
                 // $tongGiaGiam = $finalDetails['coupon_discounted'];
-             
+
 
                 //wp_woocommerce_order_items
                 $orderItemId = DB::table($this->_PRFIX_TABLE . '_woocommerce_order_items')->insertGetId(
@@ -1583,7 +1583,7 @@ class Controller extends BaseController
                     $tempSaveOrderItemMetaTmcartepo_data = $temp3;
                 }
                 $finalDetails['total'] = $finalDetails['total'] + ($price * $totalPriceDetails['quantity'][$key]);
-                $totalPriceAndVoucher += $price * $totalPriceDetails['quantity'][$key] - ( $finalDetails['coupon_discounted'])?:0;
+                $totalPriceAndVoucher += $price * $totalPriceDetails['quantity'][$key] - ($finalDetails['coupon_discounted']) ?: 0;
                 DB::table($this->_PRFIX_TABLE . '_woocommerce_order_itemmeta')->insert(
                     array(
                         array(
@@ -1625,7 +1625,7 @@ class Controller extends BaseController
                         array(
                             'order_item_id' => $orderItemId,
                             'meta_key' => '_line_total',
-                            'meta_value' => $price * $totalPriceDetails['quantity'][$key] -  ($priceDiscountOneSP * $totalPriceDetails['quantity'][$key] )?:0,
+                            'meta_value' => $price * $totalPriceDetails['quantity'][$key] -  ($priceDiscountOneSP * $totalPriceDetails['quantity'][$key]) ?: 0,
                         ),
                         array(
                             'order_item_id' => $orderItemId,
@@ -1749,7 +1749,7 @@ class Controller extends BaseController
 
                 // tính điểm sang tiền
                 $tienDoiThuong = $points_converted_to_money * $data['point_use'];
-                
+
                 if ($tienDoiThuong > $finalDetails['total']) {
                     throw new \Exception('Tiền đổi thưởng không được quá tổng đơn hàng');
                 }
@@ -1799,9 +1799,9 @@ class Controller extends BaseController
             }
             //them hoa hồng
             $getUserParent = $this->getUserParentLastes($user['id']);
-            
+
             $configAff = $this->getOptionsMeta('woo_aff_setting');
-           
+
             if ($getUserParent && $configAff) {
                 $commissions = ($totalPriceAndVoucher) * $configAff / 100;
                 DB::table($this->_PRFIX_TABLE . '_woo_history_user_commission')->insertGetId(
@@ -1821,7 +1821,6 @@ class Controller extends BaseController
                     )
                 );
             }
-            $data['payment_gateway'] = 'momo';
             if ($data['payment_gateway'] == 'cod') {
                 $paymentTitle  = 'Thanh toán khi giao hàng';
             } elseif ($data['payment_gateway'] == 'momo') {
@@ -1941,7 +1940,7 @@ class Controller extends BaseController
                     array(
                         'post_id' => $postId,
                         'meta_key' => '_order_total',
-                        'meta_value' => $finalDetails['total'] + $fee - ( $finalDetails['coupon_discounted'])?:0,
+                        'meta_value' => $finalDetails['total'] + $fee - ($finalDetails['coupon_discounted']) ?: 0,
                     ),
                     array(
                         'post_id' => $postId,
@@ -2144,7 +2143,7 @@ class Controller extends BaseController
                     DB::insert($sqlAddMeta);
                 }
             }
-           
+
             // lưu lịch sử commission
             $history = DB::table($this->_PRFIX_TABLE . '_woo_history_user_commission')
                 ->where('order_id', $postId)
@@ -2234,16 +2233,15 @@ class Controller extends BaseController
                 $subtotal = $subtotal - $coupon_amount_total;
                 $discounted_price += $coupon_amount_total;
             }
-        } else if(!empty($validated_data['discount'])){
+        } else if (!empty($validated_data['discount'])) {
             $discounted_price = $validated_data['discount'];
-
         } else {
             $discounted_price = $this->calculateCoupon($coupon, []);
         }
-        
-        
+
+
         $price['total'] -= $discounted_price;
-        
+
         $product_tax = $data['product_tax'];
         $shipping_cost = $data['shipping_cost'];
 
@@ -2254,7 +2252,7 @@ class Controller extends BaseController
         // $total['payment_meta'] = $this->payment_meta(compact('product_tax', 'shipping_cost', 'subtotal', 'total'));
         $total['coupon_discounted'] = $discounted_price;
 
-        
+
         return $total;
     }
     public function getFinalPriceDetails($user, $validated_data, $totalPriceDetails)
@@ -2388,19 +2386,19 @@ class Controller extends BaseController
 
 
         $key = 0;
-      
+
         foreach ($cart as $item) {
 
             $attribute = DB::table($this->_PRFIX_TABLE . '_postmeta')->where('meta_key', 'tm_meta')->select('meta_value')->first();
-            $priceTopping = 0 ;
-            
+            $priceTopping = 0;
+
             if ($attribute  && isset($item['radioGroups'])) {
                 $attribute = unserialize($attribute->meta_value)['tmfbuilder'];
                 $i = 0;
                 $temp1 = [];
                 $temp2 = [];
                 $temp3 = [];
-                
+
                 foreach ($item['radioGroups'] as $keyGroup => $valueGroup) {
                     $sttKeyGroup = 2;
                     if ($keyGroup == "size") {
@@ -2409,7 +2407,7 @@ class Controller extends BaseController
                     if ($keyGroup == "topping") {
                         $sttKeyGroup = 1;
                     }
-                    
+
 
                     if (isset($attribute['multiple_radiobuttons_options_value'][$sttKeyGroup])) {
                         $listTitleSize = $attribute['multiple_radiobuttons_options_value'][$sttKeyGroup];
@@ -2419,7 +2417,7 @@ class Controller extends BaseController
                             $priceTopping = $priceTopping + $priceAttribute;
                         }
                     }
-                 
+
                     $i++;
                 }
                 $j = 0;
@@ -2437,7 +2435,7 @@ class Controller extends BaseController
                     $j++;
                 }
             }
-           
+
             $cartArr[$key] = [
                 'id' => (int)$item['productId'],
                 'name' => $item['title'],
@@ -2560,7 +2558,7 @@ class Controller extends BaseController
         $totalPriceTopping = 0;
 
         $cartArr = self::getCartProductsPos($cart);
-      
+
         $time = time();
         foreach ($cartArr as $key => $item) {
 
@@ -2620,7 +2618,7 @@ class Controller extends BaseController
 
         $arr = [
             'total' => $total,
-            'totalPriceTopping'=>$totalPriceTopping,
+            'totalPriceTopping' => $totalPriceTopping,
             'products_id' => $products_id,
             'variants' => $variant,
             'quantity' => $quantity
@@ -2793,7 +2791,7 @@ class Controller extends BaseController
     }
     public function getUserParentLastes($userChild)
     {
-        $data = $this->getUserMeta($userChild,'user_parent');
+        $data = $this->getUserMeta($userChild, 'user_parent');
 
         return $data;
     }
@@ -2833,10 +2831,10 @@ class Controller extends BaseController
     }
     public function tongHoaHongChuaNhan($userParent, $userChild2, $date = null, $month = null, $year = null)
     {
-       
-            $data = DB::table($this->_PRFIX_TABLE . '_woo_history_user_commission')->whereIn('user_parent', $userParent)->where('status', 6)->sum('commission');
-            $total = $data;
-        
+
+        $data = DB::table($this->_PRFIX_TABLE . '_woo_history_user_commission')->whereIn('user_parent', $userParent)->where('status', 6)->sum('commission');
+        $total = $data;
+
         return $total;
     }
     public function tongDoanhThu($userParent, $userChild2, $date = null, $month = null, $year = null)
@@ -2862,6 +2860,7 @@ class Controller extends BaseController
     {
         // Create a stream
         $freeship = DB::table($this->_PRFIX_TABLE . '_woocommerce_shipping_zone_methods')->where('method_id', 'free_shipping')->where('is_enabled', 1)->get()->count();
+
         if ($freeship == 1) {
             return 0;
         }
@@ -2869,24 +2868,30 @@ class Controller extends BaseController
             "http" => [
                 "method" => "GET",
                 "header" => "Accept-language: en\r\n" .
-                    "Token: 80b69b6b-a60f-11ed-b190-ea4934f9883e\r\n"
+                    "Token: dc6e07f3-ece6-11ef-9601-2aa9f69b8470\r\n"
             ]
         ];
+        // 80b69b6b-a60f-11ed-b190-ea4934f9883e
+    //    dc6e07f3-ece6-11ef-9601-2aa9f69b8470
         $listCity = $this->convertCity();
         $quan = $listCity['districts'][$quan];
         $phuong = $listCity['wards'][$phuong];
 
+
+       
+        
 
         // DOCS: https://www.php.net/manual/en/function.stream-context-create.php
         $context = stream_context_create($opts);
         // Open the file using the HTTP headers set above
         // DOCS: https://www.php.net/manual/en/function.file-get-contents.php
         for ($i = 0; $i <= 5; $i++) {
-            $file = @file_get_contents("https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee?service_id=5332$i&service_type_id=2&insurance_value=0&to_district_id=$quan&to_ward_code=$phuong&weight=1000&width=10&height=10&length=10&coupon", false, $context);
+            $file = @file_get_contents("https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee?service_id=53320&service_type_id=2&insurance_value=0&to_district_id=$quan&to_ward_code=$phuong&weight=1000&width=10&height=10&length=10&coupon", false, $context);
             if ($file) {
                 break;
             }
         }
+      
         $fee  = 0;
         if ($file) {
             $file = json_decode($file);

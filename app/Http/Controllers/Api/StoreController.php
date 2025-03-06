@@ -1042,4 +1042,29 @@ class StoreController extends Controller
             return $this->returnError([], $th->getMessage());
         }
     }
+
+    public function notifications(Request $request){
+        $store = $request['data_reponse'];
+        $this->_PRFIX_TABLE = $store->prefixTable;
+        $userId = $store->user_id;
+        $noti = DB::table($this->_PRFIX_TABLE . '_woo_notification')
+        ->join($this->_PRFIX_TABLE . '_woo_user_notification', $this->_PRFIX_TABLE . '_woo_notification.id', $this->_PRFIX_TABLE . '_woo_user_notification.notification_id')
+        ->where($this->_PRFIX_TABLE . '_woo_user_notification.user_id', $userId)
+        ->select($this->_PRFIX_TABLE . '_woo_notification.id',$this->_PRFIX_TABLE . '_woo_notification.link',$this->_PRFIX_TABLE . '_woo_notification.content',$this->_PRFIX_TABLE . '_woo_user_notification.status')
+        ->get();
+        return $this->returnSuccess($noti);
+
+    }
+    public function notification_read(Request $request){
+        $store = $request['data_reponse'];
+        $this->_PRFIX_TABLE = $store->prefixTable;
+        $userId = $store->user_id;
+        $user = DB::table($this->_PRFIX_TABLE . '_woo_user_notification')->where('user_id', $userId)->update(
+            array(
+                'status' => 1,
+            )
+        );
+        return $this->returnSuccess([1],"Đã xem");
+
+    }
 }

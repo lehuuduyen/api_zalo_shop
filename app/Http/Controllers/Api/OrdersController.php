@@ -296,6 +296,7 @@ class OrdersController extends Controller
         $store = $request['data_reponse'];
         $this->_PRFIX_TABLE = $store->prefixTable;
         try {
+            
             $validator = Validator::make($request->all(), [
                 'payment_gateway' => 'required',
                 'name' => 'required',

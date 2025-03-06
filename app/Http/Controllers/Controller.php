@@ -521,7 +521,7 @@ class Controller extends BaseController
         $paramCoupon = $data['coupon'];
         $coupon = DB::table($this->_PRFIX_TABLE . '_posts')->where('post_title', $paramCoupon)->where('post_status', 'publish')->where('post_type', 'shop_coupon')->first();
 
-
+       
 
         if (is_null($coupon)) {
             return $discount_total;
@@ -550,7 +550,7 @@ class Controller extends BaseController
         if ($coupon_type == "percent") {
             $coupon_type = 'percentage';
         }
-
+       
         if ($minimum_amount > $data['subtotal']) {
             throw new Exception("Tổng hóa đơn phải lớn hơn " . $minimum_amount);
         }
@@ -1335,7 +1335,7 @@ class Controller extends BaseController
             if (!$totalPriceDetails) {
                 throw new \Exception('Không đủ số lượng trong kho');
             }
-
+            
             $totalQuantity = array_sum($totalPriceDetails['quantity']);
 
             $totalOrderBanDau = $totalPriceDetails['totalPriceTopping'];

@@ -89,6 +89,8 @@ Route::group(['middleware' => [ 'GetData']], function () {
     Route::put('register_aff', 'App\Http\Controllers\Api\StoreController@register_aff');
     Route::post('receiver_aff', 'App\Http\Controllers\Api\StoreController@receiver_aff');
     Route::post('history_share_link', 'App\Http\Controllers\Api\StoreController@history_share_link');
+    Route::get('notifications', 'App\Http\Controllers\Api\StoreController@notifications');
+    Route::put('notification_read', 'App\Http\Controllers\Api\StoreController@notification_read');
 
     Route::prefix('booking')->group(function () {
         Route::get('categories', 'App\Http\Controllers\Api\ProductController@getCategories');

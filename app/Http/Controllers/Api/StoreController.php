@@ -316,8 +316,8 @@ class StoreController extends Controller
         $phuong = $this->getUserMeta($user->ID, 'phuong');
         $birthday = $this->getUserMeta($user->ID, 'birthday');
         $image = $this->getUserMeta($user->ID, 'image_user');
-        if($image){
-            $image = env('API_URL_BACKEND')."/storage/".$image;
+        if ($image) {
+            $image = env('API_URL_BACKEND') . "/storage/" . $image;
         }
 
         $user->address = $address;
@@ -327,11 +327,11 @@ class StoreController extends Controller
 
         $user->company = $company;
         $user->city = $city;
-        $user->city_name = ($city)?$this->city($request,$city):"";
+        $user->city_name = ($city) ? $this->city($request, $city) : "";
         $user->quan = $quan;
-        $user->quan_name = ($quan)?$this->quan($request,$city,$quan):"";
+        $user->quan_name = ($quan) ? $this->quan($request, $city, $quan) : "";
         $user->phuong = $phuong;
-        $user->phuong_name = ($phuong)?$this->phuong($request,$quan,$phuong):"";
+        $user->phuong_name = ($phuong) ? $this->phuong($request, $quan, $phuong) : "";
 
         $user->birthday = $birthday;
         // $user->xu = 10000;e/
@@ -462,7 +462,7 @@ class StoreController extends Controller
 
             $sortedData = $listUserChild->sortByDesc('create_at');
             // $userParent = $this->loopChild($userId);
-        
+
             $stt = 0;
             $result = [];
             foreach ($sortedData as $key => $user) {
@@ -507,14 +507,12 @@ class StoreController extends Controller
 
         $this->_PRFIX_TABLE = $store->prefixTable;
         $userId = $store->user_id;
-        if(isset($_GET['status']) && !empty($_GET['status'])){
-            $status = explode(',',$_GET['status']);
-          
+        if (isset($_GET['status']) && !empty($_GET['status'])) {
+            $status = explode(',', $_GET['status']);
+
             $data = DB::table($this->_PRFIX_TABLE . '_woo_history_user_commission')->where('user_id', $userId)->whereIn('status', $status)->get();
-
-        }else{
+        } else {
             $data = DB::table($this->_PRFIX_TABLE . '_woo_history_user_commission')->where('user_id', $userId)->whereIn('status', [2, 4, 5])->get();
-
         }
 
         return $this->returnSuccess($data);
@@ -545,13 +543,13 @@ class StoreController extends Controller
         $userId = $store->user_id;
 
         $user = DB::table($this->_PRFIX_TABLE . '_woo_history_user_commission')
-        ->where('user_parent', $userId)
-        ->where('status', 6)
-        ->update(
-            array(
-                'status' => 1,
-            )
-        );
+            ->where('user_parent', $userId)
+            ->where('status', 6)
+            ->update(
+                array(
+                    'status' => 1,
+                )
+            );
         return $this->returnSuccess($userId, 'Cập nhật thành công');
     }
     public function history_share_link(Request $request)
@@ -746,11 +744,11 @@ class StoreController extends Controller
         }
         return $this->returnSuccess($banner);
     }
-    public function city(Request $request,$idCity ="")
+    public function city(Request $request, $idCity = "")
     {
         $city = file_get_contents('data/tinh_tp.json');
         $city = json_decode($city);
-        if($idCity){
+        if ($idCity) {
             return $city->$idCity->name_with_type;
         }
         $listCity = [];
@@ -761,9 +759,9 @@ class StoreController extends Controller
         }
         return $this->returnSuccess($listCity);
     }
-    public function quan(Request $request,$idCity="",$idQuan ="")
+    public function quan(Request $request, $idCity = "", $idQuan = "")
     {
-        if($idCity && $idQuan){
+        if ($idCity && $idQuan) {
             $param = $idCity;
             $quan = file_get_contents("data/quan-huyen/$param.json");
             $quan = json_decode($quan);
@@ -782,7 +780,7 @@ class StoreController extends Controller
                 $param = $data['parent'];
                 $quan = file_get_contents("data/quan-huyen/$param.json");
                 $quan = json_decode($quan);
-               
+
                 $listQuan = [];
                 foreach ($quan as $id => $val) {
                     $json['id'] = $id;
@@ -798,11 +796,11 @@ class StoreController extends Controller
             return $this->returnError([], "Lỗi hệ thống");
         }
     }
-    public function phuong(Request $request,$idQuan ="",$idPhuong="")
+    public function phuong(Request $request, $idQuan = "", $idPhuong = "")
     {
 
-   
-        if($idPhuong && $idQuan){
+
+        if ($idPhuong && $idQuan) {
             $param = $idQuan;
             $phuong = file_get_contents("data/xa-phuong/$param.json");
             $phuong = json_decode($phuong);
@@ -821,7 +819,7 @@ class StoreController extends Controller
                 $param = $data['parent'];
                 $phuong = file_get_contents("data/xa-phuong/$param.json");
                 $phuong = json_decode($phuong);
-                if($idPhuong){
+                if ($idPhuong) {
                     return $phuong->$idPhuong->name_with_type;
                 }
                 $listPhuong = [];
@@ -1016,7 +1014,7 @@ class StoreController extends Controller
             'to_point' => $this->getOptionsMeta('woo_rotation_to_point'),
         ]);
     }
-    
+
     public function getFee(Request $request)
     {
         try {
@@ -1043,19 +1041,20 @@ class StoreController extends Controller
         }
     }
 
-    public function notifications(Request $request){
+    public function notifications(Request $request)
+    {
         $store = $request['data_reponse'];
         $this->_PRFIX_TABLE = $store->prefixTable;
         $userId = $store->user_id;
         $noti = DB::table($this->_PRFIX_TABLE . '_woo_notification')
-        ->join($this->_PRFIX_TABLE . '_woo_user_notification', $this->_PRFIX_TABLE . '_woo_notification.id', $this->_PRFIX_TABLE . '_woo_user_notification.notification_id')
-        ->where($this->_PRFIX_TABLE . '_woo_user_notification.user_id', $userId)
-        ->select($this->_PRFIX_TABLE . '_woo_notification.id',$this->_PRFIX_TABLE . '_woo_notification.link',$this->_PRFIX_TABLE . '_woo_notification.content',$this->_PRFIX_TABLE . '_woo_user_notification.status')
-        ->get();
+            ->join($this->_PRFIX_TABLE . '_woo_user_notification', $this->_PRFIX_TABLE . '_woo_notification.id', $this->_PRFIX_TABLE . '_woo_user_notification.notification_id')
+            ->where($this->_PRFIX_TABLE . '_woo_user_notification.user_id', $userId)
+            ->select($this->_PRFIX_TABLE . '_woo_notification.id', $this->_PRFIX_TABLE . '_woo_notification.link', $this->_PRFIX_TABLE . '_woo_notification.content', $this->_PRFIX_TABLE . '_woo_user_notification.status')
+            ->get();
         return $this->returnSuccess($noti);
-
     }
-    public function notification_read(Request $request){
+    public function notification_read(Request $request)
+    {
         $store = $request['data_reponse'];
         $this->_PRFIX_TABLE = $store->prefixTable;
         $userId = $store->user_id;
@@ -1064,7 +1063,115 @@ class StoreController extends Controller
                 'status' => 1,
             )
         );
-        return $this->returnSuccess([1],"Đã xem");
+        return $this->returnSuccess([1], "Đã xem");
+    }
+    public function prize(Request $request)
+    {
+        $store = $request['data_reponse'];
+        $this->_PRFIX_TABLE = $store->prefixTable;
+        $prizes = DB::table($this->_PRFIX_TABLE . '_woo_point_prize')
+            ->get();
+        return $this->returnSuccess($prizes);
+    }
+    public function doi_qua(Request $request)
+    {
+        try {
+            //code...
+            DB::beginTransaction();
 
+            $store = $request['data_reponse'];
+            $data = $request->all();
+            $this->_PRFIX_TABLE = $store->prefixTable;
+            $userId = $store->user_id;
+            $timeNow = date('Y/m/d H:i:s');
+
+            $prizes = DB::table($this->_PRFIX_TABLE . '_woo_point_prize')
+                ->where('id', $data['prize_id'])
+                ->where('status', 1)
+                ->first();
+            if (!$prizes) {
+                return $this->returnError([], "Phần thưởng không tồn tại ");
+            }
+            if ($prizes->quantity >= $prizes->count) {
+                return $this->returnError([], "Phần thưởng hiện tại đã hết ");
+            }
+            $history = $this->getHistoryUser($userId);
+
+            $point = $this->getPointUser($history);
+            $pointDoiThuong = $point['totalDoiThuong'];
+            if ($pointDoiThuong < $prizes->point) {
+                return $this->returnError([], "Bạn chỉ còn $pointDoiThuong điểm, không đủ để đổi thưởng ");
+            }
+            //type là voucher
+            if ($prizes->type == 1) {
+                //them voucher
+                $postId = DB::table($this->_PRFIX_TABLE . '_posts')->insertGetId(
+                    array(
+                        'post_date' => $timeNow,
+                        'post_date_gmt' => $timeNow,
+                        'post_modified' => $timeNow,
+                        'post_modified_gmt' => $timeNow,
+                        'post_title' => '[Đổi quà]  ' . $prizes->name,
+                        'post_status' => 'wc-completed',
+                        'post_type' => 'shop_order',
+                        'post_content' => '',
+                        'post_excerpt' => '[Đổi quà]  ' . $prizes->name,
+                        'post_name' =>  \Str::slug('[Đổi quà]  ' . $prizes->name),
+                        'to_ping' => '',
+                        'pinged' => '',
+                        'post_content_filtered' => '',
+                        'post_author' => '',
+
+                        'comment_count' => '0',
+                    )
+                );
+                $postMeta = DB::table($this->_PRFIX_TABLE . '_postmeta')->insert(
+                    array(
+                       
+                        array(
+                            'post_id' => $postId,
+                            'meta_key' => 'coupon_amount',
+                            'meta_value' => $prizes->percent,
+                        ),
+                        array(
+                            'post_id' => $postId,
+                            'meta_key' => 'discount_type',
+                            'meta_value' => 'percent',
+                        ),
+                        array(
+                            'post_id' => $postId,
+                            'meta_key' => 'individual_use',
+                            'meta_value' => 'no',
+                        ),
+                        array(
+                            'post_id' => $postId,
+                            'meta_key' => 'usage_limit',
+                            'meta_value' => 0,
+                        ),
+                        array(
+                            'post_id' => $postId,
+                            'meta_key' => 'usage_limit_per_user',
+                            'meta_value' => 1,
+                        ),
+    
+                        array(
+                            'post_id' => $postId,
+                            'meta_key' => 'limit_usage_to_x_items',
+                            'meta_value' => 0,
+                        )
+                      
+                       
+    
+                    )
+                );
+            }
+            // type là quà tặng
+            return $this->returnSuccess($prizes);
+
+            DB::commit();
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            //throw $th;
+        }
     }
 }

@@ -17,23 +17,26 @@ use Illuminate\Support\Facades\Route;
 // Route::middleware('auth:api')->get('/user', function (Request $request) {
 //     return $request->user();
 // });
-Route::post('register', 'App\Http\Controllers\Api\GatewaveController@index')->middleware('CorsApi');
-Route::post('reset_pass', 'App\Http\Controllers\Api\GatewaveController@reset_pass')->middleware('CorsApi');
-Route::post('call_otp', 'App\Http\Controllers\Api\GatewaveController@call_otp')->middleware('CorsApi');
+Route::group(['middleware' => ['CorsApi']], function () {
+    Route::post('register', 'App\Http\Controllers\Api\GatewaveController@index')->middleware('CorsApi');
+    Route::post('reset_pass', 'App\Http\Controllers\Api\GatewaveController@reset_pass')->middleware('CorsApi');
+    Route::post('call_otp', 'App\Http\Controllers\Api\GatewaveController@call_otp')->middleware('CorsApi');
 
-Route::post('login', 'App\Http\Controllers\Api\GatewaveController@login')->middleware('CorsApi');
+    Route::post('login', 'App\Http\Controllers\Api\GatewaveController@login')->middleware('CorsApi');
 
-Route::post('loginPos', 'App\Http\Controllers\Api\GatewaveController@loginPos');
+    Route::post('loginPos', 'App\Http\Controllers\Api\GatewaveController@loginPos');
 
-Route::view('/', 'home');
+    Route::view('/', 'home');
 
-Route::get('checkFollow', 'App\Http\Controllers\Api\GatewaveController@checkFollow')->middleware('CorsApi');
-Route::get('city', 'App\Http\Controllers\Api\StoreController@city');
-Route::get('quan', 'App\Http\Controllers\Api\StoreController@quan');
-Route::get('phuong', 'App\Http\Controllers\Api\StoreController@phuong');
-Route::get('getFee', 'App\Http\Controllers\Api\StoreController@getFee');
+    Route::get('checkFollow', 'App\Http\Controllers\Api\GatewaveController@checkFollow')->middleware('CorsApi');
+    Route::get('city', 'App\Http\Controllers\Api\StoreController@city');
+    Route::get('quan', 'App\Http\Controllers\Api\StoreController@quan');
+    Route::get('phuong', 'App\Http\Controllers\Api\StoreController@phuong');
+    Route::get('getFee', 'App\Http\Controllers\Api\StoreController@getFee');
+});
 
-Route::group(['middleware' => ['GetData']], function () {
+
+Route::group(['middleware' => ['GetData', 'CorsApi']], function () {
     Route::get('product/categories', 'App\Http\Controllers\Api\ProductController@getCategories');
     Route::get('product/attribute', 'App\Http\Controllers\Api\ProductController@getAttribute');
     Route::get('products', 'App\Http\Controllers\Api\ProductController@index');
@@ -46,7 +49,7 @@ Route::group(['middleware' => ['GetData']], function () {
     Route::post('order_pos', 'App\Http\Controllers\Api\OrdersController@storePos')->middleware('CheckStore');
 });
 
-Route::group(['middleware' => [ 'GetData']], function () {
+Route::group(['middleware' => ['GetData', 'CorsApi']], function () {
 
     Route::get('list_rotation', 'App\Http\Controllers\Api\StoreController@listRotation')->middleware('CorsApi');
     Route::get('get_turn', 'App\Http\Controllers\Api\StoreController@getTurn')->middleware('CorsApi');
@@ -91,6 +94,8 @@ Route::group(['middleware' => [ 'GetData']], function () {
     Route::post('history_share_link', 'App\Http\Controllers\Api\StoreController@history_share_link');
     Route::get('notifications', 'App\Http\Controllers\Api\StoreController@notifications');
     Route::put('notification_read', 'App\Http\Controllers\Api\StoreController@notification_read');
+    Route::get('prize', 'App\Http\Controllers\Api\StoreController@prize');
+    Route::put('prize', 'App\Http\Controllers\Api\StoreController@doi_qua');
 
     Route::prefix('booking')->group(function () {
         Route::get('categories', 'App\Http\Controllers\Api\ProductController@getCategories');

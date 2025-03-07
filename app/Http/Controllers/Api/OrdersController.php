@@ -335,6 +335,7 @@ class OrdersController extends Controller
                     'state' => $data['state'],
                     'city' => $data['city'],
                     'email' => $data['email'],
+                    'user_email' => $user->user_email,
                     'address' => $data['address']
                 ];
                 $order = $this->createOrder($data, $user);
@@ -396,6 +397,7 @@ class OrdersController extends Controller
                         'state' => $data['state'],
                         'city' => $data['city'],
                         'email' => $user->user_email,
+                        'user_email'=>$user->user_email,
                         'address' => "",
                         'user_created' => $store->user_id
                     ];

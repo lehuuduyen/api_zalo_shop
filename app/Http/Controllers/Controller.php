@@ -520,29 +520,36 @@ class Controller extends BaseController
         $discount_total = 0;
         $paramCoupon = $data['coupon'];
         $coupon = DB::table($this->_PRFIX_TABLE . '_posts')->where('post_title', $paramCoupon)->where('post_status', 'publish')->where('post_type', 'shop_coupon')->first();
-
-       
+        
 
         if (is_null($coupon)) {
             return $discount_total;
         }
-        $checkPoint = $this->getPostMeta($coupon->ID, 'customer_user');
+        $checkPoint = $this->getPostMeta($coupon->ID, 'customer_email');
+      
         $minimum_amount = $this->getPostMeta($coupon->ID, 'minimum_amount');
 
         $date_expires = $this->getPostMeta($coupon->ID, 'date_expires');
-        if (!$checkPoint) {
-            if ($date_expires < time()) {
+        if ($checkPoint) {
+            $listEMailAccept = unserialize($checkPoint);
+            if(!in_array($data['email'],$listEMailAccept)){
+                throw new Exception("Voucher không thể sử dụng");
 
-                throw new Exception("voucher hết hạn");
-
-                return $discount_total;
             }
+            // unserialize($checkPoint)
         }
+      
+       
+        if ($date_expires < time()) {
 
+            throw new Exception("Voucher hết hạn");
 
+            return $discount_total;
+        }
         $coupon_amount = $this->getPostMeta($coupon->ID, 'coupon_amount');
-        $usage_limit = $this->getPostMeta($coupon->ID, 'usage_limit');
+        $usage_limit = $this->getPostMeta($coupon->ID, 'usage_limit_per_user');
         $usage_count = $this->getPostMeta($coupon->ID, 'usage_count');
+       
         if ($usage_limit <= $usage_count) {
             return $discount_total;
         }
@@ -551,6 +558,7 @@ class Controller extends BaseController
             $coupon_type = 'percentage';
         }
        
+        
         if ($minimum_amount > $data['subtotal']) {
             throw new Exception("Tổng hóa đơn phải lớn hơn " . $minimum_amount);
         }
@@ -563,6 +571,7 @@ class Controller extends BaseController
         if ($discount_total > $data['subtotal']) {
             $discount_total = $data['subtotal'];
         }
+       
         if (!$isCheckApiCoupon) {
             DB::table($this->_PRFIX_TABLE . '_postmeta')->where('post_id', $coupon->ID)->where('meta_key', 'usage_count')->update(
                 array(
@@ -2206,7 +2215,7 @@ class Controller extends BaseController
 
         $price = $totalPriceDetails;
 
-        $coupon = ["coupon" => $validated_data['used_coupon'], "subtotal" => $price['total']];
+        $coupon = ["coupon" => $validated_data['used_coupon'], "subtotal" => $price['total'],'email'=>$user['user_email']];
 
         $discounted_price = 0;
 

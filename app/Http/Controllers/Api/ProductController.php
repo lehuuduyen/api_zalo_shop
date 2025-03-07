@@ -489,6 +489,7 @@ class ProductController extends Controller
                 $controller = new Controller();
                 $da = $controller->getTotalPriceDetailsPos($order,1,1);
                 $data['subtotal'] = $da['totalPriceTopping'];
+                $data['email'] = $store->email;
                 $coupon_amount_total = $this->calculateCoupon($data, $products, true);
                 if ($coupon_amount_total > 0) {
                     return $this->returnSuccess($coupon_amount_total);

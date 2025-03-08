@@ -531,7 +531,9 @@ class Controller extends BaseController
 
         $date_expires = $this->getPostMeta($coupon->ID, 'date_expires');
         if ($checkPoint) {
+          
             $listEMailAccept = unserialize($checkPoint);
+            
             if(!in_array($data['email'],$listEMailAccept)){
                 throw new Exception("Voucher không thể sử dụng");
 
@@ -1746,7 +1748,6 @@ class Controller extends BaseController
                     )
                 );
             }
-            if (array_key_exists('point_use', $data)) {
                 $history = DB::table($this->_PRFIX_TABLE . '_woo_history_user_point')->where('user_id', $user['id'])->orderBy('id', 'DESC')->get();
                 $setting = DB::table($this->_PRFIX_TABLE . '_woo_setting')->where('id', 1)->first();
                 $money_converted_to_point = 0;
@@ -1757,41 +1758,41 @@ class Controller extends BaseController
                 }
 
                 // tính điểm sang tiền
-                $tienDoiThuong = $points_converted_to_money * $data['point_use'];
+                // $tienDoiThuong = $points_converted_to_money * $data['point_use'];
 
-                if ($tienDoiThuong > $finalDetails['total']) {
-                    throw new \Exception('Tiền đổi thưởng không được quá tổng đơn hàng');
-                }
+                // if ($tienDoiThuong > $finalDetails['total']) {
+                //     throw new \Exception('Tiền đổi thưởng không được quá tổng đơn hàng');
+                // }
 
 
 
-                $totalDoiThuong = 0;
-                foreach ($history  as $value) {
-                    if ($value->status == 1) {
-                        $totalDoiThuong = $totalDoiThuong + $value->point;
-                    }
-                    if ($value->status == 2 || $value->status == 4) {
-                        $totalDoiThuong = $totalDoiThuong - $value->point;
-                    }
-                }
+                // $totalDoiThuong = 0;
+                // foreach ($history  as $value) {
+                //     if ($value->status == 1) {
+                //         $totalDoiThuong = $totalDoiThuong + $value->point;
+                //     }
+                //     if ($value->status == 2 || $value->status == 4) {
+                //         $totalDoiThuong = $totalDoiThuong - $value->point;
+                //     }
+                // }
 
-                if ($data['point_use'] && $totalDoiThuong > 0 && $totalDoiThuong >= $data['point_use']) {
-                    $finalDetails['total'] = $finalDetails['total'] - $tienDoiThuong;
-                    DB::table($this->_PRFIX_TABLE . '_woo_history_user_point')->insertGetId(
-                        array(
-                            'order_id' => $postId,
-                            'total_order' => $finalDetails['total'],
-                            'user_id' => $user['id'],
-                            'point' => $data['point_use'],
-                            'minimum_spending' => $totalOrderBanDau,
-                            'points_converted_to_money' => $points_converted_to_money,
-                            'status' => 4,
-                        )
-                    );
-                } else if ($data['point_use'] == '' || $data['point_use'] == 0) {
-                } else {
-                    throw new \Exception('Vượt quá số điểm hiện có');
-                }
+                // if ($data['point_use'] && $totalDoiThuong > 0 && $totalDoiThuong >= $data['point_use']) {
+                //     $finalDetails['total'] = $finalDetails['total'] - $tienDoiThuong;
+                //     DB::table($this->_PRFIX_TABLE . '_woo_history_user_point')->insertGetId(
+                //         array(
+                //             'order_id' => $postId,
+                //             'total_order' => $finalDetails['total'],
+                //             'user_id' => $user['id'],
+                //             'point' => $data['point_use'],
+                //             'minimum_spending' => $totalOrderBanDau,
+                //             'points_converted_to_money' => $points_converted_to_money,
+                //             'status' => 4,
+                //         )
+                //     );
+                // } else if ($data['point_use'] == '' || $data['point_use'] == 0) {
+                // } else {
+                //     throw new \Exception('Vượt quá số điểm hiện có');
+                // }
 
                 $convertMoneyToPoint = ($money_converted_to_point) > 0 ? floor($totalPriceAndVoucher / $money_converted_to_point) : 0;
                 DB::table($this->_PRFIX_TABLE . '_woo_history_user_point')->insertGetId(
@@ -1805,7 +1806,6 @@ class Controller extends BaseController
                         'status' => 3,
                     )
                 );
-            }
             //them hoa hồng
             $getUserParent = $this->getUserParentLastes($user['id']);
 

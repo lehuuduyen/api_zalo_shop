@@ -48,6 +48,6 @@ class GetData extends Controller
             //throw $th;
 
         }
-        return $this->returnError(new \stdClass, "Token không đúng hoặc hết hạn");
+        return $this->returnError(new \stdClass, "Token không đúng ");
     }
 }

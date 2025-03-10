@@ -24,41 +24,33 @@ class StoreController extends Controller
 
 
         $info = new \stdClass();
-        $info->email = [
-            'title' => "",
-            'value' => "",
-        ];
-        $info->phone = [
-            'title' => "",
-            'value' => "",
-        ];
-        $info->address = [
-            'title' => "",
-            'value' => "",
-        ];
-        $info->open_hour = [
-            'title' => "",
-            'value' => "",
-        ];
+        $info->email = "";
+        $info->phone = "";
+        $info->website = "";
+        $info->open_hour = "08:00 - 22:00";
+        $branchs = DB::table($this->_PRFIX_TABLE . '_woo_branchs')->where('status', 1)
+            ->get();
+
+        foreach ($branchs as $key => $val) {
+            $branchs[$key]->city_name = ($val->city) ? $this->city($request, $val->city) : "";
+            $branchs[$key]->quan_name = ($val->district) ? $this->quan($request, $val->city, $val->district) : "";
+            $branchs[$key]->phuong_name = ($val->ward) ? $this->phuong($request, $val->district, $val->ward) : "";
+        }
+        $info->chi_nhanh = $branchs;
+        
         if ($infor) {
             $content = $infor->post_content;
             $lineAfterPhone = $this->lienhe($content, 'Điện thoại:', 11);
 
 
-            $info->phone = [
-                'title' => 'Điện thoại:',
-                'value' => $lineAfterPhone,
-            ];
             $email = $this->lienhe($content, 'Email:', 6);
-            $info->email = [
-                'title' => 'Email:',
-                'value' => $email,
-            ];
-            $address = $this->lienhe($content, 'Địa chỉ:', 8);
-            $info->address = [
-                'title' => 'Địa chỉ :',
-                'value' => $address,
-            ];
+            $website = $this->lienhe($content, 'Website:', 6);
+            $email = $this->lienhe($content, 'Email:', 6);
+
+            $info->email =$email;
+            $info->phone = $lineAfterPhone;
+            $info->website = $website;
+            
         }
 
         return $this->returnSuccess($info);
@@ -308,7 +300,8 @@ class StoreController extends Controller
         $this->_PRFIX_TABLE = $store->prefixTable;
         $user = DB::table($this->_PRFIX_TABLE . '_users')->where('user_login', $store->sdt)->select('ID', 'display_name as name', 'user_email as email', 'user_login as mobile')
             ->first();
-
+        $countNoti = DB::table($this->_PRFIX_TABLE . '_woo_user_notification')->where('user_id', $user->ID)->where('status', 0)
+        ->count();
         $address = $this->getUserMeta($user->ID, 'shipping_address_1');
         $company = $this->getUserMeta($user->ID, 'company');
         $city = $this->getUserMeta($user->ID, 'city');
@@ -320,6 +313,7 @@ class StoreController extends Controller
             $image = env('API_URL_BACKEND') . "/storage/" . $image;
         }
 
+        $user->count_notification_not_read = $countNoti;
         $user->address = $address;
         $user->avt = $image;
         $user->user_parent = $this->getUserMeta($user->ID, 'user_parent');
@@ -1065,6 +1059,7 @@ class StoreController extends Controller
         );
         return $this->returnSuccess([1], "Đã xem");
     }
+    
     public function prize(Request $request)
     {
         $store = $request['data_reponse'];
@@ -1127,7 +1122,7 @@ class StoreController extends Controller
                 );
                 $postMeta = DB::table($this->_PRFIX_TABLE . '_postmeta')->insert(
                     array(
-                       
+
                         array(
                             'post_id' => $postId,
                             'meta_key' => 'coupon_amount',
@@ -1153,15 +1148,15 @@ class StoreController extends Controller
                             'meta_key' => 'usage_limit_per_user',
                             'meta_value' => 1,
                         ),
-    
+
                         array(
                             'post_id' => $postId,
                             'meta_key' => 'limit_usage_to_x_items',
                             'meta_value' => 0,
                         )
-                      
-                       
-    
+
+
+
                     )
                 );
             }

@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Illuminate\Support\Str;
 
 class StoreController extends Controller
 {
@@ -1111,7 +1111,7 @@ class StoreController extends Controller
                         'post_type' => 'shop_order',
                         'post_content' => '',
                         'post_excerpt' => '[Đổi quà]  ' . $prizes->name,
-                        'post_name' =>  \Str::slug('[Đổi quà]  ' . $prizes->name),
+                        'post_name' =>  Str::slug('[Đổi quà]  ' . $prizes->name),
                         'to_ping' => '',
                         'pinged' => '',
                         'post_content_filtered' => '',
@@ -1161,12 +1161,24 @@ class StoreController extends Controller
                 );
             }
             // type là quà tặng
-            return $this->returnSuccess($prizes);
+            $results = DB::table($this->_PRFIX_TABLE . '_woo_history_user_point')->insertGetId(
+                array(
+                    'user_id' => $userId,
+                    'total_order' => 0,
+                    'point' => $prizes->point,
+                    'minimum_spending' => 0,
+                    'points_converted_to_money' => 0,
+                    'status' => 2,
+                    'prize_id' => $prizes->id,
+                )
+            );
 
             DB::commit();
+            return $this->returnSuccess($results,'Đổi quà thành công');
+
         } catch (\Throwable $th) {
             DB::rollBack();
-            //throw $th;
+            return $this->returnError([],$th->getMessage());
         }
     }
 }

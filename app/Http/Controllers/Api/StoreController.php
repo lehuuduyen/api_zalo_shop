@@ -30,11 +30,36 @@ class StoreController extends Controller
         $info->open_hour = "08:00 - 22:00";
         $branchs = DB::table($this->_PRFIX_TABLE . '_woo_branchs')->where('status', 1)
             ->get();
+            $opts = [
+                "http" => [
+                    "method" => "GET",
+                    "header" => "User-Agent: MyGeolocationApp/1.0 (your@email.com)\r\n" // Required by OSM
+                ]
+            ];
+            $context = stream_context_create($opts);
 
         foreach ($branchs as $key => $val) {
             $branchs[$key]->city_name = ($val->city) ? $this->city($request, $val->city) : "";
             $branchs[$key]->quan_name = ($val->district) ? $this->quan($request, $val->city, $val->district) : "";
             $branchs[$key]->phuong_name = ($val->ward) ? $this->phuong($request, $val->district, $val->ward) : "";
+            $branchs[$key]->img = 'https://scontent.fsgn8-4.fna.fbcdn.net/v/t39.30808-6/466000325_1318374532658086_1906160599489764874_n.jpg?_nc_cat=107&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=r_rKZjhtKV4Q7kNvgFfQNPY&_nc_oc=AdjLZFSDPdUCHswWF-J4VyqgdI2UJLWKq0QVLlPUEXxypv7K7mtxxK-i5zLDMtE5rbI&_nc_zt=23&_nc_ht=scontent.fsgn8-4.fna&_nc_gid=A3CCli41rSY71n_p_MuiytM&oh=00_AYGS0qxLBxgqtRbjERiqwPcwL4vs0f-DBm44DHsJ4L0-bQ&oe=67D9A101'; // Properly encode the address
+
+            $address = urlencode($branchs[$key]->address.','.$branchs[$key]->phuong_name.','.$branchs[$key]->quan_name.','.$branchs[$key]->city_name); // Properly encode the address
+
+            $position = file_get_contents('https://nominatim.openstreetmap.org/search?q='.$address.'&format=json&limit=1', false, $context);
+            if ($position === false) {
+                // return ['error' => 'Failed to retrieve location'];
+                $branchs[$key]->lat = '';
+                $branchs[$key]->lon = '';
+            }else{
+                $json = json_decode($position, true);
+                $branchs[$key]->lat = $json[0]['lat'];
+                $branchs[$key]->lon = $json[0]['lon'];
+            }
+            
+            
+            
+        
         }
         $info->chi_nhanh = $branchs;
         

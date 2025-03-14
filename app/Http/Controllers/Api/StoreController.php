@@ -43,8 +43,8 @@ class StoreController extends Controller
             $branchs[$key]->quan_name = ($val->district) ? $this->quan($request, $val->city, $val->district) : "";
             $branchs[$key]->phuong_name = ($val->ward) ? $this->phuong($request, $val->district, $val->ward) : "";
             $branchs[$key]->img = 'https://scontent.fsgn8-4.fna.fbcdn.net/v/t39.30808-6/466000325_1318374532658086_1906160599489764874_n.jpg?_nc_cat=107&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=r_rKZjhtKV4Q7kNvgFfQNPY&_nc_oc=AdjLZFSDPdUCHswWF-J4VyqgdI2UJLWKq0QVLlPUEXxypv7K7mtxxK-i5zLDMtE5rbI&_nc_zt=23&_nc_ht=scontent.fsgn8-4.fna&_nc_gid=A3CCli41rSY71n_p_MuiytM&oh=00_AYGS0qxLBxgqtRbjERiqwPcwL4vs0f-DBm44DHsJ4L0-bQ&oe=67D9A101'; // Properly encode the address
-
-            $address = urlencode($branchs[$key]->address.','.ltrim($branchs[$key]->phuong_name, "0").','.$branchs[$key]->quan_name.','.$branchs[$key]->city_name); // Properly encode the address
+            $phuong = preg_replace('/\b0(\d)/', '$1', $branchs[$key]->phuong_name) . PHP_EOL;
+            $address = urlencode($branchs[$key]->address.','.$phuong.','.$branchs[$key]->quan_name.','.$branchs[$key]->city_name); // Properly encode the address
 
             $position = file_get_contents('https://nominatim.openstreetmap.org/search?q='.$address.'&format=json&limit=1', false, $context);
             if (!$position ) {

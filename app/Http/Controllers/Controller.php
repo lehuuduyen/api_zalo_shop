@@ -552,9 +552,12 @@ class Controller extends BaseController
         $usage_limit = $this->getPostMeta($coupon->ID, 'usage_limit_per_user');
         $usage_count = $this->getPostMeta($coupon->ID, 'usage_count');
        
-        if ($usage_limit <= $usage_count) {
+        if ($usage_limit >= $usage_count) {
+            throw new Exception("Khuyến mãi đã hết lượt sử dụng");
+
             return $discount_total;
         }
+        
         $coupon_type = $this->getPostMeta($coupon->ID, 'discount_type');
         if ($coupon_type == "percent") {
             $coupon_type = 'percentage';

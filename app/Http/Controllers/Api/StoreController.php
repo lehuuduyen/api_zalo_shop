@@ -1043,7 +1043,6 @@ class StoreController extends Controller
         $noti = DB::table($this->_PRFIX_TABLE . '_woo_notification')
             ->join($this->_PRFIX_TABLE . '_woo_user_notification', $this->_PRFIX_TABLE . '_woo_notification.id', $this->_PRFIX_TABLE . '_woo_user_notification.notification_id')
             ->where($this->_PRFIX_TABLE . '_woo_user_notification.user_id', $userId)
-            ->select($this->_PRFIX_TABLE . '_woo_notification.id', $this->_PRFIX_TABLE . '_woo_notification.link', $this->_PRFIX_TABLE . '_woo_notification.content', $this->_PRFIX_TABLE . '_woo_user_notification.status')
             ->get();
         return $this->returnSuccess($noti);
     }

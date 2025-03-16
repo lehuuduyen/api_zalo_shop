@@ -337,6 +337,11 @@ class StoreController extends Controller
         if ($image) {
             $image = env('API_URL_BACKEND') . "/storage/" . $image;
         }
+        $CouponsController =  new CouponsController();
+        $coupons = $CouponsController->index($request,true);
+      
+        $user->countCoupon = count($coupons);
+
 
         $user->count_notification_not_read = $countNoti;
         $user->address = $address;

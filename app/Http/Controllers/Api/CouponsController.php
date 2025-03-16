@@ -14,7 +14,7 @@ class CouponsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index(Request $request,$check = false)
     {
         $store = $request['data_reponse'];
         $this->_PRFIX_TABLE = $store->prefixTable;
@@ -72,7 +72,9 @@ class CouponsController extends Controller
                 $i++;
             }
         }
-
+        if($check){
+            return $listCoupons;
+        }
 
         return $this->returnSuccess($listCoupons);
     }

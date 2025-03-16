@@ -565,7 +565,7 @@ class Controller extends BaseController
        
         
         if ($minimum_amount > $data['subtotal']) {
-            throw new Exception("Tổng hóa đơn phải lớn hơn " . $minimum_amount);
+            throw new Exception("Tổng hóa đơn phải lớn hơn " .number_format($minimum_amount, 0, ",", "."));
         }
         // calculate based on coupon type
         if ($coupon_type === 'percentage') {

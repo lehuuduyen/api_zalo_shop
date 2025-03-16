@@ -1139,7 +1139,6 @@ class StoreController extends Controller
                         'to_ping' => '',
                         'pinged' => '',
                         'post_content_filtered' => '',
-                        'post_author' => '',
 
                         'comment_count' => '0',
                     )

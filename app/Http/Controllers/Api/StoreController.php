@@ -382,39 +382,39 @@ class StoreController extends Controller
         $user->tong_doanh_thu = $this->tongDoanhThu([$user->ID], []);
         $user->tong_don_hang = $this->tongDonHang([$user->ID], []);
 
-        $getWeek = $this->getWeek();
-        $arr[0]['label'] = 'Tổng hoa hồng';
-        $arr[1]['label'] = 'Tổng doanh thu';
-        $arr[2]['label'] = 'Tổng hoa hồng đã rút';
-        $arr[3]['label'] = 'Tổng đơn';
-        $listTongHoaHong = [];
-        $listTongDoanhThu = [];
-        $listTongHoaHongDaRut = [];
-        $listTongDon = [];
-        foreach ($getWeek as $day) {
-            $arrDay = explode('-', $day);
-            $date = $arrDay[2];
-            $month = $arrDay[1];
-            $year = $arrDay[0];
-            $tongHoaHong = $this->tongHoaHong([$user->ID], [], $date, $month, $year);
-            $tongDoanhThu = $this->tongDoanhThu([$user->ID], [], $date, $month, $year);
-            $tongHoaHongDaRut = $this->thucNhan([$user->ID], $date, $month, $year);
-            $tongDon =  $this->tongDonHang([$user->ID], [], $date, $month, $year);
-            $listTongHoaHong[] = $tongHoaHong;
-            $listTongDoanhThu[] = $tongDoanhThu;
-            $listTongHoaHongDaRut[] = $tongHoaHongDaRut;
-            $listTongDon[] = $tongDon;
-        }
-        $arr[0]['data'] = $listTongHoaHong;
-        $arr[1]['data'] = $listTongDoanhThu;
-        $arr[2]['data'] = $listTongHoaHongDaRut;
-        $arr[3]['data'] = $listTongDon;
+        // $getWeek = $this->getWeek();
+        // $arr[0]['label'] = 'Tổng hoa hồng';
+        // $arr[1]['label'] = 'Tổng doanh thu';
+        // $arr[2]['label'] = 'Tổng hoa hồng đã rút';
+        // $arr[3]['label'] = 'Tổng đơn';
+        // $listTongHoaHong = [];
+        // $listTongDoanhThu = [];
+        // $listTongHoaHongDaRut = [];
+        // $listTongDon = [];
+        // foreach ($getWeek as $day) {
+        //     $arrDay = explode('-', $day);
+        //     $date = $arrDay[2];
+        //     $month = $arrDay[1];
+        //     $year = $arrDay[0];
+        //     $tongHoaHong = $this->tongHoaHong([$user->ID], [], $date, $month, $year);
+        //     $tongDoanhThu = $this->tongDoanhThu([$user->ID], [], $date, $month, $year);
+        //     $tongHoaHongDaRut = $this->thucNhan([$user->ID], $date, $month, $year);
+        //     $tongDon =  $this->tongDonHang([$user->ID], [], $date, $month, $year);
+        //     $listTongHoaHong[] = $tongHoaHong;
+        //     $listTongDoanhThu[] = $tongDoanhThu;
+        //     $listTongHoaHongDaRut[] = $tongHoaHongDaRut;
+        //     $listTongDon[] = $tongDon;
+        // }
+        // $arr[0]['data'] = $listTongHoaHong;
+        // $arr[1]['data'] = $listTongDoanhThu;
+        // $arr[2]['data'] = $listTongHoaHongDaRut;
+        // $arr[3]['data'] = $listTongDon;
 
-        $arr[0]['backgroundColor'] = '#F57C00';
-        $arr[1]['backgroundColor'] = '#00E572';
-        $arr[2]['backgroundColor'] = '#EB00F0';
-        $arr[3]['backgroundColor'] = '#3D3BC2';
-        $user->bieu_do = $arr;
+        // $arr[0]['backgroundColor'] = '#F57C00';
+        // $arr[1]['backgroundColor'] = '#00E572';
+        // $arr[2]['backgroundColor'] = '#EB00F0';
+        // $arr[3]['backgroundColor'] = '#3D3BC2';
+        // $user->bieu_do = $arr;
         return $this->returnSuccess($user);
     }
     public function userChild(Request $request)
@@ -663,21 +663,21 @@ class StoreController extends Controller
             $this->_PRFIX_TABLE = $store->prefixTable;
             $validator = Validator::make($request->all(), [
                 'name' => 'required',
-                'stk' => 'required',
-                'bankname' => 'required',
+                // 'stk' => 'required',
+                // 'bankname' => 'required',
                 'money' => 'required',
 
             ], [
                 'name.required' => "Vui lòng tên tài khoản ",
-                'stk.required' => "Vui lòng nhập STK",
-                'bankname.required' => "Vui lòng nhập tên ngân hàng",
+                // 'stk.required' => "Vui lòng nhập STK",
+                // 'bankname.required' => "Vui lòng nhập tên ngân hàng",
                 'money.required' => "Vui lòng nhập tiền rút",
             ]);
             if ($validator->fails()) {
                 return $this->returnError(new \stdClass, $validator->errors()->first());
             } else {
                 if ($data['money'] < 100) {
-                    return $this->returnError(new \stdClass, "Số tiền rút phải lớn hơn 100000");
+                    return $this->returnError(new \stdClass, "Số tiền rút phải lớn hơn 100.000");
                 }
                 $userId = $store->user_id;
 
@@ -688,6 +688,10 @@ class StoreController extends Controller
                 $hoa_hong = $tong_hoa_hong - $thuc_nhan - $cho_doi_soat;
                 if ($data['money'] > $hoa_hong) {
                     return $this->returnError(new \stdClass, "Tiền hoa hồng chỉ còn " . $hoa_hong);
+                }
+                if(isset($data['sdt'])){
+                    $data['stk'] = $data['sdt'];
+                    $data['bankname'] = "MOMO";
                 }
                 $paymentMethod = json_encode(['name' => $data['name'], 'stk' => $data['stk'], 'bankname' => $data['bankname']]);
                 DB::table($this->_PRFIX_TABLE . '_woo_history_user_commission')->insertGetId(

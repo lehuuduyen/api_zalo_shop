@@ -27,14 +27,17 @@ class OrdersController extends Controller
     {
         try {
             //code...
+            DB::beginTransaction();
+
             $store = $request['data_reponse'];
-           
+
             $order = DB::table($this->_PRFIX_TABLE . '_wc_order_stats')->join($this->_PRFIX_TABLE . '_posts', $this->_PRFIX_TABLE . '_posts.ID', $this->_PRFIX_TABLE . '_wc_order_stats.order_id')->where($this->_PRFIX_TABLE . '_wc_order_stats.customer_id', $store->user_id)->where($this->_PRFIX_TABLE . '_wc_order_stats.order_id', '=',  $id)->first();
             if (!$order) {
                 return $this->returnError([], 'Đơn hàng không tồn tại');
             }
+
             if ($order->post_status == "wc-pending" || $order->post_status == "wc-processing") {
-              
+
 
                 //ghi chú
                 $content = "Trạng thái đơn hàng đã được chuyển từ " . $order->post_status . " sang Đã hủy.";
@@ -61,16 +64,37 @@ class OrdersController extends Controller
                     array('meta_value' => $content)
                 );
                 DB::table('wp_posts')
-                ->where('ID', $order->ID)
-                ->update(['post_status' => 'wc-cancelled']);
+                    ->where('ID', $order->ID)
+                    ->update(['post_status' => 'wc-cancelled']);
+
+                // huy coupon
+                $coupon = DB::table($this->_PRFIX_TABLE . '_wc_order_coupon_lookup')->where('order_id', '=',  $order->ID)->first();
+                if ($coupon) {
+                    $meta = DB::table($this->_PRFIX_TABLE . '_postmeta')
+                        ->where('post_id', $coupon->coupon_id)
+                        ->where('meta_key', 'usage_count')
+                        ->first();
+
+                    $metaValue = $meta ? $meta->meta_value - 1 : 0;
+                    $insertMetaUser = DB::table($this->_PRFIX_TABLE . '_postmeta')->updateOrInsert(
+                        array(
+                            'post_id' => $coupon->coupon_id,
+                            'meta_key' => 'usage_count'
+                        ),
+                        array('meta_value' =>  $metaValue)
+                    );
+                }
+                DB::commit();
+
                 return $this->returnSuccess([$order->ID], 'Hủy đơn hàng thành công');
             }
             return $this->returnError([], 'Đơn này không được hủy');
         } catch (\Throwable $th) {
             //throw $th;
             $this->woo_logs('cancel_order', $th->getMessage());
+            DB::rollBack();
 
-            return $this->returnError([], 'Đơn này không được hủy');
+            return $this->returnError([],  'Đơn này không được hủy');
         }
     }
     public function index(Request $request)
@@ -129,14 +153,14 @@ class OrdersController extends Controller
             $pointUseMoney =  0;
             // lý do hủy
             $ly_do = DB::table($this->_PRFIX_TABLE . '_wc_orders_meta')->where('order_id', $order->order_id)
-            ->where('meta_key', 'comment')->orderBy('id',"DESC")->first();
-            $orders[$key]->ly_do = ($ly_do)?$ly_do->meta_value:"";
-           
+                ->where('meta_key', 'comment')->orderBy('id', "DESC")->first();
+            $orders[$key]->ly_do = ($ly_do) ? $ly_do->meta_value : "";
+
             if ($pointUseMoney != 0) {
                 $orders[$key]->total_price = $orders[$key]->total_price + $pointUseMoney;
             }
             $orders[$key]->point_use = $pointUse;
-            
+
             $orders[$key]->points_converted_to_money = $pointUseMoney;
 
             $orders[$key]->point_receive = $pointReceive;
@@ -296,7 +320,7 @@ class OrdersController extends Controller
         $store = $request['data_reponse'];
         $this->_PRFIX_TABLE = $store->prefixTable;
         try {
-            
+
             $validator = Validator::make($request->all(), [
                 'payment_gateway' => 'required',
                 'name' => 'required',
@@ -397,7 +421,7 @@ class OrdersController extends Controller
                         'state' => $data['state'],
                         'city' => $data['city'],
                         'email' => $user->user_email,
-                        'user_email'=>$user->user_email,
+                        'user_email' => $user->user_email,
                         'address' => "",
                         'user_created' => $store->user_id
                     ];

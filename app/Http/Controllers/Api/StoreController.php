@@ -1108,6 +1108,7 @@ class StoreController extends Controller
             DB::beginTransaction();
 
             $store = $request['data_reponse'];
+            
             $data = $request->all();
             $this->_PRFIX_TABLE = $store->prefixTable;
             $userId = $store->user_id;
@@ -1139,9 +1140,9 @@ class StoreController extends Controller
                         'post_date_gmt' => $timeNow,
                         'post_modified' => $timeNow,
                         'post_modified_gmt' => $timeNow,
-                        'post_title' => '[Đổi quà]  ' . $prizes->name,
-                        'post_status' => 'wc-completed',
-                        'post_type' => 'shop_order',
+                        'post_title' => uniqid(),
+                        'post_status' => 'publish',
+                        'post_type' => 'shop_coupon',
                         'post_content' => '',
                         'post_excerpt' => '[Đổi quà]  ' . $prizes->name,
                         'post_name' =>  Str::slug('[Đổi quà]  ' . $prizes->name),
@@ -1173,7 +1174,7 @@ class StoreController extends Controller
                         array(
                             'post_id' => $postId,
                             'meta_key' => 'usage_limit',
-                            'meta_value' => 0,
+                            'meta_value' => 1,
                         ),
                         array(
                             'post_id' => $postId,
@@ -1183,10 +1184,19 @@ class StoreController extends Controller
 
                         array(
                             'post_id' => $postId,
-                            'meta_key' => 'limit_usage_to_x_items',
+                            'meta_key' => 'usage_count',
                             'meta_value' => 0,
+                        ),
+                        array(
+                            'post_id' => $postId,
+                            'meta_key' => 'date_expires',
+                            'meta_value' => strtotime("+1 month"),
+                        ),
+                        array(
+                            'post_id' => $postId,
+                            'meta_key' => 'customer_email',
+                            'meta_value' => serialize([$store->email]),
                         )
-
 
 
                     )
@@ -1206,7 +1216,7 @@ class StoreController extends Controller
             );
 
             DB::commit();
-            return $this->returnSuccess($results,'Đổi quà thành công');
+            return $this->returnSuccess($postId,'Đổi quà thành công');
 
         } catch (\Throwable $th) {
             DB::rollBack();

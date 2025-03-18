@@ -19,7 +19,9 @@ class CouponsController extends Controller
         $store = $request['data_reponse'];
         $this->_PRFIX_TABLE = $store->prefixTable;
 
-        $coupons = DB::table($this->_PRFIX_TABLE . '_posts')->where('post_status', 'publish')->where('post_type', 'shop_coupon')->get();
+        $coupons = DB::table($this->_PRFIX_TABLE . '_posts')->where('post_status', 'publish')->where('post_type', 'shop_coupon')->orderBy('id', 'DESC')->get();
+       
+       
         $listCoupons = [];
         $i = 0;
         foreach ($coupons as $key => $val) {
@@ -36,6 +38,7 @@ class CouponsController extends Controller
             $usage_limit = $this->getPostMeta($val->ID, 'usage_limit');
             $usage_count = $this->getPostMeta($val->ID, 'usage_count');
             $minimum_amount = $this->getPostMeta($val->ID, 'minimum_amount');
+           
             if ($usage_limit <= $usage_count) {
                 continue;
             }

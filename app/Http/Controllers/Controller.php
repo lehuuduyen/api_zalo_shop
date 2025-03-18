@@ -520,28 +520,27 @@ class Controller extends BaseController
         $discount_total = 0;
         $paramCoupon = $data['coupon'];
         $coupon = DB::table($this->_PRFIX_TABLE . '_posts')->where('post_title', $paramCoupon)->where('post_status', 'publish')->where('post_type', 'shop_coupon')->first();
-        
+
 
         if (is_null($coupon)) {
             return $discount_total;
         }
         $checkPoint = $this->getPostMeta($coupon->ID, 'customer_email');
-      
+
         $minimum_amount = $this->getPostMeta($coupon->ID, 'minimum_amount');
 
         $date_expires = $this->getPostMeta($coupon->ID, 'date_expires');
         if ($checkPoint) {
-          
-            $listEMailAccept = unserialize($checkPoint);
-            
-            if(!in_array($data['email'],$listEMailAccept)){
-                throw new Exception("Voucher không thể sử dụng");
 
+            $listEMailAccept = unserialize($checkPoint);
+
+            if (!in_array($data['email'], $listEMailAccept)) {
+                throw new Exception("Voucher không thể sử dụng");
             }
             // unserialize($checkPoint)
         }
-      
-       
+
+
         if ($date_expires < time()) {
 
             throw new Exception("Voucher hết hạn");
@@ -549,23 +548,23 @@ class Controller extends BaseController
             return $discount_total;
         }
         $coupon_amount = $this->getPostMeta($coupon->ID, 'coupon_amount');
-        $usage_limit = $this->getPostMeta($coupon->ID, 'usage_limit_per_user');
+        $usage_limit = $this->getPostMeta($coupon->ID, 'usage_limit');
         $usage_count = $this->getPostMeta($coupon->ID, 'usage_count');
-       
-        if ($usage_limit >= $usage_count) {
+
+        if ($usage_limit <= $usage_count) {
             throw new Exception("Khuyến mãi đã hết lượt sử dụng");
 
             return $discount_total;
         }
-        
+
         $coupon_type = $this->getPostMeta($coupon->ID, 'discount_type');
         if ($coupon_type == "percent") {
             $coupon_type = 'percentage';
         }
-       
-        
+
+
         if ($minimum_amount > $data['subtotal']) {
-            throw new Exception("Tổng hóa đơn phải lớn hơn " .number_format($minimum_amount, 0, ",", "."));
+            throw new Exception("Tổng hóa đơn phải lớn hơn " . number_format($minimum_amount, 0, ",", "."));
         }
         // calculate based on coupon type
         if ($coupon_type === 'percentage') {
@@ -576,7 +575,7 @@ class Controller extends BaseController
         if ($discount_total > $data['subtotal']) {
             $discount_total = $data['subtotal'];
         }
-       
+
         if (!$isCheckApiCoupon) {
             DB::table($this->_PRFIX_TABLE . '_postmeta')->where('post_id', $coupon->ID)->where('meta_key', 'usage_count')->update(
                 array(
@@ -1349,7 +1348,7 @@ class Controller extends BaseController
             if (!$totalPriceDetails) {
                 throw new \Exception('Không đủ số lượng trong kho');
             }
-            
+
             $totalQuantity = array_sum($totalPriceDetails['quantity']);
 
             $totalOrderBanDau = $totalPriceDetails['totalPriceTopping'];
@@ -1751,64 +1750,64 @@ class Controller extends BaseController
                     )
                 );
             }
-                $history = DB::table($this->_PRFIX_TABLE . '_woo_history_user_point')->where('user_id', $user['id'])->orderBy('id', 'DESC')->get();
-                $setting = DB::table($this->_PRFIX_TABLE . '_woo_setting')->where('id', 1)->first();
-                $money_converted_to_point = 0;
-                $points_converted_to_money = 0;
-                if ($setting) {
-                    $money_converted_to_point = $setting->amount_spent;
-                    $points_converted_to_money = $setting->points_converted_to_money;
-                }
+            $history = DB::table($this->_PRFIX_TABLE . '_woo_history_user_point')->where('user_id', $user['id'])->orderBy('id', 'DESC')->get();
+            $setting = DB::table($this->_PRFIX_TABLE . '_woo_setting')->where('id', 1)->first();
+            $money_converted_to_point = 0;
+            $points_converted_to_money = 0;
+            if ($setting) {
+                $money_converted_to_point = $setting->amount_spent;
+                $points_converted_to_money = $setting->points_converted_to_money;
+            }
 
-                // tính điểm sang tiền
-                // $tienDoiThuong = $points_converted_to_money * $data['point_use'];
+            // tính điểm sang tiền
+            // $tienDoiThuong = $points_converted_to_money * $data['point_use'];
 
-                // if ($tienDoiThuong > $finalDetails['total']) {
-                //     throw new \Exception('Tiền đổi thưởng không được quá tổng đơn hàng');
-                // }
+            // if ($tienDoiThuong > $finalDetails['total']) {
+            //     throw new \Exception('Tiền đổi thưởng không được quá tổng đơn hàng');
+            // }
 
 
 
-                // $totalDoiThuong = 0;
-                // foreach ($history  as $value) {
-                //     if ($value->status == 1) {
-                //         $totalDoiThuong = $totalDoiThuong + $value->point;
-                //     }
-                //     if ($value->status == 2 || $value->status == 4) {
-                //         $totalDoiThuong = $totalDoiThuong - $value->point;
-                //     }
-                // }
+            // $totalDoiThuong = 0;
+            // foreach ($history  as $value) {
+            //     if ($value->status == 1) {
+            //         $totalDoiThuong = $totalDoiThuong + $value->point;
+            //     }
+            //     if ($value->status == 2 || $value->status == 4) {
+            //         $totalDoiThuong = $totalDoiThuong - $value->point;
+            //     }
+            // }
 
-                // if ($data['point_use'] && $totalDoiThuong > 0 && $totalDoiThuong >= $data['point_use']) {
-                //     $finalDetails['total'] = $finalDetails['total'] - $tienDoiThuong;
-                //     DB::table($this->_PRFIX_TABLE . '_woo_history_user_point')->insertGetId(
-                //         array(
-                //             'order_id' => $postId,
-                //             'total_order' => $finalDetails['total'],
-                //             'user_id' => $user['id'],
-                //             'point' => $data['point_use'],
-                //             'minimum_spending' => $totalOrderBanDau,
-                //             'points_converted_to_money' => $points_converted_to_money,
-                //             'status' => 4,
-                //         )
-                //     );
-                // } else if ($data['point_use'] == '' || $data['point_use'] == 0) {
-                // } else {
-                //     throw new \Exception('Vượt quá số điểm hiện có');
-                // }
+            // if ($data['point_use'] && $totalDoiThuong > 0 && $totalDoiThuong >= $data['point_use']) {
+            //     $finalDetails['total'] = $finalDetails['total'] - $tienDoiThuong;
+            //     DB::table($this->_PRFIX_TABLE . '_woo_history_user_point')->insertGetId(
+            //         array(
+            //             'order_id' => $postId,
+            //             'total_order' => $finalDetails['total'],
+            //             'user_id' => $user['id'],
+            //             'point' => $data['point_use'],
+            //             'minimum_spending' => $totalOrderBanDau,
+            //             'points_converted_to_money' => $points_converted_to_money,
+            //             'status' => 4,
+            //         )
+            //     );
+            // } else if ($data['point_use'] == '' || $data['point_use'] == 0) {
+            // } else {
+            //     throw new \Exception('Vượt quá số điểm hiện có');
+            // }
 
-                $convertMoneyToPoint = ($money_converted_to_point) > 0 ? floor($totalPriceAndVoucher / $money_converted_to_point) : 0;
-                DB::table($this->_PRFIX_TABLE . '_woo_history_user_point')->insertGetId(
-                    array(
-                        'order_id' => $postId,
-                        'total_order' => $finalDetails['total'],
-                        'user_id' => $user['id'],
-                        'point' => $convertMoneyToPoint,
-                        'minimum_spending' => $totalOrderBanDau,
-                        'points_converted_to_money' => $points_converted_to_money,
-                        'status' => 3,
-                    )
-                );
+            $convertMoneyToPoint = ($money_converted_to_point) > 0 ? floor($totalPriceAndVoucher / $money_converted_to_point) : 0;
+            DB::table($this->_PRFIX_TABLE . '_woo_history_user_point')->insertGetId(
+                array(
+                    'order_id' => $postId,
+                    'total_order' => $finalDetails['total'],
+                    'user_id' => $user['id'],
+                    'point' => $convertMoneyToPoint,
+                    'minimum_spending' => $totalOrderBanDau,
+                    'points_converted_to_money' => $points_converted_to_money,
+                    'status' => 3,
+                )
+            );
             //them hoa hồng
             $getUserParent = $this->getUserParentLastes($user['id']);
 
@@ -2083,77 +2082,77 @@ class Controller extends BaseController
                 ->get();
 
             if ($history->isNotEmpty()) {
-                $id = $history[0]->id;
-                $userId = $user['id'];
+                // $id = $history[0]->id;
+                // $userId = $user['id'];
 
-                $totalOrder = DB::table($this->_PRFIX_TABLE . '_woo_history_user_point')
-                    ->where('user_id', $userId)
-                    ->where('status', '1')
-                    ->sum('total_order');
+                // $totalOrder = DB::table($this->_PRFIX_TABLE . '_woo_history_user_point')
+                //     ->where('user_id', $userId)
+                //     ->where('status', '1')
+                //     ->sum('total_order');
 
-                $totalOrder = $totalOrder ?: 0;
+                // $totalOrder = $totalOrder ?: 0;
 
-                $checkRankBefore = DB::table($this->_PRFIX_TABLE . '_woo_rank')
-                    ->where('minimum_spending', '<=', $totalOrder)
-                    ->orderBy('minimum_spending', 'DESC')
-                    ->limit(1)
-                    ->get();
+                // $checkRankBefore = DB::table($this->_PRFIX_TABLE . '_woo_rank')
+                //     ->where('minimum_spending', '<=', $totalOrder)
+                //     ->orderBy('minimum_spending', 'DESC')
+                //     ->limit(1)
+                //     ->get();
 
-                DB::table($this->_PRFIX_TABLE . '_woo_history_user_point')
-                    ->where('id', $id)
-                    ->update(['status' => 1]);
+                // DB::table($this->_PRFIX_TABLE . '_woo_history_user_point')
+                //     ->where('id', $id)
+                //     ->update(['status' => 1]);
 
-                $totalOrder = DB::table($this->_PRFIX_TABLE . '_woo_history_user_point')
-                    ->where('user_id', $userId)
-                    ->where('status', '1')
-                    ->sum('total_order');
+                // $totalOrder = DB::table($this->_PRFIX_TABLE . '_woo_history_user_point')
+                //     ->where('user_id', $userId)
+                //     ->where('status', '1')
+                //     ->sum('total_order');
 
-                $totalOrder = $totalOrder ?: 0;
+                // $totalOrder = $totalOrder ?: 0;
 
-                $checkRankAfter = DB::table($this->_PRFIX_TABLE . '_woo_rank')
-                    ->where('minimum_spending', '<=', $totalOrder)
-                    ->orderBy('minimum_spending', 'DESC')
-                    ->limit(1)
-                    ->get();
+                // $checkRankAfter = DB::table($this->_PRFIX_TABLE . '_woo_rank')
+                //     ->where('minimum_spending', '<=', $totalOrder)
+                //     ->orderBy('minimum_spending', 'DESC')
+                //     ->limit(1)
+                //     ->get();
 
-                if ($checkRankBefore->isNotEmpty() && $checkRankAfter->isNotEmpty() && $checkRankBefore[0]->id != $checkRankAfter[0]->id) {
-                    $date = now();
-                    $code = Str::random(10);
-                    $priceSaleOff = $checkRankAfter[0]->price_sale_off;
+                // if ($checkRankBefore->isNotEmpty() && $checkRankAfter->isNotEmpty() && $checkRankBefore[0]->id != $checkRankAfter[0]->id) {
+                //     $date = now();
+                //     $code = Str::random(10);
+                //     $priceSaleOff = $checkRankAfter[0]->price_sale_off;
 
-                    if (!isset($checkRankAfter[0]->text)) {
-                        $text = $checkRankAfter[0]->text;
-                    } else {
-                        $text = 'Voucher cho ' . $checkRankAfter[0]->name . '. Ưu đãi ' . $priceSaleOff;
-                    }
+                //     if (!isset($checkRankAfter[0]->text)) {
+                //         $text = $checkRankAfter[0]->text;
+                //     } else {
+                //         $text = 'Voucher cho ' . $checkRankAfter[0]->name . '. Ưu đãi ' . $priceSaleOff;
+                //     }
 
 
-                    $PostIdVoucher = DB::table($this->_PRFIX_TABLE . '_posts')->insertGetId([
-                        'post_author' => $userId,
-                        'post_date' => $date,
-                        'post_date_gmt' => $date,
-                        'post_title' => $code,
-                        'post_excerpt' => $text,
-                        'post_content' => $text,
-                        'post_status' => 'publish',
-                        'comment_status' => 'closed',
-                        'ping_status' => 'closed',
-                        'post_name' => $code,
-                        'post_modified' => $date,
-                        'post_modified_gmt' => $date,
-                        'post_parent' => 0,
-                        'post_type' => 'shop_coupon',
-                        'to_ping' => '',
-                        'pinged' => '',
-                        'post_content_filtered' => '',
+                //     $PostIdVoucher = DB::table($this->_PRFIX_TABLE . '_posts')->insertGetId([
+                //         'post_author' => $userId,
+                //         'post_date' => $date,
+                //         'post_date_gmt' => $date,
+                //         'post_title' => $code,
+                //         'post_excerpt' => $text,
+                //         'post_content' => $text,
+                //         'post_status' => 'publish',
+                //         'comment_status' => 'closed',
+                //         'ping_status' => 'closed',
+                //         'post_name' => $code,
+                //         'post_modified' => $date,
+                //         'post_modified_gmt' => $date,
+                //         'post_parent' => 0,
+                //         'post_type' => 'shop_coupon',
+                //         'to_ping' => '',
+                //         'pinged' => '',
+                //         'post_content_filtered' => '',
 
-                        'comment_count' => '0',
-                    ]);
+                //         'comment_count' => '0',
+                //     ]);
 
-                    $arrayEmail = serialize([$user['email']]);
-                    $sqlAddMeta = "INSERT INTO " . $this->_PRFIX_TABLE . "_postmeta ( `post_id`, `meta_key`, `meta_value` ) VALUES ('$PostIdVoucher', 'discount_type', 'fixed_cart'), ('$PostIdVoucher', 'coupon_amount', '$priceSaleOff'), ('$PostIdVoucher', 'usage_limit', '1'), ('$PostIdVoucher', 'usage_limit_per_user', '1'), ('$PostIdVoucher', 'limit_usage_to_x_items', '0'), ('$PostIdVoucher', 'usage_count', '0'), ('$PostIdVoucher', 'customer_email', '$arrayEmail'), ('$PostIdVoucher', 'customer_user', '$userId')";
-                    DB::insert($sqlAddMeta);
-                }
+                //     $arrayEmail = serialize([$user['email']]);
+                //     $sqlAddMeta = "INSERT INTO " . $this->_PRFIX_TABLE . "_postmeta ( `post_id`, `meta_key`, `meta_value` ) VALUES ('$PostIdVoucher', 'discount_type', 'fixed_cart'), ('$PostIdVoucher', 'coupon_amount', '$priceSaleOff'), ('$PostIdVoucher', 'usage_limit', '1'), ('$PostIdVoucher', 'usage_limit_per_user', '1'), ('$PostIdVoucher', 'limit_usage_to_x_items', '0'), ('$PostIdVoucher', 'usage_count', '0'), ('$PostIdVoucher', 'customer_email', '$arrayEmail'), ('$PostIdVoucher', 'customer_user', '$userId')";
+                //     DB::insert($sqlAddMeta);
+                // }
             }
 
             // lưu lịch sử commission
@@ -2218,7 +2217,7 @@ class Controller extends BaseController
 
         $price = $totalPriceDetails;
 
-        $coupon = ["coupon" => $validated_data['used_coupon'], "subtotal" => $price['total'],'email'=>$user['user_email']];
+        $coupon = ["coupon" => $validated_data['used_coupon'], "subtotal" => $price['total'], 'email' => $user['user_email']];
 
         $discounted_price = 0;
 
@@ -2641,7 +2640,7 @@ class Controller extends BaseController
     }
     public function getHistoryUser($userId)
     {
-        $data = DB::table($this->_PRFIX_TABLE . '_woo_history_user_point')->where('user_id', $userId)->orderBy('id', 'DESC')->get();
+        $data = DB::table($this->_PRFIX_TABLE . '_woo_history_user_point')->leftJoin($this->_PRFIX_TABLE . '_woo_point_prize',$this->_PRFIX_TABLE . '_woo_point_prize.id',$this->_PRFIX_TABLE . '_woo_history_user_point.prize_id')->where($this->_PRFIX_TABLE . '_woo_history_user_point.user_id', $userId)->select($this->_PRFIX_TABLE . '_woo_history_user_point.*',$this->_PRFIX_TABLE . '_woo_point_prize.name')->orderBy($this->_PRFIX_TABLE . '_woo_history_user_point.id', 'DESC')->get();
         return $data;
     }
     public function getXuUser($userId)
@@ -2884,14 +2883,14 @@ class Controller extends BaseController
             ]
         ];
         // 80b69b6b-a60f-11ed-b190-ea4934f9883e
-    //    dc6e07f3-ece6-11ef-9601-2aa9f69b8470
+        //    dc6e07f3-ece6-11ef-9601-2aa9f69b8470
         $listCity = $this->convertCity();
         $quan = $listCity['districts'][$quan];
         $phuong = $listCity['wards'][$phuong];
 
 
-       
-        
+
+
 
         // DOCS: https://www.php.net/manual/en/function.stream-context-create.php
         $context = stream_context_create($opts);
@@ -2903,7 +2902,7 @@ class Controller extends BaseController
                 break;
             }
         }
-      
+
         $fee  = 0;
         if ($file) {
             $file = json_decode($file);

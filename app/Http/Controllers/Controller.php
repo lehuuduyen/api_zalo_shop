@@ -2640,8 +2640,26 @@ class Controller extends BaseController
     }
     public function getHistoryUser($userId)
     {
-        $data = DB::table($this->_PRFIX_TABLE . '_woo_history_user_point')->leftJoin($this->_PRFIX_TABLE . '_woo_point_prize',$this->_PRFIX_TABLE . '_woo_point_prize.id',$this->_PRFIX_TABLE . '_woo_history_user_point.prize_id')->where($this->_PRFIX_TABLE . '_woo_history_user_point.user_id', $userId)->select($this->_PRFIX_TABLE . '_woo_history_user_point.*',$this->_PRFIX_TABLE . '_woo_point_prize.name')->orderBy($this->_PRFIX_TABLE . '_woo_history_user_point.id', 'DESC')->get();
-        return $data;
+        $data = DB::table($this->_PRFIX_TABLE . '_woo_history_user_point')
+        ->leftJoin($this->_PRFIX_TABLE . '_posts', 
+            $this->_PRFIX_TABLE . '_woo_history_user_point.order_id', 
+            '=', 
+            $this->_PRFIX_TABLE . '_posts.ID'
+        )
+        ->leftJoin($this->_PRFIX_TABLE . '_woo_point_prize', 
+            $this->_PRFIX_TABLE . '_woo_point_prize.id', 
+            '=', 
+            $this->_PRFIX_TABLE . '_woo_history_user_point.prize_id'
+        )
+        ->where($this->_PRFIX_TABLE . '_woo_history_user_point.user_id', $userId)
+        ->where(function ($query) {
+            $query->where($this->_PRFIX_TABLE . '_posts.post_status', 'wc-completed')
+                  ->orWhere($this->_PRFIX_TABLE . '_woo_history_user_point.prize_id', '!=', NULL);
+        })
+        ->select($this->_PRFIX_TABLE . '_woo_history_user_point.*', $this->_PRFIX_TABLE . '_woo_point_prize.name')
+        ->orderBy($this->_PRFIX_TABLE . '_woo_history_user_point.id', 'DESC')
+        ->get();
+            return $data;
     }
     public function getXuUser($userId)
     {

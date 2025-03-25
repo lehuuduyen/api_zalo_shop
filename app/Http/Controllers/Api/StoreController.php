@@ -30,13 +30,13 @@ class StoreController extends Controller
         $info->open_hour = "08:00 - 22:00";
         $branchs = DB::table($this->_PRFIX_TABLE . '_woo_branchs')->where('status', 1)
             ->get();
-            $opts = [
-                "http" => [
-                    "method" => "GET",
-                    "header" => "User-Agent: MyGeolocationApp/1.0 (your@email.com)\r\n" // Required by OSM
-                ]
-            ];
-            $context = stream_context_create($opts);
+        $opts = [
+            "http" => [
+                "method" => "GET",
+                "header" => "User-Agent: MyGeolocationApp/1.0 (your@email.com)\r\n" // Required by OSM
+            ]
+        ];
+        $context = stream_context_create($opts);
 
         foreach ($branchs as $key => $val) {
             $branchs[$key]->city_name = ($val->city) ? $this->city($request, $val->city) : "";
@@ -44,25 +44,21 @@ class StoreController extends Controller
             $branchs[$key]->phuong_name = ($val->ward) ? $this->phuong($request, $val->district, $val->ward) : "";
             $branchs[$key]->img = 'https://scontent.fsgn8-4.fna.fbcdn.net/v/t39.30808-6/466000325_1318374532658086_1906160599489764874_n.jpg?_nc_cat=107&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=r_rKZjhtKV4Q7kNvgFfQNPY&_nc_oc=AdjLZFSDPdUCHswWF-J4VyqgdI2UJLWKq0QVLlPUEXxypv7K7mtxxK-i5zLDMtE5rbI&_nc_zt=23&_nc_ht=scontent.fsgn8-4.fna&_nc_gid=A3CCli41rSY71n_p_MuiytM&oh=00_AYGS0qxLBxgqtRbjERiqwPcwL4vs0f-DBm44DHsJ4L0-bQ&oe=67D9A101'; // Properly encode the address
             $phuong = preg_replace('/\b0(\d)/', '$1', $branchs[$key]->phuong_name) . PHP_EOL;
-            $address = urlencode($branchs[$key]->address.','.$phuong.','.$branchs[$key]->quan_name.','.$branchs[$key]->city_name); // Properly encode the address
+            $address = urlencode($branchs[$key]->address . ',' . $phuong . ',' . $branchs[$key]->quan_name . ',' . $branchs[$key]->city_name); // Properly encode the address
 
-            $position = file_get_contents('https://nominatim.openstreetmap.org/search?q='.$address.'&format=json&limit=1', false, $context);
-            if (!$position ) {
+            $position = file_get_contents('https://nominatim.openstreetmap.org/search?q=' . $address . '&format=json&limit=1', false, $context);
+            if (!$position) {
                 // return ['error' => 'Failed to retrieve location'];
                 $branchs[$key]->lat = '';
                 $branchs[$key]->lon = '';
-            }else{
+            } else {
                 $json = json_decode($position, true);
                 $branchs[$key]->lat = $json[0]['lat'];
                 $branchs[$key]->lon = $json[0]['lon'];
             }
-            
-            
-            
-        
         }
         $info->chi_nhanh = $branchs;
-        
+
         if ($infor) {
             $content = $infor->post_content;
             $lineAfterPhone = $this->lienhe($content, 'Điện thoại:', 11);
@@ -72,10 +68,9 @@ class StoreController extends Controller
             $website = $this->lienhe($content, 'Website:', 6);
             $email = $this->lienhe($content, 'Email:', 6);
 
-            $info->email =$email;
+            $info->email = $email;
             $info->phone = $lineAfterPhone;
             $info->website = $website;
-            
         }
 
         return $this->returnSuccess($info);
@@ -326,7 +321,7 @@ class StoreController extends Controller
         $user = DB::table($this->_PRFIX_TABLE . '_users')->where('user_login', $store->sdt)->select('ID', 'display_name as name', 'user_email as email', 'user_login as mobile')
             ->first();
         $countNoti = DB::table($this->_PRFIX_TABLE . '_woo_user_notification')->where('user_id', $user->ID)->where('status', 0)
-        ->count();
+            ->count();
         $address = $this->getUserMeta($user->ID, 'shipping_address_1');
         $company = $this->getUserMeta($user->ID, 'company');
         $city = $this->getUserMeta($user->ID, 'city');
@@ -338,8 +333,8 @@ class StoreController extends Controller
             $image = env('API_URL_BACKEND') . "/storage/" . $image;
         }
         $CouponsController =  new CouponsController();
-        $coupons = $CouponsController->index($request,true);
-      
+        $coupons = $CouponsController->index($request, true);
+
         $user->countCoupon = count($coupons);
 
 
@@ -658,6 +653,7 @@ class StoreController extends Controller
     public function withdraw(Request $request)
     {
         try {
+            DB::beginTransaction();
             $data = $request->all();
             $store = $request['data_reponse'];
             $this->_PRFIX_TABLE = $store->prefixTable;
@@ -681,6 +677,12 @@ class StoreController extends Controller
                 }
                 $userId = $store->user_id;
 
+                // check stk
+
+
+
+
+
 
                 $cho_doi_soat = $this->choDoiSoat($userId);
                 $thuc_nhan = $this->thucNhan($userId);
@@ -689,11 +691,50 @@ class StoreController extends Controller
                 if ($data['money'] > $hoa_hong) {
                     return $this->returnError(new \stdClass, "Tiền hoa hồng chỉ còn " . $hoa_hong);
                 }
-                if(isset($data['sdt'])){
+                if (isset($data['sdt'])) {
                     $data['stk'] = $data['sdt'];
                     $data['bankname'] = "MOMO";
                 }
-                $paymentMethod = json_encode(['name' => $data['name'], 'stk' => $data['stk'], 'bankname' => $data['bankname']]);
+
+                // check stk
+                $list = ['name' => $data['name'], 'stk' => $data['stk'], 'bankname' => $data['bankname']];
+                $getWallet = $this->getUserMeta($userId, 'wallet');
+                $isSave = true;
+                if ($getWallet) {
+                    $listWallet = unserialize($getWallet);
+                    foreach($listWallet as $walletOne){
+                        if($walletOne['name'] != $list['name'] ){
+                            $isSave = false;
+                            return $this->returnError([], "Bảo mật, Tên tài khoản phải là ".$walletOne['name']." . Hãy liên hệ tổng đài để đổi. ");
+                        }
+                        if($walletOne['name'] ==  $list['name'] && $walletOne['stk'] ==  $list['stk'] && $walletOne['bankname'] ==  $list['bankname']){
+                            $isSave = false;
+                        }
+                    }
+
+                    array_push($listWallet, $list);
+                    
+                } else {
+                    $listWallet = [['name' => $data['name'], 'stk' => $data['stk'], 'bankname' => $data['bankname']]];
+                }
+                if($isSave){
+                    $paymentMethod = serialize($listWallet);
+
+
+                    $wallet = DB::table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
+                        array(
+                            'user_id' => $userId,
+                            'meta_key' => 'wallet'
+                        ),
+                        array('meta_value' => $paymentMethod)
+                    );
+                }
+               
+
+
+
+
+                $paymentMethod = json_encode($list);
                 DB::table($this->_PRFIX_TABLE . '_woo_history_user_commission')->insertGetId(
                     array(
                         'user_id' => $userId,
@@ -706,13 +747,16 @@ class StoreController extends Controller
                         'status' => 4,
                     )
                 );
+                DB::commit();
+
                 return $this->returnSuccess($userId, 'Cập nhật thành công');
             }
         } catch (\Throwable $th) {
             //throw $th;
             $this->woo_logs('withdraw', $th->getMessage());
+            DB::rollback();
 
-            return $this->returnError([], "Lỗi hệ thống");
+            return $this->returnError([],  $th->getMessage());
         }
     }
     public function getWeek()
@@ -1092,7 +1136,7 @@ class StoreController extends Controller
         );
         return $this->returnSuccess([1], "Đã xem");
     }
-    
+
     public function prize(Request $request)
     {
         $store = $request['data_reponse'];
@@ -1108,7 +1152,7 @@ class StoreController extends Controller
             DB::beginTransaction();
 
             $store = $request['data_reponse'];
-            
+
             $data = $request->all();
             $this->_PRFIX_TABLE = $store->prefixTable;
             $userId = $store->user_id;
@@ -1216,11 +1260,89 @@ class StoreController extends Controller
             );
 
             DB::commit();
-            return $this->returnSuccess($postId,'Đổi quà thành công');
-
+            return $this->returnSuccess($postId, 'Đổi quà thành công');
         } catch (\Throwable $th) {
             DB::rollBack();
-            return $this->returnError([],$th->getMessage());
+            return $this->returnError([], $th->getMessage());
         }
+    }
+
+    public function wallet(Request $request)
+    {
+        $store = $request['data_reponse'];
+        $this->_PRFIX_TABLE = $store->prefixTable;
+        $userId = $store->user_id;
+        $getWallet = $this->getUserMeta($userId, 'wallet');
+        if ($getWallet) {
+            $getWallet = unserialize($getWallet);
+        } else {
+            $getWallet = [];
+        }
+
+
+
+        return $this->returnSuccess($getWallet);
+    }
+    public function addWallet(Request $request)
+    {
+
+        try {
+            $store = $request['data_reponse'];
+            $this->_PRFIX_TABLE = $store->prefixTable;
+            $data = $request->all();
+            $userId = $store->user_id;
+            $getWallet = $this->getUserMeta($userId, 'wallet');
+            $validator = Validator::make($request->all(), [
+                'name' => 'required',
+                // 'stk' => 'required',
+                // 'bankname' => 'required',
+
+            ], [
+                'name.required' => "Vui lòng tên tài khoản ",
+                // 'stk.required' => "Vui lòng nhập STK",
+                // 'bankname.required' => "Vui lòng nhập tên ngân hàng",
+            ]);
+            if ($validator->fails()) {
+                return $this->returnError(new \stdClass, $validator->errors()->first());
+            } else {
+
+                $userId = $store->user_id;
+                if (isset($data['sdt'])) {
+                    $data['stk'] = $data['sdt'];
+                    $data['bankname'] = "MOMO";
+                }
+                $list = ['name' => $data['name'], 'stk' => $data['stk'], 'bankname' => $data['bankname']];
+                if ($getWallet) {
+                    $listWallet = unserialize($getWallet);
+                    array_push($listWallet, $list);
+
+                    echo '<pre>';
+                    print_r($listWallet);
+                    echo '</pre>';
+                    die;
+                } else {
+                    $listWallet = [['name' => $data['name'], 'stk' => $data['stk'], 'bankname' => $data['bankname']]];
+                }
+                $paymentMethod = serialize($listWallet);
+
+
+                $wallet = DB::table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
+                    array(
+                        'user_id' => $userId,
+                        'meta_key' => 'wallet'
+                    ),
+                    array('meta_value' => $paymentMethod)
+                );
+                return $this->returnSuccess($wallet, 'Cập nhật thành công');
+            }
+        } catch (\Throwable $th) {
+            //throw $th;
+            $this->woo_logs('addWallet', $th->getMessage());
+
+            return $this->returnError([], "Lỗi hệ thống");
+        }
+
+
+        return response()->json($getWallet, 200);
     }
 }

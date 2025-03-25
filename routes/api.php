@@ -79,6 +79,8 @@ Route::group(['middleware' => ['GetData', 'CorsApi']], function () {
     Route::put('update_payment_method', 'App\Http\Controllers\Api\StoreController@update_payment_method');
     Route::post('withdraw', 'App\Http\Controllers\Api\StoreController@withdraw');
 
+    Route::get('wallet', 'App\Http\Controllers\Api\StoreController@wallet');
+    Route::post('wallet', 'App\Http\Controllers\Api\StoreController@addWallet');
     Route::get('country', 'App\Http\Controllers\Api\StoreController@country');
     Route::get('state', 'App\Http\Controllers\Api\StoreController@state');
     Route::put('user', 'App\Http\Controllers\Api\StoreController@update');

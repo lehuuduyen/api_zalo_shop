@@ -366,6 +366,10 @@ class OrdersController extends Controller
                 if (!$order) {
                     return $this->returnError(new \stdClass, $this->_messageError);
                 }
+                if($data['payment_gateway'] =="momo"){
+                return $this->returnSuccess($order, "Thanh toán đơn hàng thành công");
+
+                }
                 return $this->returnSuccess($order, "Thêm đơn hàng thành công");
             }
         } catch (\Throwable $th) {

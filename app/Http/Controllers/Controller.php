@@ -1860,6 +1860,11 @@ class Controller extends BaseController
                     ),
                     array(
                         'post_id' => $postId,
+                        'meta_key' => 'momo_response',
+                        'meta_value' => (isset($data['momo_response']))?json_encode($data['momo_response']):NULL,
+                    ),
+                    array(
+                        'post_id' => $postId,
                         'meta_key' => '_customer_user',
                         'meta_value' => $user['id'],
                     ),

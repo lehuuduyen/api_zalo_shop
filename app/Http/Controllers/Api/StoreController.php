@@ -213,6 +213,18 @@ class StoreController extends Controller
                     )
                 );
             }
+            if (isset($data['user_key_notification'])) {
+
+                $user = DB::table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
+                    array(
+                        'user_id' => $userId,
+                        'meta_key' => 'user_key_notification'
+                    ),
+                    array(
+                        'meta_value' => $data['user_key_notification'],
+                    )
+                );
+            }
             if (isset($data['birthday'])) {
 
                 $user = DB::table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
@@ -658,13 +670,13 @@ class StoreController extends Controller
             $store = $request['data_reponse'];
             $this->_PRFIX_TABLE = $store->prefixTable;
             $validator = Validator::make($request->all(), [
-                'name' => 'required',
+                // 'name' => 'required',
                 // 'stk' => 'required',
                 // 'bankname' => 'required',
                 'money' => 'required',
 
             ], [
-                'name.required' => "Vui lòng tên tài khoản ",
+                // 'name.required' => "Vui lòng tên tài khoản ",
                 // 'stk.required' => "Vui lòng nhập STK",
                 // 'bankname.required' => "Vui lòng nhập tên ngân hàng",
                 'money.required' => "Vui lòng nhập tiền rút",
@@ -694,6 +706,7 @@ class StoreController extends Controller
                 if (isset($data['sdt'])) {
                     $data['stk'] = $data['sdt'];
                     $data['bankname'] = "MOMO";
+                    $data['name'] = $data['sdt'];
                 }
 
                 // check stk
@@ -703,10 +716,18 @@ class StoreController extends Controller
                 if ($getWallet) {
                     $listWallet = unserialize($getWallet);
                     foreach($listWallet as $walletOne){
-                        if($walletOne['name'] != $list['name'] ){
-                            $isSave = false;
-                            return $this->returnError([], "Bảo mật, Tên tài khoản phải là ".$walletOne['name']." . Hãy liên hệ tổng đài để đổi. ");
+                        if($data['bankname'] == "MOMO" && $walletOne['bankname'] == "MOMO" ){
+                            if($walletOne['name'] != $list['name'] ){
+                                $isSave = false;
+                                return $this->returnError([], "Bảo mật, Số điện thoại phải là ".$walletOne['name']." . Hãy liên hệ tổng đài để đổi. ");
+                            }
+                        }else{
+                            if($walletOne['name'] != $list['name'] ){
+                                $isSave = false;
+                                return $this->returnError([], "Bảo mật, Tên tài khoản phải là ".$walletOne['name']." . Hãy liên hệ tổng đài để đổi. ");
+                            }
                         }
+                        
                         if($walletOne['name'] ==  $list['name'] && $walletOne['stk'] ==  $list['stk'] && $walletOne['bankname'] ==  $list['bankname']){
                             $isSave = false;
                         }
@@ -718,6 +739,7 @@ class StoreController extends Controller
                     $listWallet = [['name' => $data['name'], 'stk' => $data['stk'], 'bankname' => $data['bankname']]];
                 }
                 if($isSave){
+                   
                     $paymentMethod = serialize($listWallet);
 
 
@@ -1283,66 +1305,7 @@ class StoreController extends Controller
 
         return $this->returnSuccess($getWallet);
     }
-    public function addWallet(Request $request)
-    {
-
-        try {
-            $store = $request['data_reponse'];
-            $this->_PRFIX_TABLE = $store->prefixTable;
-            $data = $request->all();
-            $userId = $store->user_id;
-            $getWallet = $this->getUserMeta($userId, 'wallet');
-            $validator = Validator::make($request->all(), [
-                'name' => 'required',
-                // 'stk' => 'required',
-                // 'bankname' => 'required',
-
-            ], [
-                'name.required' => "Vui lòng tên tài khoản ",
-                // 'stk.required' => "Vui lòng nhập STK",
-                // 'bankname.required' => "Vui lòng nhập tên ngân hàng",
-            ]);
-            if ($validator->fails()) {
-                return $this->returnError(new \stdClass, $validator->errors()->first());
-            } else {
-
-                $userId = $store->user_id;
-                if (isset($data['sdt'])) {
-                    $data['stk'] = $data['sdt'];
-                    $data['bankname'] = "MOMO";
-                }
-                $list = ['name' => $data['name'], 'stk' => $data['stk'], 'bankname' => $data['bankname']];
-                if ($getWallet) {
-                    $listWallet = unserialize($getWallet);
-                    array_push($listWallet, $list);
-
-                    echo '<pre>';
-                    print_r($listWallet);
-                    echo '</pre>';
-                    die;
-                } else {
-                    $listWallet = [['name' => $data['name'], 'stk' => $data['stk'], 'bankname' => $data['bankname']]];
-                }
-                $paymentMethod = serialize($listWallet);
-
-
-                $wallet = DB::table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
-                    array(
-                        'user_id' => $userId,
-                        'meta_key' => 'wallet'
-                    ),
-                    array('meta_value' => $paymentMethod)
-                );
-                return $this->returnSuccess($wallet, 'Cập nhật thành công');
-            }
-        } catch (\Throwable $th) {
-            //throw $th;
-            $this->woo_logs('addWallet', $th->getMessage());
-
-            return $this->returnError([], "Lỗi hệ thống");
-        }
-
-
-        return response()->json($getWallet, 200);
-    }
+    public function crawSendNotification(){
+        
+    }  
 }

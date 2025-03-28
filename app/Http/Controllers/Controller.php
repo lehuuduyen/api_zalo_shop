@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use stdClass;
 use Illuminate\Support\Str;
 use Exception;
+use Illuminate\Support\Facades\Http;
 
 class Controller extends BaseController
 {
@@ -1861,7 +1862,7 @@ class Controller extends BaseController
                     array(
                         'post_id' => $postId,
                         'meta_key' => 'momo_res',
-                        'meta_value' => (isset($data['momo_res']))?json_encode($data['momo_res']):NULL,
+                        'meta_value' => (isset($data['momo_res'])) ? json_encode($data['momo_res']) : NULL,
                     ),
                     array(
                         'post_id' => $postId,
@@ -2646,25 +2647,27 @@ class Controller extends BaseController
     public function getHistoryUser($userId)
     {
         $data = DB::table($this->_PRFIX_TABLE . '_woo_history_user_point')
-        ->leftJoin($this->_PRFIX_TABLE . '_posts', 
-            $this->_PRFIX_TABLE . '_woo_history_user_point.order_id', 
-            '=', 
-            $this->_PRFIX_TABLE . '_posts.ID'
-        )
-        ->leftJoin($this->_PRFIX_TABLE . '_woo_point_prize', 
-            $this->_PRFIX_TABLE . '_woo_point_prize.id', 
-            '=', 
-            $this->_PRFIX_TABLE . '_woo_history_user_point.prize_id'
-        )
-        ->where($this->_PRFIX_TABLE . '_woo_history_user_point.user_id', $userId)
-        ->where(function ($query) {
-            $query->where($this->_PRFIX_TABLE . '_posts.post_status', 'wc-completed')
-                  ->orWhere($this->_PRFIX_TABLE . '_woo_history_user_point.prize_id', '!=', NULL);
-        })
-        ->select($this->_PRFIX_TABLE . '_woo_history_user_point.*', $this->_PRFIX_TABLE . '_woo_point_prize.name')
-        ->orderBy($this->_PRFIX_TABLE . '_woo_history_user_point.id', 'DESC')
-        ->get();
-            return $data;
+            ->leftJoin(
+                $this->_PRFIX_TABLE . '_posts',
+                $this->_PRFIX_TABLE . '_woo_history_user_point.order_id',
+                '=',
+                $this->_PRFIX_TABLE . '_posts.ID'
+            )
+            ->leftJoin(
+                $this->_PRFIX_TABLE . '_woo_point_prize',
+                $this->_PRFIX_TABLE . '_woo_point_prize.id',
+                '=',
+                $this->_PRFIX_TABLE . '_woo_history_user_point.prize_id'
+            )
+            ->where($this->_PRFIX_TABLE . '_woo_history_user_point.user_id', $userId)
+            ->where(function ($query) {
+                $query->where($this->_PRFIX_TABLE . '_posts.post_status', 'wc-completed')
+                    ->orWhere($this->_PRFIX_TABLE . '_woo_history_user_point.prize_id', '!=', NULL);
+            })
+            ->select($this->_PRFIX_TABLE . '_woo_history_user_point.*', $this->_PRFIX_TABLE . '_woo_point_prize.name')
+            ->orderBy($this->_PRFIX_TABLE . '_woo_history_user_point.id', 'DESC')
+            ->get();
+        return $data;
     }
     public function getXuUser($userId)
     {
@@ -14329,5 +14332,35 @@ class Controller extends BaseController
 
         // Return phone unmodified if it doesn't start with 0
         return $phone;
+    }
+    public function sendNotificationToAll($title, $body)
+    {
+        $serverKey = env('FIREBASE_SERVER_KEY');
+        $url = 'https://fcm.googleapis.com/fcm/send';
+
+        // Lấy toàn bộ device tokens
+        $tokens = DB::table($this->_PRFIX_TABLE . '_usermeta')->where('meta_key', 'user_key_notification')->pluck('meta_value')->toArray();
+        if (empty($tokens)) {
+            return response()->json(['message' => 'No tokens found']);
+        }
+
+        $data = [
+            'registration_ids' => $tokens, // Gửi đến nhiều thiết bị
+            'notification' => [
+                'title' => $title,
+                'body'  => $body,
+                'sound' => 'default'
+            ],
+            'data' => [
+                'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
+            ],
+        ];
+
+        $response = Http::withHeaders([
+            'Authorization' => 'key=' . $serverKey,
+            'Content-Type'  => 'application/json',
+        ])->post($url, $data);
+
+        return $response->json();
     }
 }

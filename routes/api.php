@@ -75,6 +75,7 @@ Route::group(['middleware' => ['GetData', 'CorsApi']], function () {
     Route::get('orders', 'App\Http\Controllers\Api\OrdersController@index');
     Route::get('campaigns', 'App\Http\Controllers\Api\FlashSaleController@index');
     Route::post('order', 'App\Http\Controllers\Api\OrdersController@store');
+    Route::get('config', 'App\Http\Controllers\Api\StoreController@config');
     Route::delete('order/cancel/{orderId}', 'App\Http\Controllers\Api\OrdersController@cancel_order');
     Route::put('update_payment_method', 'App\Http\Controllers\Api\StoreController@update_payment_method');
     Route::post('withdraw', 'App\Http\Controllers\Api\StoreController@withdraw');

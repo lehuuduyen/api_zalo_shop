@@ -715,31 +715,30 @@ class StoreController extends Controller
                 $isSave = true;
                 if ($getWallet) {
                     $listWallet = unserialize($getWallet);
-                    foreach($listWallet as $walletOne){
-                        if($data['bankname'] == "MOMO" && $walletOne['bankname'] == "MOMO" ){
-                            if($walletOne['name'] != $list['name'] ){
+                    foreach ($listWallet as $walletOne) {
+                        if ($data['bankname'] == "MOMO" && $walletOne['bankname'] == "MOMO") {
+                            if ($walletOne['name'] != $list['name']) {
                                 $isSave = false;
-                                return $this->returnError([], "Bảo mật, Số điện thoại phải là ".$walletOne['name']." . Hãy liên hệ tổng đài để đổi. ");
+                                return $this->returnError([], "Bảo mật, Số điện thoại phải là " . $walletOne['name'] . " . Hãy liên hệ tổng đài để đổi. ");
                             }
-                        }else{
-                            if($walletOne['name'] != $list['name'] ){
+                        } else {
+                            if ($walletOne['name'] != $list['name']) {
                                 $isSave = false;
-                                return $this->returnError([], "Bảo mật, Tên tài khoản phải là ".$walletOne['name']." . Hãy liên hệ tổng đài để đổi. ");
+                                return $this->returnError([], "Bảo mật, Tên tài khoản phải là " . $walletOne['name'] . " . Hãy liên hệ tổng đài để đổi. ");
                             }
                         }
-                        
-                        if($walletOne['name'] ==  $list['name'] && $walletOne['stk'] ==  $list['stk'] && $walletOne['bankname'] ==  $list['bankname']){
+
+                        if ($walletOne['name'] ==  $list['name'] && $walletOne['stk'] ==  $list['stk'] && $walletOne['bankname'] ==  $list['bankname']) {
                             $isSave = false;
                         }
                     }
 
                     array_push($listWallet, $list);
-                    
                 } else {
                     $listWallet = [['name' => $data['name'], 'stk' => $data['stk'], 'bankname' => $data['bankname']]];
                 }
-                if($isSave){
-                   
+                if ($isSave) {
+
                     $paymentMethod = serialize($listWallet);
 
 
@@ -751,7 +750,7 @@ class StoreController extends Controller
                         array('meta_value' => $paymentMethod)
                     );
                 }
-               
+
 
 
 
@@ -1305,7 +1304,10 @@ class StoreController extends Controller
 
         return $this->returnSuccess($getWallet);
     }
-    public function crawSendNotification(){
-        
-    }  
+    public function crawSendNotification() {}
+    public function config()
+    {
+
+        return $this->returnSuccess(true, '');
+    }
 }

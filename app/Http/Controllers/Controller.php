@@ -31,12 +31,14 @@ class Controller extends BaseController
     }
     public function returnSuccess($data = [], $message = "Lấy dữ liệu thành công")
     {
-
+        if (empty($data) && empty($message)) {
+            $message = "Dữ liệu rỗng";
+        }
         return response()->json([
             'status' => 'success',
             'code' => empty($data) ? 204 : 200,
             'data' => $data,
-            'message' => empty($data) ? "Dữ liệu rỗng" : $message /* Or optional success message */
+            'message' => $message /* Or optional success message */
         ]);
     }
     public function returnError($data = [], $message = "Lấy dữ liệu thất bại", $code = 500)

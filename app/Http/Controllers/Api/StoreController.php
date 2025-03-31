@@ -1307,7 +1307,8 @@ class StoreController extends Controller
     public function crawSendNotification() {}
     public function config()
     {
+        $is = env('IS_PAYMENT');
 
-        return $this->returnSuccess(env('IS_PAYMENT'), 'Tính năng đặt hàng đang phát triển');
+        return $this->returnSuccess($is, ($is)?"":'Tính năng đặt hàng đang phát triển');
     }
 }

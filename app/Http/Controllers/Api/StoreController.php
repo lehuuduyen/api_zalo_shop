@@ -1308,6 +1308,6 @@ class StoreController extends Controller
     public function config()
     {
 
-        return $this->returnSuccess(false, 'Tính năng đặt hàng đang phát triển');
+        return $this->returnSuccess(env('IS_PAYMENT'), 'Tính năng đặt hàng đang phát triển');
     }
 }

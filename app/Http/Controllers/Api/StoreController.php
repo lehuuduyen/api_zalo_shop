@@ -355,6 +355,7 @@ class StoreController extends Controller
         $user->avt = $image;
         $user->user_parent = $this->getUserMeta($user->ID, 'user_parent');
         $user->user_parent_created = $this->getUserMeta($user->ID, 'user_parent_created');
+        $user->user_key_notification = $this->getUserMeta($user->ID, 'user_key_notification');
 
         $user->company = $company;
         $user->city = $city;
@@ -1304,11 +1305,31 @@ class StoreController extends Controller
 
         return $this->returnSuccess($getWallet);
     }
-    public function crawSendNotification() {}
+    public function send_notification()
+    {
+        try {
+            $channelName = 'new';
+            $recipient = 'ExponentPushToken[PbX_02HqX8EYES8VPInoNO]';
+
+            // You can quickly bootup an expo instance
+            $expo = \ExponentPhpSDK\Expo::normalSetup();
+
+            // Subscribe the recipient to the server
+            $expo->subscribe($channelName, $recipient);
+
+            // Build the notification data
+            $notification = ['body' => 'Hello World! 32323243'];
+
+            // Notify an interest with a notification
+            $expo->notify([$channelName], $notification);
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
     public function config()
     {
         $is = env('IS_PAYMENT');
 
-        return $this->returnSuccess($is, ($is)?"":'Tính năng đặt hàng đang phát triển');
+        return $this->returnSuccess($is, ($is) ? "" : 'Tính năng đặt hàng đang phát triển');
     }
 }

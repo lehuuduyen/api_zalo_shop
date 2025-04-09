@@ -34,6 +34,8 @@ Route::group(['middleware' => ['CorsApi']], function () {
     Route::get('phuong', 'App\Http\Controllers\Api\StoreController@phuong');
     Route::get('getFee', 'App\Http\Controllers\Api\StoreController@getFee');
 });
+Route::get('webhook', 'App\Http\Controllers\Api\OrdersController@webhook');
+Route::post('webhook', 'App\Http\Controllers\Api\OrdersController@webhookPost');
 
 
 Route::group(['middleware' => ['GetData', 'CorsApi']], function () {
@@ -97,6 +99,7 @@ Route::group(['middleware' => ['GetData', 'CorsApi']], function () {
     Route::post('history_share_link', 'App\Http\Controllers\Api\StoreController@history_share_link');
     Route::get('notifications', 'App\Http\Controllers\Api\StoreController@notifications');
     Route::put('notification_read', 'App\Http\Controllers\Api\StoreController@notification_read');
+    Route::get('send_notification', 'App\Http\Controllers\Api\StoreController@send_notification');
     Route::get('prize', 'App\Http\Controllers\Api\StoreController@prize');
     Route::put('prize', 'App\Http\Controllers\Api\StoreController@doi_qua');
 

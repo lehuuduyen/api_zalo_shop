@@ -341,6 +341,51 @@ class OrdersController extends Controller
                 return $this->returnError(new \stdClass, $validator->errors()->first());
             } else {
                 $data = $request->all();
+
+                $endpoint = env('URL_MOMO') . '/gw_payment/transactionProcessor';
+                $partnerCode =  env('PARNER_CODE_MOMO');
+
+                $accessKey = env('ACCESSKEY_MOMO');
+                $serectkey = env('SECRETKEY_MOMO');
+                $orderInfo = "Thanh toán qua MoMo";
+                $amount = "10000";
+                $orderId = time() . "";
+                $returnUrl = "http://localhost:8000/paymomo/result.php";
+                $notifyurl = "http://localhost:8000/paymomo/ipn_momo.php";
+                // Lưu ý: link notifyUrl không phải là dạng localhost
+                $extraData = "merchantName=MoMo Partner";
+
+
+
+                $requestId = time() . "";
+                $requestType = "captureMoMoWallet";
+                //before sign HMAC SHA256 signature
+                $rawHash = "partnerCode=" . $partnerCode . "&accessKey=" . $accessKey . "&requestId=" . $requestId . "&amount=" . $amount . "&orderId=" . $orderId . "&orderInfo=" . $orderInfo . "&returnUrl=" . $returnUrl . "&notifyUrl=" . $notifyurl . "&extraData=" . $extraData;
+                $signature = hash_hmac("sha256", $rawHash, $serectkey);
+                $data = array(
+                    'partnerCode' => $partnerCode,
+                    'accessKey' => $accessKey,
+                    'requestId' => $requestId,
+                    'amount' => $amount,
+                    'orderId' => $orderId,
+                    'orderInfo' => $orderInfo,
+                    'returnUrl' => $returnUrl,
+                    'notifyUrl' => $notifyurl,
+                    'extraData' => $extraData,
+                    'requestType' => $requestType,
+                    'signature' => $signature
+                );
+                $result = $this->execPostRequest($endpoint, json_encode($data));
+                $jsonResult = json_decode($result, true);  // decode json
+                echo '<pre>';
+                print_r($result);
+                echo '</pre>';
+                die;
+
+
+
+
+
                 $store = $request['data_reponse'];
 
                 $data['sdt'] = $store->sdt;
@@ -366,9 +411,8 @@ class OrdersController extends Controller
                 if (!$order) {
                     return $this->returnError(new \stdClass, $this->_messageError);
                 }
-                if($data['payment_gateway'] =="momo"){
-                return $this->returnSuccess($order, "Thanh toán đơn hàng thành công");
-
+                if ($data['payment_gateway'] == "momo") {
+                    return $this->returnSuccess($order, "Thanh toán đơn hàng thành công");
                 }
                 return $this->returnSuccess($order, "Thêm đơn hàng thành công");
             }
@@ -378,7 +422,28 @@ class OrdersController extends Controller
             return $this->returnError(new \stdClass, $th->getMessage());
         }
     }
-
+    function execPostRequest($url, $data)
+    {
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt(
+            $ch,
+            CURLOPT_HTTPHEADER,
+            array(
+                'Content-Type: application/json',
+                'Content-Length: ' . strlen($data)
+            )
+        );
+        curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+        //execute post
+        $result = curl_exec($ch);
+        //close connection
+        curl_close($ch);
+        return $result;
+    }
     public function storePos(Request $request)
     {
         $store = $request['data_reponse'];
@@ -533,8 +598,14 @@ class OrdersController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function webhook(Request $request )
     {
-        //
+        $this->woo_logs('momo', json_encode($request->all()));
+        return $this->returnSuccess(json_encode($request->all()));
+    }
+    public function webhookPost(Request $request )
+    {
+        $this->woo_logs('momopost', json_encode($request->all()));
+        return $this->returnSuccess(json_encode($request->all()));
     }
 }

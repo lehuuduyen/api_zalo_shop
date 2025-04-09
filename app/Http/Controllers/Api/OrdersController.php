@@ -335,7 +335,14 @@ class OrdersController extends Controller
         $rawHash = "partnerCode=" . $partnerCode . "&accessKey=" . $accessKey . "&requestId=" . $requestId . "&amount=" . $amount . "&orderId=" . $orderId . "&orderInfo=" . $orderInfo . "&extraData=" . $extraData;
         $signature = hash_hmac("sha256", $rawHash, $serectkey);
         $data = array(
-            'rawHash' => $rawHash,
+            'partnerCode' => $partnerCode,
+            'accessKey' => $accessKey,
+            'requestId' => $requestId,
+            'amount' => $amount,
+            'orderId' => $orderId,
+            'orderInfo' => $orderInfo,
+            'extraData' => $extraData,
+            'requestType' => $requestType,
             'signature' => $signature
         );
         return $this->returnSuccess($data);
@@ -352,7 +359,7 @@ class OrdersController extends Controller
         // );
         // $result = $this->execPostRequest($endpoint, json_encode($data));
         // $jsonResult = json_decode($result, true);  // decode json
-       
+
     }
     public function store(Request $request)
     {

@@ -344,6 +344,7 @@ class OrdersController extends Controller
             'orderInfo' => $orderInfo,
             'extraData' => $extraData,
             'requestType' => $requestType,
+            'ipnUrl' => env('API_URL_BACKEND').'/api/webhook',
             'signature' => $signature
         );
         return $this->returnSuccess($data);

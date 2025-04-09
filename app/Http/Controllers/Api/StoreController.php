@@ -215,15 +215,20 @@ class StoreController extends Controller
             }
             if (isset($data['user_key_notification'])) {
 
-                $user = DB::table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
-                    array(
-                        'user_id' => $userId,
-                        'meta_key' => 'user_key_notification'
-                    ),
-                    array(
-                        'meta_value' => $data['user_key_notification'],
-                    )
-                );
+                $check = DB::table($this->_PRFIX_TABLE . '_woo_user_key_notification')
+                    ->select("token")
+                    ->where('user_id', $userId)
+                    ->where('token', $data['user_key_notification'])
+                    ->first();
+
+                if (!$check) {
+                    DB::table($this->_PRFIX_TABLE . '_woo_user_key_notification')->insert(
+                        array(
+                            'user_id' => $userId,
+                            'token' => $data['user_key_notification'],
+                        ),
+                    );
+                }
             }
             if (isset($data['birthday'])) {
 
@@ -355,7 +360,11 @@ class StoreController extends Controller
         $user->avt = $image;
         $user->user_parent = $this->getUserMeta($user->ID, 'user_parent');
         $user->user_parent_created = $this->getUserMeta($user->ID, 'user_parent_created');
-        $user->user_key_notification = $this->getUserMeta($user->ID, 'user_key_notification');
+        $listTokenNotification = DB::table($this->_PRFIX_TABLE . '_woo_user_key_notification')
+            ->select("token")
+            ->where('user_id', $user->ID)
+            ->get();
+        $user->user_key_notification = $listTokenNotification;
 
         $user->company = $company;
         $user->city = $city;
@@ -1307,23 +1316,58 @@ class StoreController extends Controller
     }
     public function send_notification()
     {
-        try {
-            $channelName = 'new';
-            $recipient = 'ExponentPushToken[PbX_02HqX8EYES8VPInoNO]';
+        $listSendNotification = DB::table($this->_PRFIX_TABLE . '_woo_send_notification')
+            ->where('status', 1)
+            ->distinct()
+            ->get(['id', 'token', 'content']); // Lấy cả `id` để cập nhật status
 
-            // You can quickly bootup an expo instance
-            $expo = \ExponentPhpSDK\Expo::normalSetup();
+        $expo = \ExponentPhpSDK\Expo::normalSetup();
+        $subscribedTokens = [];
+        $processedIds = []; // Lưu ID để update status
 
-            // Subscribe the recipient to the server
-            $expo->subscribe($channelName, $recipient);
+        foreach ($listSendNotification as $sendNotification) {
+            $channelName = time().rand(100,999999);
 
-            // Build the notification data
-            $notification = ['body' => 'Hello World! 32323243'];
+            $recipient = $sendNotification->token;
 
-            // Notify an interest with a notification
-            $expo->notify([$channelName], $notification);
-        } catch (\Throwable $th) {
-            throw $th;
+            // Kiểm tra token hợp lệ
+            if (strpos($recipient, 'ExponentPushToken[') !== 0) {
+                continue;
+            }
+
+            // Chỉ subscribe nếu chưa có trong danh sách
+            if (!in_array($recipient, $subscribedTokens)) {
+                $expo->subscribe($channelName, $recipient);
+                $subscribedTokens[] = $recipient;
+            }
+
+            // Xây dựng nội dung thông báo
+            $notification = ['body' => $sendNotification->content];
+
+            try {
+                $check = $expo->notify([$channelName], $notification);
+                if ($check[0]['status'] == "error" && $check[0]['details']['error'] == "DeviceNotRegistered") {
+                    DB::table($this->_PRFIX_TABLE . '_woo_send_notification')->where('token', $recipient)->delete();
+                }
+                $processedIds[] = $sendNotification->id; // Lưu ID đã gửi thành công
+
+
+            } catch (\ExponentPhpSDK\Exceptions\ExpoException $e) {
+                $response = json_decode($e->getMessage(), true);
+
+                // Nếu token hết hạn, xoá khỏi database
+                if (isset($response['errors'][0]['code']) && $response['errors'][0]['code'] == 'DeviceNotRegistered') {
+                    DB::table($this->_PRFIX_TABLE . '_woo_send_notification')->where('token', $recipient)->delete();
+                }
+                $this->woo_logs('send_notification', "Expo Notification Error: " . $e->getMessage());
+            }
+        }
+
+        // Cập nhật status = 2 cho các bản ghi đã gửi thành công
+        if (!empty($processedIds)) {
+            DB::table($this->_PRFIX_TABLE . '_woo_send_notification')
+                ->whereIn('id', $processedIds)
+                ->update(['status' => 2]);
         }
     }
     public function config()

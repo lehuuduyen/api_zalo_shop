@@ -37,11 +37,11 @@ Route::group(['middleware' => ['CorsApi']], function () {
 Route::get('webhook', 'App\Http\Controllers\Api\OrdersController@webhook');
 Route::post('webhook', 'App\Http\Controllers\Api\OrdersController@webhookPost');
 
+Route::get('products', 'App\Http\Controllers\Api\ProductController@index');
 
 Route::group(['middleware' => ['GetData', 'CorsApi']], function () {
     Route::get('product/categories', 'App\Http\Controllers\Api\ProductController@getCategories');
     Route::get('product/attribute', 'App\Http\Controllers\Api\ProductController@getAttribute');
-    Route::get('products', 'App\Http\Controllers\Api\ProductController@index');
     Route::get('blogs', 'App\Http\Controllers\Api\BlogController@index');
     Route::get('get_payment_method', 'App\Http\Controllers\Api\StoreController@getPaymentMethod');
     Route::get('coupons', 'App\Http\Controllers\Api\CouponsController@index');

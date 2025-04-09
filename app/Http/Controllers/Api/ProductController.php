@@ -8,6 +8,7 @@ use Exception;
 use Gloudemans\Shoppingcart\Facades\Cart;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use stdClass;
 
 class ProductController extends Controller
 {
@@ -32,8 +33,13 @@ class ProductController extends Controller
     }
     public function index(Request $request)
     {
-        $store = $request['data_reponse'];
-        $this->_PRFIX_TABLE = $store->prefixTable;
+        $store = new stdClass();
+        $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+
+        // Combine protocol and host to get the full domain
+        $fullDomain = $protocol . \env('APP_URL_BACKEND');
+        $store->domain = $fullDomain;
+        $this->_PRFIX_TABLE = 'wp';
         
         $discount = 0;
         

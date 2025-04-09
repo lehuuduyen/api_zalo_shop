@@ -327,17 +327,18 @@ class OrdersController extends Controller
         // Lưu ý: link notifyUrl không phải là dạng localhost
         $extraData = json_encode($request->all());
 
-
+        $appScheme = 'vn.gsmilkteaproduct.gsmilkteaproduct';
 
         $requestId = time() . "";
         $requestType = "captureMoMoWallet";
         //before sign HMAC SHA256 signature
-        $rawHash = "partnerCode=" . $partnerCode . "&accessKey=" . $accessKey . "&requestId=" . $requestId . "&amount=" . $amount . "&orderId=" . $orderId . "&orderInfo=" . $orderInfo . "&extraData=" . $extraData;
+        $rawHash = "partnerCode=" . $partnerCode . "&accessKey=" . $accessKey . "&appScheme=" . $appScheme . "&requestId=" . $requestId . "&amount=" . $amount . "&orderId=" . $orderId . "&orderInfo=" . $orderInfo . "&extraData=" . $extraData;
         $signature = hash_hmac("sha256", $rawHash, $serectkey);
         $data = array(
             'partnerCode' => $partnerCode,
             'accessKey' => $accessKey,
             'requestId' => $requestId,
+            'appScheme' => $appScheme,
             'amount' => $amount,
             'orderId' => $orderId,
             'orderInfo' => $orderInfo,

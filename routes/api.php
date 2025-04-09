@@ -36,6 +36,7 @@ Route::group(['middleware' => ['CorsApi']], function () {
 });
 Route::get('webhook', 'App\Http\Controllers\Api\OrdersController@webhook');
 Route::post('webhook', 'App\Http\Controllers\Api\OrdersController@webhookPost');
+Route::post('signature', 'App\Http\Controllers\Api\OrdersController@signature');
 
 Route::get('products', 'App\Http\Controllers\Api\ProductController@index');
 

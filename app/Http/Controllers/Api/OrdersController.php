@@ -313,7 +313,47 @@ class OrdersController extends Controller
         }
         return $products;
     }
+    public function signature(Request $request)
+    {
 
+        $endpoint = env('URL_MOMO') . '/gw_payment/transactionProcessor';
+        $partnerCode =  env('PARNER_CODE_MOMO');
+
+        $accessKey = env('ACCESSKEY_MOMO');
+        $serectkey = env('SECRETKEY_MOMO');
+        $orderInfo = "Thanh toán qua MoMo";
+        $amount = "10000";
+        $orderId = time() . "";
+        // Lưu ý: link notifyUrl không phải là dạng localhost
+        $extraData = json_encode($request->all());
+
+
+
+        $requestId = time() . "";
+        $requestType = "captureMoMoWallet";
+        //before sign HMAC SHA256 signature
+        $rawHash = "partnerCode=" . $partnerCode . "&accessKey=" . $accessKey . "&requestId=" . $requestId . "&amount=" . $amount . "&orderId=" . $orderId . "&orderInfo=" . $orderInfo . "&extraData=" . $extraData;
+        $signature = hash_hmac("sha256", $rawHash, $serectkey);
+        $data = array(
+            'rawHash' => $rawHash,
+            'signature' => $signature
+        );
+        return $this->returnSuccess($data);
+        // $data = array(
+        //     'partnerCode' => $partnerCode,
+        //     'accessKey' => $accessKey,
+        //     'requestId' => $requestId,
+        //     'amount' => $amount,
+        //     'orderId' => $orderId,
+        //     'orderInfo' => $orderInfo,
+        //     'extraData' => $extraData,
+        //     'requestType' => $requestType,
+        //     'signature' => $signature
+        // );
+        // $result = $this->execPostRequest($endpoint, json_encode($data));
+        // $jsonResult = json_decode($result, true);  // decode json
+       
+    }
     public function store(Request $request)
     {
 
@@ -341,51 +381,6 @@ class OrdersController extends Controller
                 return $this->returnError(new \stdClass, $validator->errors()->first());
             } else {
                 $data = $request->all();
-
-                $endpoint = env('URL_MOMO') . '/gw_payment/transactionProcessor';
-                $partnerCode =  env('PARNER_CODE_MOMO');
-
-                $accessKey = env('ACCESSKEY_MOMO');
-                $serectkey = env('SECRETKEY_MOMO');
-                $orderInfo = "Thanh toán qua MoMo";
-                $amount = "10000";
-                $orderId = time() . "";
-                $returnUrl = "http://localhost:8000/paymomo/result.php";
-                $notifyurl = "http://localhost:8000/paymomo/ipn_momo.php";
-                // Lưu ý: link notifyUrl không phải là dạng localhost
-                $extraData = "merchantName=MoMo Partner";
-
-
-
-                $requestId = time() . "";
-                $requestType = "captureMoMoWallet";
-                //before sign HMAC SHA256 signature
-                $rawHash = "partnerCode=" . $partnerCode . "&accessKey=" . $accessKey . "&requestId=" . $requestId . "&amount=" . $amount . "&orderId=" . $orderId . "&orderInfo=" . $orderInfo . "&returnUrl=" . $returnUrl . "&notifyUrl=" . $notifyurl . "&extraData=" . $extraData;
-                $signature = hash_hmac("sha256", $rawHash, $serectkey);
-                $data = array(
-                    'partnerCode' => $partnerCode,
-                    'accessKey' => $accessKey,
-                    'requestId' => $requestId,
-                    'amount' => $amount,
-                    'orderId' => $orderId,
-                    'orderInfo' => $orderInfo,
-                    'returnUrl' => $returnUrl,
-                    'notifyUrl' => $notifyurl,
-                    'extraData' => $extraData,
-                    'requestType' => $requestType,
-                    'signature' => $signature
-                );
-                $result = $this->execPostRequest($endpoint, json_encode($data));
-                $jsonResult = json_decode($result, true);  // decode json
-                echo '<pre>';
-                print_r($result);
-                echo '</pre>';
-                die;
-
-
-
-
-
                 $store = $request['data_reponse'];
 
                 $data['sdt'] = $store->sdt;
@@ -598,12 +593,12 @@ class OrdersController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function webhook(Request $request )
+    public function webhook(Request $request)
     {
         $this->woo_logs('momo', json_encode($request->all()));
         return $this->returnSuccess(json_encode($request->all()));
     }
-    public function webhookPost(Request $request )
+    public function webhookPost(Request $request)
     {
         $this->woo_logs('momopost', json_encode($request->all()));
         return $this->returnSuccess(json_encode($request->all()));

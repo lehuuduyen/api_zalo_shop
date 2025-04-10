@@ -316,24 +316,35 @@ class OrdersController extends Controller
     public function signature(Request $request)
     {
 
-        $endpoint = env('URL_MOMO') . '/gw_payment/transactionProcessor';
+        $endpoint = env('URL_MOMO') . '/v2/gateway/api/create';
         $partnerCode =  env('PARNER_CODE_MOMO');
 
         $accessKey = env('ACCESSKEY_MOMO');
-        $serectkey = env('SECRETKEY_MOMO');
+        $secretKey = env('SECRETKEY_MOMO');
         $orderInfo = "Thanh toán qua MoMo";
         $amount = "10000";
         $orderId = time() . "";
         // Lưu ý: link notifyUrl không phải là dạng localhost
-        $extraData = json_encode($request->all());
+        $extraData = '';
 
         $appScheme = 'vn.gsmilkteaproduct.gsmilkteaproduct';
 
         $requestId = time() . "";
-        $requestType = "captureMoMoWallet";
+        $requestType = "captureWallet";
+        $ipnUrl = env('API_URL_BACKEND') . '/api/webhook';
+        $redirectUrl = "vn.gsmilkteaproduct.gsmilkteaproduct";
         //before sign HMAC SHA256 signature
-        $rawHash = "partnerCode=" . $partnerCode . "&accessKey=" . $accessKey . "&appScheme=" . $appScheme . "&requestId=" . $requestId . "&amount=" . $amount . "&orderId=" . $orderId . "&orderInfo=" . $orderInfo . "&extraData=" . $extraData;
-        $signature = hash_hmac("sha256", $rawHash, $serectkey);
+        $rawHash = "accessKey=" . $accessKey .
+        "&amount=" . $amount .
+        "&extraData=" . $extraData .
+        "&ipnUrl=" . $ipnUrl .
+        "&orderId=" . $orderId .
+        "&orderInfo=" . urldecode($orderInfo) . // dùng urldecode để khớp với raw
+        "&partnerCode=" . $partnerCode .
+        "&redirectUrl=" . $redirectUrl .
+        "&requestId=" . $requestId .
+        "&requestType=" . $requestType;
+        $signature = hash_hmac("sha256", $rawHash, $secretKey);
         $data = array(
             'partnerCode' => $partnerCode,
             'accessKey' => $accessKey,
@@ -342,12 +353,17 @@ class OrdersController extends Controller
             'amount' => $amount,
             'orderId' => $orderId,
             'orderInfo' => $orderInfo,
+            'redirectUrl' => $redirectUrl ,
             'extraData' => $extraData,
             'requestType' => $requestType,
-            'ipnUrl' => env('API_URL_BACKEND').'/api/webhook',
+            'ipnUrl' => $ipnUrl,
+            'lang' => 'vi',
+
             'signature' => $signature
         );
-        return $this->returnSuccess($data);
+        $result = $this->execPostRequest($endpoint, json_encode($data));
+        $jsonResult = json_decode($result, true);  // decode json
+        return $this->returnSuccess($jsonResult);
         // $data = array(
         //     'partnerCode' => $partnerCode,
         //     'accessKey' => $accessKey,

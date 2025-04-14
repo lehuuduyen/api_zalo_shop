@@ -322,7 +322,7 @@ class OrdersController extends Controller
         $accessKey = env('ACCESSKEY_MOMO');
         $secretKey = env('SECRETKEY_MOMO');
         $orderInfo = "Thanh toán qua MoMo";
-        $amount = $data['amount']  || 1000;
+        $amount = (string) $data['amount']  ;
         $orderId = time() . "";
         // Lưu ý: link notifyUrl không phải là dạng localhost
         $extraData = '';

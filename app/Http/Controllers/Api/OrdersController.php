@@ -315,14 +315,14 @@ class OrdersController extends Controller
     }
     public function signature(Request $request)
     {
-
+        $data = $request->all();
         $endpoint = env('URL_MOMO') . '/v2/gateway/api/create';
         $partnerCode =  env('PARNER_CODE_MOMO');
 
         $accessKey = env('ACCESSKEY_MOMO');
         $secretKey = env('SECRETKEY_MOMO');
         $orderInfo = "Thanh toán qua MoMo";
-        $amount = "10000";
+        $amount = $data['amount']  || 1000;
         $orderId = time() . "";
         // Lưu ý: link notifyUrl không phải là dạng localhost
         $extraData = '';

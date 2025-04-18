@@ -89,6 +89,7 @@ Route::group(['middleware' => ['GetData', 'CorsApi']], function () {
     Route::get('state', 'App\Http\Controllers\Api\StoreController@state');
     Route::put('user', 'App\Http\Controllers\Api\StoreController@update');
     Route::get('user', 'App\Http\Controllers\Api\StoreController@info');
+    Route::delete('user/{id}', 'App\Http\Controllers\Api\StoreController@deleteUser');
     Route::get('user_child', 'App\Http\Controllers\Api\StoreController@userChild');
     Route::get('history_withdraw', 'App\Http\Controllers\Api\StoreController@historyWithdraw');
     Route::get('ranks', 'App\Http\Controllers\Api\RanksController@index');

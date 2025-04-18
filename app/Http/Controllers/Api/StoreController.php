@@ -1326,7 +1326,7 @@ class StoreController extends Controller
         $processedIds = []; // Lưu ID để update status
 
         foreach ($listSendNotification as $sendNotification) {
-            $channelName = time().rand(100,999999);
+            $channelName = time() . rand(100, 999999);
 
             $recipient = $sendNotification->token;
 
@@ -1375,5 +1375,21 @@ class StoreController extends Controller
         $is = env('IS_PAYMENT');
 
         return $this->returnSuccess($is, ($is) ? "" : 'Tính năng đặt hàng đang phát triển');
+    }
+    public function deleteUser(Request $request, $id)
+    {
+        $store = $request['data_reponse'];
+        $this->_PRFIX_TABLE = $store->prefixTable;
+        $userId = $store->user_id;
+        $user = DB::table('wp_users')->find($userId);
+        
+        if($user){
+            DB::table('wp_usermeta')->where('user_id', $userId)->delete();
+            DB::table('wp_users')->where('ID', $userId)->delete();
+        }
+        return $this->returnSuccess([true],"Xóa thành công");
+
+        
+       
     }
 }

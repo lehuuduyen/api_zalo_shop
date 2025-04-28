@@ -183,7 +183,6 @@ class ProductController extends Controller
         $this->_PRFIX_TABLE = 'wp';
 
       
-        $this->_PRFIX_TABLE = $store->prefixTable;
      
         $categories = DB::table($this->_PRFIX_TABLE . '_term_taxonomy')->join($this->_PRFIX_TABLE . '_terms', $this->_PRFIX_TABLE . '_terms.term_id', $this->_PRFIX_TABLE . '_term_taxonomy.term_id')->where($this->_PRFIX_TABLE . '_term_taxonomy.taxonomy', 'product_cat')->select($this->_PRFIX_TABLE . '_terms.*')->get();
         

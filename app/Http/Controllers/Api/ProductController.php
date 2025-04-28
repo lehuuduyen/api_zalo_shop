@@ -200,9 +200,13 @@ class ProductController extends Controller
     public function getAttribute(Request $request)
     {
         
-        $store = $request['data_reponse'];
-      
-        $this->_PRFIX_TABLE = $store->prefixTable;
+        $store = new stdClass();
+        $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+
+        // Combine protocol and host to get the full domain
+        $fullDomain = $protocol . \env('APP_URL_BACKEND');
+        $store->domain = $fullDomain;
+        $this->_PRFIX_TABLE = 'wp';
      
         $attribute = DB::table($this->_PRFIX_TABLE . '_postmeta')->where('meta_key','tm_meta')->select('meta_value')->get();
         $listTopping = [];

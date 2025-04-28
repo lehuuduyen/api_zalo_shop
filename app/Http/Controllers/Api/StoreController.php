@@ -42,7 +42,7 @@ class StoreController extends Controller
             $branchs[$key]->city_name = ($val->city) ? $this->city($request, $val->city) : "";
             $branchs[$key]->quan_name = ($val->district) ? $this->quan($request, $val->city, $val->district) : "";
             $branchs[$key]->phuong_name = ($val->ward) ? $this->phuong($request, $val->district, $val->ward) : "";
-            $branchs[$key]->img = 'https://prnt.sc/TQQwe94UsOzI'; // Properly encode the address
+            $branchs[$key]->img = env('API_URL_BACKEND').'/quan.png'; // Properly encode the address
             $phuong = preg_replace('/\b0(\d)/', '$1', $branchs[$key]->phuong_name) . PHP_EOL;
             $address = urlencode($branchs[$key]->address . ',' . $phuong . ',' . $branchs[$key]->quan_name . ',' . $branchs[$key]->city_name); // Properly encode the address
 

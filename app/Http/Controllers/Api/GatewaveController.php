@@ -243,7 +243,7 @@ class GatewaveController extends Controller
                                                   
                         if (isset($request['referrer_code']) && !empty($request['referrer_code'])   &&  $request['referrer_code'] != '77777777' && $request['sdt'] != $request['referrer_code'] ) {
                       
-                            $this->woo_logs('user_parent_save', $request['referrer_code'] . '-' . $userId);
+                            $this->woo_logs('user_parent_save', $request['referrer_code'] . '-' . $insertGetId);
 
                             $user = DB::table($this->_PRFIX_TABLE . '_usermeta')->insert(
                                 array(

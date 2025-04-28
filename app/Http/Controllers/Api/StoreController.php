@@ -1387,7 +1387,7 @@ class StoreController extends Controller
             DB::table('wp_usermeta')->where('user_id', $userId)->delete();
             DB::table('wp_users')->where('ID', $userId)->delete();
         }
-        return $this->returnSuccess([true],"Xóa thành công");
+        return $this->returnSuccess([$userId],"Xóa thành công");
 
         
        

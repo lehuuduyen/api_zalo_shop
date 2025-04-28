@@ -239,7 +239,7 @@ class GatewaveController extends Controller
                             array('meta_value' => 'a:1:{s:10:"subscriber";b:1;}')
                         );
                                                   
-                        if (isset($data['referrer_code']) && !empty($data['referrer_code'])   &&  $data['referrer_code'] != '77777777' &&  $userId != 0  && $request['sdt'] != $data['referrer_code'] ) {
+                        if (isset($data['referrer_code']) && !empty($data['referrer_code'])   &&  $data['referrer_code'] != '77777777' && $request['sdt'] != $data['referrer_code'] ) {
                       
                             $this->woo_logs('user_parent_save', $data['referrer_code'] . '-' . $userId);
 

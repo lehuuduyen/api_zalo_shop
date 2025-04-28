@@ -39,11 +39,11 @@ Route::post('webhook', 'App\Http\Controllers\Api\OrdersController@webhookPost');
 Route::post('signature', 'App\Http\Controllers\Api\OrdersController@signature');
 
 Route::get('products', 'App\Http\Controllers\Api\ProductController@index');
+Route::get('product/categories', 'App\Http\Controllers\Api\ProductController@getCategories');
+Route::get('product/attribute', 'App\Http\Controllers\Api\ProductController@getAttribute');
+Route::get('blogs', 'App\Http\Controllers\Api\BlogController@index');
 
 Route::group(['middleware' => ['GetData', 'CorsApi']], function () {
-    Route::get('product/categories', 'App\Http\Controllers\Api\ProductController@getCategories');
-    Route::get('product/attribute', 'App\Http\Controllers\Api\ProductController@getAttribute');
-    Route::get('blogs', 'App\Http\Controllers\Api\BlogController@index');
     Route::get('get_payment_method', 'App\Http\Controllers\Api\StoreController@getPaymentMethod');
     Route::get('coupons', 'App\Http\Controllers\Api\CouponsController@index');
     Route::get('update_status_shipper/{orderId}', 'App\Http\Controllers\Api\OrdersController@update_status_shipper');

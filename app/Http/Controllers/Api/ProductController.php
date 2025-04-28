@@ -174,8 +174,14 @@ class ProductController extends Controller
     }
     public function getCategories(Request $request)
     {
-        
-        $store = $request['data_reponse'];
+        $store = new stdClass();
+        $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+
+        // Combine protocol and host to get the full domain
+        $fullDomain = $protocol . \env('APP_URL_BACKEND');
+        $store->domain = $fullDomain;
+        $this->_PRFIX_TABLE = 'wp';
+
       
         $this->_PRFIX_TABLE = $store->prefixTable;
      

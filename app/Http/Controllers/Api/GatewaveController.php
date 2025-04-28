@@ -183,7 +183,10 @@ class GatewaveController extends Controller
                 return $this->returnError(new \stdClass, $validator->errors()->first());
             } else {
                 //check otp 
-                var_dump(isset($data['referrer_code']) && !empty($data['referrer_code'])   &&  $data['referrer_code'] != '77777777' && $request['sdt'] != $data['referrer_code']);die;
+                var_dump($data['referrer_code']);
+                var_dump($request['sdt']);
+                
+                die;
 
                 $user = DB::table($this->_PRFIX_TABLE . '_users')->where('user_login', $request['sdt'])->first();
 

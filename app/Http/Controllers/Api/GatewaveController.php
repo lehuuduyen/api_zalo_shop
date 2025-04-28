@@ -183,10 +183,7 @@ class GatewaveController extends Controller
                 return $this->returnError(new \stdClass, $validator->errors()->first());
             } else {
                 //check otp 
-                var_dump($data['referrer_code']);
-                var_dump($request['sdt']);
-                
-                die;
+              
 
                 $user = DB::table($this->_PRFIX_TABLE . '_users')->where('user_login', $request['sdt'])->first();
 
@@ -244,15 +241,15 @@ class GatewaveController extends Controller
                             array('meta_value' => 'a:1:{s:10:"subscriber";b:1;}')
                         );
                                                   
-                        if (isset($data['referrer_code']) && !empty($data['referrer_code'])   &&  $data['referrer_code'] != '77777777' && $request['sdt'] != $data['referrer_code'] ) {
+                        if (isset($request['referrer_code']) && !empty($request['referrer_code'])   &&  $request['referrer_code'] != '77777777' && $request['sdt'] != $request['referrer_code'] ) {
                       
-                            $this->woo_logs('user_parent_save', $data['referrer_code'] . '-' . $userId);
+                            $this->woo_logs('user_parent_save', $request['referrer_code'] . '-' . $userId);
 
                             $user = DB::table($this->_PRFIX_TABLE . '_usermeta')->insert(
                                 array(
                                     'user_id' => $insertGetId,
                                     'meta_key' => 'user_parent',
-                                    'meta_value' => $data['referrer_code']
+                                    'meta_value' => $request['referrer_code']
                                 ),
                             );
                             $user = DB::table($this->_PRFIX_TABLE . '_usermeta')->insert(

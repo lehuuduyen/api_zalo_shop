@@ -210,6 +210,8 @@ class GatewaveController extends Controller
                     // wp_wc_customer_lookup
 
                     if (!$user) {
+                      
+
                         $email = $this->randomEmail();
                         $insertGetId = DB::table($this->_PRFIX_TABLE . '_users')->insertGetId(
                             array(
@@ -236,6 +238,27 @@ class GatewaveController extends Controller
                             ),
                             array('meta_value' => 'a:1:{s:10:"subscriber";b:1;}')
                         );
+                                                  
+                        if (isset($data['referrer_code']) && !empty($data['referrer_code'])   &&  $data['referrer_code'] != '77777777' &&  $userId != 0  && $request['sdt'] != $data['referrer_code'] ) {
+                      
+                            $this->woo_logs('user_parent_save', $data['referrer_code'] . '-' . $userId);
+
+                            $user = DB::table($this->_PRFIX_TABLE . '_usermeta')->insert(
+                                array(
+                                    'user_id' => $insertGetId,
+                                    'meta_key' => 'user_parent',
+                                    'meta_value' => $data['referrer_code']
+                                ),
+                            );
+                            $user = DB::table($this->_PRFIX_TABLE . '_usermeta')->insert(
+                                array(
+                                    'user_id' => $insertGetId,
+                                    'meta_key' => 'user_parent_created',
+                                    'meta_value' => date("d/m/Y")
+                                ),
+                            );
+                     
+                        }   
                     } else {
                         return $this->returnError(new \stdClass, "User đã tồn tại");
                     }

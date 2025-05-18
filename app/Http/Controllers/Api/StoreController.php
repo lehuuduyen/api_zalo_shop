@@ -838,13 +838,11 @@ class StoreController extends Controller
      */
     public function banner(Request $request)
     {
-        $store = $request['data_reponse'];
-        $banner = DB::table('badges')->where('status', 'active')
-            ->get();
-        foreach ($banner as $key =>   $value) {
-            $banner[$key]->name = $this->getTextByLanguare($value->name);
-            $banner[$key]->image = $this->getImage($value->image, $store);
-        }
+        $banner = [
+            'https://gsmilktea.vn/wp-content/uploads/2021/10/slider_2.jpg',
+            'https://gsmilktea.vn/wp-content/uploads/2021/10/slider_1.jpg',
+            'https://gsmilktea.vn/wp-content/uploads/2020/08/ms_banner_img4-min.jpg',
+        ];
         return $this->returnSuccess($banner);
     }
     public function city(Request $request, $idCity = "")

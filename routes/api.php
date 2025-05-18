@@ -34,6 +34,8 @@ Route::group(['middleware' => ['CorsApi']], function () {
     Route::get('phuong', 'App\Http\Controllers\Api\StoreController@phuong');
     Route::get('getFee', 'App\Http\Controllers\Api\StoreController@getFee');
 });
+Route::get('banner', 'App\Http\Controllers\Api\StoreController@banner');
+
 Route::get('webhook', 'App\Http\Controllers\Api\OrdersController@webhook');
 Route::post('webhook', 'App\Http\Controllers\Api\OrdersController@webhookPost');
 Route::post('signature', 'App\Http\Controllers\Api\OrdersController@signature');
@@ -89,7 +91,7 @@ Route::group(['middleware' => ['GetData', 'CorsApi']], function () {
     Route::get('state', 'App\Http\Controllers\Api\StoreController@state');
     Route::put('user', 'App\Http\Controllers\Api\StoreController@update');
     Route::get('user', 'App\Http\Controllers\Api\StoreController@info');
-    Route::delete('user/{id}', 'App\Http\Controllers\Api\StoreController@deleteUser');
+    Route::delete('user/{id}', 'App\Http\Controllers\Api\StoreController@b');
     Route::get('user_child', 'App\Http\Controllers\Api\StoreController@userChild');
     Route::get('history_withdraw', 'App\Http\Controllers\Api\StoreController@historyWithdraw');
     Route::get('ranks', 'App\Http\Controllers\Api\RanksController@index');
@@ -107,7 +109,6 @@ Route::group(['middleware' => ['GetData', 'CorsApi']], function () {
 
     Route::prefix('booking')->group(function () {
         Route::get('categories', 'App\Http\Controllers\Api\ProductController@getCategories');
-        Route::get('banner', 'App\Http\Controllers\Api\StoreController@banner');
         Route::get('products', 'App\Http\Controllers\Api\ProductController@index');
     });
 });

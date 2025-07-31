@@ -9,3 +9,15 @@ This tutorial is created to illustrate the basic CRUD (Create , Read, Update, De
 - Run php artisan serve
 
 Link to the tutorial : https://bishrulhaq.com/laravel/crud-in-laravel-8/
+
+
+// cai dat php 
+sudo apt update
+
+sudo apt-get install php8.3-common php8.3-cli php8.3-fpm php8.3-fileinfo
+
+sudo apt install php8.3-curl php8.3-xml
+
+ sudo apt install lsphp82-curl -y
+sudo apt install lsphp82-mysql -y
+

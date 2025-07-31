@@ -386,6 +386,7 @@ class StoreController extends Controller
         $is_affliate = $this->getUserMeta($user->ID, 'is_affliate');
         $user->is_affliate = $is_affliate;
         $user->store = $store->store;
+        $user->link_gioi_thieu = "https://".env('APP_URL_POS')."/taiapp.html?code=".$user->mobile;
 
 
 
@@ -464,7 +465,6 @@ class StoreController extends Controller
             $listUserChild = $listUserChild
                 ->groupBy($this->_PRFIX_TABLE . '_users.ID', $this->_PRFIX_TABLE . '_users.display_name', $this->_PRFIX_TABLE . '_users.user_login')
                 ->get();
-
             $tempIds = [];
             foreach ($listUserChild as $key => $child) {
                 $tempIds[] = $child->ID;
@@ -723,6 +723,7 @@ class StoreController extends Controller
                 $list = ['name' => $data['name'], 'stk' => $data['stk'], 'bankname' => $data['bankname']];
                 $getWallet = $this->getUserMeta($userId, 'wallet');
                 $isSave = true;
+                
                 if ($getWallet) {
                     $listWallet = unserialize($getWallet);
                     foreach ($listWallet as $walletOne) {
@@ -731,8 +732,9 @@ class StoreController extends Controller
                                 $isSave = false;
                                 return $this->returnError([], "Bảo mật, Số điện thoại phải là " . $walletOne['name'] . " . Hãy liên hệ tổng đài để đổi. ");
                             }
-                        } else {
-                            if ($walletOne['name'] != $list['name']) {
+                        } elseif($data['bankname'] != "MOMO") {
+                           
+                            if ($walletOne['name'] != $list['name'] && $walletOne['bankname'] != "MOMO") {
                                 $isSave = false;
                                 return $this->returnError([], "Bảo mật, Tên tài khoản phải là " . $walletOne['name'] . " . Hãy liên hệ tổng đài để đổi. ");
                             }

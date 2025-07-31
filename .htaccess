@@ -19,3 +19,19 @@
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
 </IfModule>
+
+# Cho phép truy cập thư mục xác thực
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    RewriteCond %{REQUEST_URI} !^/.well-known/acme-challenge/
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ index.php [L]
+</IfModule>
+
+# Bỏ qua cache và xử lý đặc biệt cho acme challenge
+<Directory "/www/wwwroot/api_zalo_shop/.well-known/acme-challenge/">
+    AllowOverride None
+    Require all granted
+</Directory>

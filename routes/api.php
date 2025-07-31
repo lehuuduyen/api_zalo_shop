@@ -33,6 +33,8 @@ Route::group(['middleware' => ['CorsApi']], function () {
     Route::get('quan', 'App\Http\Controllers\Api\StoreController@quan');
     Route::get('phuong', 'App\Http\Controllers\Api\StoreController@phuong');
     Route::get('getFee', 'App\Http\Controllers\Api\StoreController@getFee');
+        Route::post('check_coupon_app', 'App\Http\Controllers\Api\ProductController@checkCouponApp');
+
 });
 Route::get('banner', 'App\Http\Controllers\Api\StoreController@banner');
 
@@ -41,6 +43,8 @@ Route::post('webhook', 'App\Http\Controllers\Api\OrdersController@webhookPost');
 Route::post('signature', 'App\Http\Controllers\Api\OrdersController@signature');
 
 Route::get('products', 'App\Http\Controllers\Api\ProductController@index');
+Route::get('getCategoryProduct', 'App\Http\Controllers\Api\ProductController@getCategoryProduct');
+
 Route::get('product/categories', 'App\Http\Controllers\Api\ProductController@getCategories');
 Route::get('product/attribute', 'App\Http\Controllers\Api\ProductController@getAttribute');
 Route::get('blogs', 'App\Http\Controllers\Api\BlogController@index');
@@ -91,7 +95,7 @@ Route::group(['middleware' => ['GetData', 'CorsApi']], function () {
     Route::get('state', 'App\Http\Controllers\Api\StoreController@state');
     Route::put('user', 'App\Http\Controllers\Api\StoreController@update');
     Route::get('user', 'App\Http\Controllers\Api\StoreController@info');
-    Route::delete('user/{id}', 'App\Http\Controllers\Api\StoreController@b');
+    Route::delete('user/{id}', 'App\Http\Controllers\Api\StoreController@deleteUser');
     Route::get('user_child', 'App\Http\Controllers\Api\StoreController@userChild');
     Route::get('history_withdraw', 'App\Http\Controllers\Api\StoreController@historyWithdraw');
     Route::get('ranks', 'App\Http\Controllers\Api\RanksController@index');

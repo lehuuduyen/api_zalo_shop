@@ -16,20 +16,26 @@ class CorsApi extends Controller
      * @return mixed
      */
     public function handle(Request $request, Closure $next)
-    {
-        try {
-            $response = $next($request);
-
-            // Thêm CORS headers vào response
-            $response->header('Access-Control-Allow-Origin', '*');
-            $response->header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-            $response->header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-
-            return $response;
-        } catch (\Throwable $th) {
-            //throw $th;
-
-        }
-        return $this->returnError(new \stdClass, "Token không đúng hoặc hết hạn");
+{
+     if ($request->getMethod() === "OPTIONS") {
+        $response = response('', 200);
+    } else {
+        $response = $next($request);
     }
+
+    $origin = $request->header('Origin');
+
+    if ($origin && in_array($origin, [
+        'http://pos.gsmilktea.vn',
+        'http://web.local', // Nếu vẫn cần
+    ])) {
+        $response->header('Access-Control-Allow-Origin', $origin);
+    }
+
+    $response->header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    $response->header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    $response->header('Access-Control-Allow-Credentials', 'true');
+
+    return $response;
+}
 }

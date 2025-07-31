@@ -31,6 +31,111 @@ class ProductController extends Controller
             return false;
         }
     }
+    public function getCategoryProduct( Request $request)
+    {
+        $store = new stdClass();
+        $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+
+        // Combine protocol and host to get the full domain
+        $fullDomain = $protocol . \env('APP_URL_BACKEND');
+        $store->domain = $fullDomain;
+        $this->_PRFIX_TABLE = 'wp';
+
+      
+     
+        $categories = DB::table($this->_PRFIX_TABLE . '_term_taxonomy')->join($this->_PRFIX_TABLE . '_terms', $this->_PRFIX_TABLE . '_terms.term_id', $this->_PRFIX_TABLE . '_term_taxonomy.term_id')->where($this->_PRFIX_TABLE . '_term_taxonomy.taxonomy', 'product_cat')->select($this->_PRFIX_TABLE . '_terms.*')->get();
+        $response = [];
+        if ($categories) {
+            
+            foreach ($categories as $key => $val) {
+                $listProductId = DB::table($this->_PRFIX_TABLE . '_term_relationships')->where('term_taxonomy_id', $val->term_id)    ->pluck('object_id'); // trả về Collection chứa object_id
+                $products = DB::table($this->_PRFIX_TABLE . '_posts')->where('post_type', 'product')->where('post_status', 'publish')->whereIn('ID',$listProductId)->get();
+                $time = time();
+                $listProducts = [];
+                $temp=$val;
+                foreach ($products as $key => $product) {
+                   
+                    
+                    $products[$key]->product_inventory = $this->getProductInventory($product->ID);
+                    $products[$key]->image_id = $this->getImage($product->ID, $store);
+                    $products[$key]->is_specical = $this->checkEven($product->ID);
+                   
+        
+                    $products[$key]->id = $product->ID;
+                    $products[$key]->product_id = $product->ID;
+                    $postMetaStatus = $this->getPostMeta($product->ID, '_stock_status');
+                    $postMetaStock = $this->getPostMeta($product->ID, '_stock');
+                    $postMetaGiaGoc = $this->getPostMeta($product->ID, '_regular_price');
+        
+                    $postMetaGiaKhuyenMai = $this->getPostMeta($product->ID, '_sale_price');
+                    $_sale_price_dates_from = $this->getPostMeta($product->ID, '_sale_price_dates_from');
+                    $_sale_price_dates_to = $this->getPostMeta($product->ID, '_sale_price_dates_to');
+        
+                    $postMetaStock = $this->getPostMeta($product->ID, '_stock');
+                    $products[$key]->is_campaign = false;
+                    $products[$key]->price =  $postMetaGiaGoc;
+                    $products[$key]->sale_price =  $postMetaGiaGoc;
+                    if ($postMetaGiaKhuyenMai && empty($_sale_price_dates_from) && empty($_sale_price_dates_to)) {
+                        $products[$key]->sale_price = $postMetaGiaKhuyenMai;
+        
+                    }
+                    if ($postMetaGiaKhuyenMai && $time >= $_sale_price_dates_from && $time <= $_sale_price_dates_to) {
+                        $products[$key]->sale_price = $postMetaGiaKhuyenMai;
+        
+                        $products[$key]->is_campaign = true;
+                        $products[$key]->end_date = date('Y/m/d H:i:s', $_sale_price_dates_to);
+                    }
+        
+                    // $products[$key]->brand_id = $this->getBrand($product->brand_id, $store);
+                    $products[$key]->name = $product->post_title;
+                    $products[$key]->summary = $product->post_excerpt;
+                    $products[$key]->description = $product->post_content;
+                    $products[$key]->badge_id = [];
+        
+                    if($products[$key]->image_id){
+                        $listImgThumb =[
+                            'path'=>$products[$key]->image_id->path,
+                            'title'=>"",
+                            'alt'=>""
+                        ];
+                        
+                        $gale = $this->getGalleries($product->ID, $store);
+                        array_unshift($gale, $listImgThumb);
+                        $products[$key]->galleries = $gale;
+                        
+        
+                    }else{
+                        $products[$key]->galleries = $this->getGalleries($product->ID, $store);
+                    }
+                    
+                    $products[$key]->delivery_option = [];
+                    // $products[$key]->delivery_option = $this->getProductDeliveryOption($product->id);
+                    $products[$key]->unit = [];
+                    // $products[$key]->unit = $this->getUnit($product->id);
+                    $products[$key]->policy = [];
+                    // $products[$key]->policy = $this->getPolicy($product->id);
+                    $products[$key]->tag_name = [];
+                    // $products[$key]->tag_name = $this->getTagName($product->id);
+        
+                    $products[$key]->review = $this->getreview($product->ID);
+                    $products[$key]->sold_count =  $products[$key]->product_inventory->sold_count;
+                    $products[$key]->is_bien_the = false;
+        
+                    $listProducts[] = $products[$key];
+                    
+        
+                }
+                $temp->listProducts=$listProducts;
+                $response[]=$temp;
+            }
+        }
+
+
+        return $this->returnSuccess($response);        
+        
+        
+        
+    }
     public function index(Request $request)
     {
         $store = new stdClass();
@@ -512,6 +617,56 @@ class ProductController extends Controller
                     return $this->returnError($coupon_amount_total, 'Mã khuyễn mãi không đúng');
                 }
             }
+           
+        } catch (\Throwable $th) {
+            //throw $th;
+            $this->woo_logs('checkCoupon', $th->getMessage());
+            return $this->returnError(0, $th->getMessage());
+        }
+    }
+    public function checkCouponApp(Request $request)
+    {
+        try {
+            //code...
+            $this->_PRFIX_TABLE = "wp";
+            $data = $request->all();
+            if (!isset($data['coupon'])) {
+                return $this->returnError([], "Bắt buộc phải nhập coupon");
+            }
+            if (!isset($data['subtotal'])) {
+                return $this->returnError([], "Bắt buộc phải nhập total");
+            }
+            if (!isset($data['phone'])) {
+                return $this->returnError([], "Bắt buộc phải nhập số điện thoại");
+            }
+            $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->where('user_login', $data['phone'])->first();
+           if(!$user){
+               $data['email'] = "";
+           }else{
+                $data['email'] = $user->user_email;
+
+           }
+            
+            
+            $order = $data['order'];
+            $listProductId = [];
+            foreach ($order as $value) {
+                $listProductId[] = $value['productId'];
+            }
+            $products = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->whereIn('id', $listProductId)->get();
+            
+            
+            $controller = new Controller();
+            $da = $controller->getTotalPriceDetailsPos($order,1,1);
+            $data['subtotal'] = $da['totalPriceTopping'];
+            $data['email'] = $data['email'];
+            $coupon_amount_total = $this->calculateCoupon($data, $products, true);
+            if ($coupon_amount_total > 0) {
+                return $this->returnSuccess($coupon_amount_total);
+            } else {
+                return $this->returnError($coupon_amount_total, 'Mã khuyễn mãi không đúng');
+            }
+        
            
         } catch (\Throwable $th) {
             //throw $th;

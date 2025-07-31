@@ -4,6 +4,7 @@
     </IfModule>
 
     RewriteEngine On
+    RewriteCond %{REQUEST_URI} ^/\.well-known/acme-challenge/ [NC]
 
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
@@ -19,3 +20,16 @@
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
 </IfModule>
+<IfModule mod_headers.c>
+    Header set Access-Control-Allow-Origin "*"
+    Header set Access-Control-Allow-Headers "Content-Type, Authorization"
+    Header set Access-Control-Allow-Methods "POST, GET, OPTIONS"
+</IfModule>
+# Cho phép truy cập thư mục xác thực
+
+
+# Bỏ qua cache và xử lý đặc biệt cho acme challenge
+<Directory "/www/wwwroot/api_zalo_shop/.well-known/acme-challenge/">
+    AllowOverride None
+    Require all granted
+</Directory>

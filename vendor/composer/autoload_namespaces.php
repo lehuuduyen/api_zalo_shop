@@ -6,4 +6,5 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
+    'Hautelook' => array($vendorDir . '/hautelook/phpass/src'),
 );

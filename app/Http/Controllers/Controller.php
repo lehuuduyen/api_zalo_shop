@@ -297,6 +297,7 @@ class Controller extends BaseController
 
         return $response;
     }
+    
     public function getSubCategoryByProduct($id, $store)
     {
         $response = new \stdClass();
@@ -716,12 +717,23 @@ class Controller extends BaseController
                             "key" => $valueGroup . "_" . $i,
                             "attribute" => $bien
                         ];
+                        
+                        $temp1[$bien] = $valueGroup . "_$i";
+                        if (isset($attribute['multiple_radiobuttons_options_value'][$sttKeyGroup])) {
+                            $listTitleSize = $attribute['multiple_radiobuttons_options_value'][$sttKeyGroup];
+                            $keySearchAtrribute = array_search($valueGroup, $listTitleSize);
+                            if ($keySearchAtrribute != "") {
+                                $priceAttribute = $attribute['multiple_radiobuttons_options_price'][$sttKeyGroup][$keySearchAtrribute];
+
+                                $price = $price + $priceAttribute;
+                            }
+                        }
                         $temp3[] = [
                             'mode' => 'builder',
                             'name' => ucwords($keyGroup),
                             'value' => $valueGroup,
                             'post_name' => $bien,
-                            'price' => 10000,
+                            'price' => $priceAttribute,
                             'section' => rand(1000000, 999999),
                             'section_label' => ucwords($keyGroup),
                             'fixedcurrenttotal' => 0,
@@ -729,16 +741,6 @@ class Controller extends BaseController
                             'price_per_currency' => ['VND' => ''],
                             'quantity' => 1,
                         ];
-                        $temp1[$bien] = $valueGroup . "_$i";
-
-                        if (isset($attribute['multiple_radiobuttons_options_value'][$sttKeyGroup])) {
-                            $listTitleSize = $attribute['multiple_radiobuttons_options_value'][$sttKeyGroup];
-                            $keySearchAtrribute = array_search($valueGroup, $listTitleSize);
-                            if ($keySearchAtrribute != "") {
-                                $priceAttribute = $attribute['multiple_radiobuttons_options_price'][$sttKeyGroup][$keySearchAtrribute];
-                                $price = $price + $priceAttribute;
-                            }
-                        }
                         $i++;
                     }
                     $j = 0;
@@ -947,12 +949,13 @@ class Controller extends BaseController
             $configAff = $this->getOptionsMeta('woo_aff_setting');
             if ($getUserParent && $configAff) {
                 $commissions = $finalDetails['total'] * $configAff / 100;
+                $userParentId = DB::table($this->_PRFIX_TABLE . '_users')->where('user_login', $getUserParent)->first();
                 DB::table($this->_PRFIX_TABLE . '_woo_history_user_commission')->insertGetId(
                     array(
                         'order_id' => $postId,
                         'total_order' => $finalDetails['total'],
                         'user_id' => $user['id'],
-                        'user_parent' => $getUserParent,
+                        'user_parent' => $userParentId->ID,
                         'product_id' => 1,
                         'commission' => $commissions,
                         'commission_level2' => 0,
@@ -1526,19 +1529,7 @@ class Controller extends BaseController
                             "key" => $valueGroup . "_" . $i,
                             "attribute" => $bien
                         ];
-                        $temp3[] = [
-                            'mode' => 'builder',
-                            'name' => ucwords($keyGroup),
-                            'value' => $valueGroup,
-                            'post_name' => $bien,
-                            'price' => 10000,
-                            'section' => rand(1000000, 999999),
-                            'section_label' => ucwords($keyGroup),
-                            'fixedcurrenttotal' => 0,
-                            'currencies' => [],
-                            'price_per_currency' => ['VND' => ''],
-                            'quantity' => 1,
-                        ];
+                        
                         $temp1[$bien] = $valueGroup . "_$i";
 
                         if (isset($attribute['multiple_radiobuttons_options_value'][$sttKeyGroup])) {
@@ -1549,6 +1540,19 @@ class Controller extends BaseController
                                 $price = $price + $priceAttribute;
                             }
                         }
+                        $temp3[] = [
+                            'mode' => 'builder',
+                            'name' => ucwords($keyGroup),
+                            'value' => $valueGroup,
+                            'post_name' => $bien,
+                            'price' => $priceAttribute || 0,
+                            'section' => rand(1000000, 999999),
+                            'section_label' => ucwords($keyGroup),
+                            'fixedcurrenttotal' => 0,
+                            'currencies' => [],
+                            'price_per_currency' => ['VND' => ''],
+                            'quantity' => 1,
+                        ];
                         $i++;
                     }
                     $j = 0;
@@ -1818,12 +1822,14 @@ class Controller extends BaseController
 
             if ($getUserParent && $configAff) {
                 $commissions = ($totalPriceAndVoucher) * $configAff / 100;
+                            $userParentId = DB::table($this->_PRFIX_TABLE . '_users')->where('user_login', $getUserParent)->first();
+
                 DB::table($this->_PRFIX_TABLE . '_woo_history_user_commission')->insertGetId(
                     array(
                         'order_id' => $postId,
                         'total_order' => $totalPriceAndVoucher,
                         'user_id' => $user['id'],
-                        'user_parent' => $getUserParent,
+                        'user_parent' => $userParentId->ID,
                         'product_id' => 1,
                         'commission' => $commissions,
                         'commission_level2' => 0,
@@ -2822,11 +2828,13 @@ class Controller extends BaseController
     }
     public function getPrefixTableFirst()
     {
-        $tables = DB::select('SHOW TABLES')[0];
-        $array = get_object_vars($tables);
-        $value = array_values($array)[0];
+        // $tables = DB::select('SHOW TABLES')[0];
+        // print_r($tables);die;
+        // $array = get_object_vars($tables);
+        // $value = array_values($array)[0];
 
-        return explode("_", $value)[0];
+        // return explode("_", $value)[0];
+        return 'wp';
     }
     public function getUserParentLastes($userChild)
     {

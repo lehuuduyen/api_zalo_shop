@@ -239,8 +239,9 @@ class OrdersController extends Controller
             if ($coupons) {
                 foreach ($coupons as $coupon) {
                     $orders[$key]->discount += $coupon->discount_amount;
-                    $orders[$key]->total_price += $order->total_sales + $coupon->discount_amount;
+                    $orders[$key]->total_price += $coupon->discount_amount;
                 }
+
             }
 
             // $orders[$key]->state = $this->getState($order->state);

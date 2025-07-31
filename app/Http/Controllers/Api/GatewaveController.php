@@ -168,6 +168,8 @@ class GatewaveController extends Controller
     public function index(Request $request)
     {
         try {
+            DB::beginTransaction();
+
             $validator = Validator::make($request->all(), [
                 'sdt' => 'required',
                 'name' => 'required',
@@ -241,15 +243,15 @@ class GatewaveController extends Controller
                             array('meta_value' => 'a:1:{s:10:"subscriber";b:1;}')
                         );
                                                   
-                        if (isset($request['referrer_code']) && !empty($request['referrer_code'])   &&  $request['referrer_code'] != '77777777' && $request['sdt'] != $request['referrer_code'] ) {
+                        if (isset($request['referrer_id']) && !empty($request['referrer_id'])   &&  $request['referrer_id'] != '77777777' && $request['sdt'] != $request['referrer_id'] ) {
                       
-                            $this->woo_logs('user_parent_save', $request['referrer_code'] . '-' . $insertGetId);
+                            $this->woo_logs('user_parent_save', $request['referrer_id'] . '-' . $insertGetId);
 
                             $user = DB::table($this->_PRFIX_TABLE . '_usermeta')->insert(
                                 array(
                                     'user_id' => $insertGetId,
                                     'meta_key' => 'user_parent',
-                                    'meta_value' => $request['referrer_code']
+                                    'meta_value' => $request['referrer_id']
                                 ),
                             );
                             $user = DB::table($this->_PRFIX_TABLE . '_usermeta')->insert(
@@ -282,6 +284,9 @@ class GatewaveController extends Controller
                     }
                     $hash = $this->getToken($request['store'], $request['sdt'], $databaseStore, $request['name'], $insertGetId, $email, $prefixTable);
                     $this->woo_logs('gateway', $hash, 3);
+                    $this->woo_logs('user',"user: ".$request['sdt']."-parent: ".$request['referrer_id'], 3);
+
+                    DB::commit();
 
                     return $this->returnSuccess([
                         'token' => $hash
@@ -291,6 +296,8 @@ class GatewaveController extends Controller
                 }
             }
         } catch (\Throwable $th) {
+                        DB::rollBack();
+
             $this->woo_logs('gateway', $th->getMessage());
 
             return $this->returnError(new \stdClass, $th->getMessage());

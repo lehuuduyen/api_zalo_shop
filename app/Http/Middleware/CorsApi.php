@@ -17,7 +17,7 @@ class CorsApi extends Controller
      */
     public function handle(Request $request, Closure $next)
 {
-     if ($request->getMethod() === "OPTIONS") {
+    if ($request->getMethod() === "OPTIONS") {
         $response = response('', 200);
     } else {
         $response = $next($request);
@@ -25,16 +25,18 @@ class CorsApi extends Controller
 
     $origin = $request->header('Origin');
 
-    if ($origin && in_array($origin, [
+    $allowedOrigins = [
         'http://pos.gsmilktea.vn',
-        'http://web.local', // Nếu vẫn cần
-    ])) {
-        $response->header('Access-Control-Allow-Origin', $origin);
+        'http://web.local',
+    ];
+
+    if ($origin && in_array($origin, $allowedOrigins)) {
+        $response->headers->set('Access-Control-Allow-Origin', $origin);
+        $response->headers->set('Access-Control-Allow-Credentials', 'true');
     }
 
-    $response->header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    $response->header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    $response->header('Access-Control-Allow-Credentials', 'true');
+    $response->headers->set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    $response->headers->set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
 
     return $response;
 }

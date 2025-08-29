@@ -1,0 +1,706 @@
+<html dir="ltr" lang="en-GB" hydrated="">
+
+<head>
+  <meta charset="utf-8">
+  <style data-styles="">
+    apple-tv-plus-player,
+    apple-music-video-player,
+    amp-chrome-player,
+    amp-footer-player,
+    apple-music-card-player,
+    amp-lyrics,
+    amp-user-menu,
+    amp-playback-controls-unified,
+    apple-music-artwork-lockup,
+    apple-music-progress,
+    apple-music-volume,
+    amp-add-to-library,
+    amp-jump-to-live-control,
+    amp-playback-controls-autoplay,
+    amp-playback-controls-mute,
+    amp-volume-control-unified,
+    apple-music-radio-column-player,
+    amp-ambient-video,
+    amp-artwork,
+    amp-background-video,
+    amp-eq-bars,
+    amp-footer-player-metadata,
+    amp-footer-player-progress,
+    amp-loading-spinner,
+    amp-lyrics-display-header,
+    amp-playback-controls-pip,
+    amp-playback-time,
+    amp-podcast-keyboard-controls,
+    amp-sign-in,
+    amp-transition,
+    amp-lyrics-display-footer,
+    amp-lyrics-display-instrumental-line,
+    amp-lyrics-display-synced-line,
+    amp-lyrics-display-time-synced,
+    amp-lyrics-display-static,
+    amp-chrome-volume,
+    amp-embed-notification,
+    amp-skip-intro,
+    amp-up-next,
+    apple-music-artwork,
+    amp-more-menu,
+    amp-more-menu-item,
+    amp-user-avatar,
+    amp-volume-control,
+    amp-playback-controls-progress-range,
+    amp-icon,
+    amp-playback-controls-skip,
+    amp-playback-controls-play,
+    amp-lcd-metadata,
+    amp-playback-controls-item-skip,
+    amp-playback-controls-repeat,
+    amp-playback-controls-shuffle,
+    amp-contextual-menu-button,
+    amp-marquee-text,
+    amp-lcd,
+    amp-podcast-playback-controls,
+    apple-music-playback-controls,
+    amp-lcd-progress,
+    amp-overlay,
+    amp-playback-controls-progress,
+    amp-product-placement-overlay-ui,
+    amp-pse-overlay-ui,
+    amp-rating-overlay-ui,
+    amp-contextual-menu,
+    amp-contextual-menu-item,
+    amp-contextual-menu-scrim,
+    amp-video-player-internal,
+    amp-window-takeover,
+    amp-tv-overlay,
+    amp-airplay-control,
+    amp-audio-tracks-control,
+    amp-captions-control,
+    amp-playback-controls-exit,
+    amp-playback-controls-full-screen,
+    amp-video-keyboard-controls,
+    amp-video-player {
+      visibility: hidden
+    }
+
+    [hydrated] {
+      visibility: inherit
+    }
+  </style>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="applicable-device" content="pc,mobile">
+
+  <script id="perfkit">window.initialPageRequestTime = +new Date();</script>
+  <link rel="preconnect" href="https://amp-api-edge.apps.apple.com" crossorigin="">
+  <link rel="preconnect" href="https://is1-ssl.mzstatic.com" crossorigin="">
+  <link rel="preconnect" href="https://is2-ssl.mzstatic.com" crossorigin="">
+  <link rel="preconnect" href="https://is3-ssl.mzstatic.com" crossorigin="">
+  <link rel="preconnect" href="https://is4-ssl.mzstatic.com" crossorigin="">
+  <link rel="preconnect" href="https://is5-ssl.mzstatic.com" crossorigin="">
+  <link rel="preconnect" href="https://xp.apple.com" crossorigin="">
+  <link rel="preconnect" href="https://js-cdn.music.apple.com" crossorigin="">
+  <link rel="preconnect" href="https://www.apple.com" crossorigin="">
+
+  <meta name="web-experience-app/config/environment"
+    content="%7B%22appVersion%22%3A1%2C%22modulePrefix%22%3A%22web-experience-app%22%2C%22environment%22%3A%22production%22%2C%22rootURL%22%3A%22%2F%22%2C%22locationType%22%3A%22history-hash-router-scroll%22%2C%22historySupportMiddleware%22%3Atrue%2C%22EmberENV%22%3A%7B%22FEATURES%22%3A%7B%7D%2C%22EXTEND_PROTOTYPES%22%3A%7B%22Date%22%3Afalse%7D%2C%22_APPLICATION_TEMPLATE_WRAPPER%22%3Afalse%2C%22_DEFAULT_ASYNC_OBSERVERS%22%3Atrue%2C%22_JQUERY_INTEGRATION%22%3Afalse%2C%22_TEMPLATE_ONLY_GLIMMER_COMPONENTS%22%3Atrue%7D%2C%22APP%22%3A%7B%22PROGRESS_BAR_DELAY%22%3A3000%2C%22CLOCK_INTERVAL%22%3A1000%2C%22LOADING_SPINNER_SPY%22%3Atrue%2C%22BREAKPOINTS%22%3A%7B%22large%22%3A%7B%22min%22%3A1069%2C%22content%22%3A980%7D%2C%22medium%22%3A%7B%22min%22%3A735%2C%22max%22%3A1068%2C%22content%22%3A692%7D%2C%22small%22%3A%7B%22min%22%3A320%2C%22max%22%3A734%2C%22content%22%3A280%7D%7D%2C%22buildVariant%22%3A%22apps%22%2C%22name%22%3A%22web-experience-app%22%2C%22version%22%3A%222528.2.0%2B297184d3%22%7D%2C%22MEDIA_API%22%3A%7B%22token%22%3A%22eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IlU4UlRZVjVaRFMifQ.eyJpc3MiOiI3TktaMlZQNDhaIiwiaWF0IjoxNzUyMTgyNjg3LCJleHAiOjE3NTk0NDAyODcsInJvb3RfaHR0cHNfb3JpZ2luIjpbImFwcGxlLmNvbSJdfQ.71CexKXeYjNMLSuHqzQl5YwIO-IM_Ut5q_cHHBReTLybNE5dUrYIE5i-w4ExWXcfJZyVmZG7k-R9Zl-VdGKsaQ%22%7D%2C%22i18n%22%3A%7B%22defaultLocale%22%3A%22en-gb%22%2C%22useDevLoc%22%3Afalse%2C%22pathToLocales%22%3A%22dist%2Flocales%22%7D%2C%22MEDIA_ARTWORK%22%3A%7B%22BREAKPOINTS%22%3A%7B%22large%22%3A%7B%22min%22%3A1069%2C%22content%22%3A980%7D%2C%22medium%22%3A%7B%22min%22%3A735%2C%22max%22%3A1068%2C%22content%22%3A692%7D%2C%22small%22%3A%7B%22min%22%3A320%2C%22max%22%3A734%2C%22content%22%3A280%7D%7D%7D%2C%22API%22%3A%7B%22AppHost%22%3A%22https%3A%2F%2Famp-api-edge.apps.apple.com%22%2C%22globalElementsPath%22%3A%22%2Fglobal-elements%22%7D%2C%22fastboot%22%3A%7B%22hostWhitelist%22%3A%5B%7B%7D%5D%7D%2C%22ember-short-number%22%3A%7B%22locales%22%3A%5B%22ar-dz%22%2C%22ar-bh%22%2C%22ar-eg%22%2C%22ar-iq%22%2C%22ar-jo%22%2C%22ar-kw%22%2C%22ar-lb%22%2C%22ar-ly%22%2C%22ar-ma%22%2C%22ar-om%22%2C%22ar-qa%22%2C%22ar-sa%22%2C%22ar-sd%22%2C%22ar-sy%22%2C%22ar-tn%22%2C%22ar-ae%22%2C%22ar-ye%22%2C%22he-il%22%2C%22iw-il%22%2C%22ca-es%22%2C%22cs-cz%22%2C%22da-dk%22%2C%22de-ch%22%2C%22de-de%22%2C%22el-gr%22%2C%22en-au%22%2C%22en-ca%22%2C%22en-gb%22%2C%22en-us%22%2C%22es-419%22%2C%22es-es%22%2C%22es-mx%22%2C%22es-xl%22%2C%22et-ee%22%2C%22fi-fi%22%2C%22fr-ca%22%2C%22fr-fr%22%2C%22hi-in%22%2C%22hr-hr%22%2C%22hu-hu%22%2C%22id-id%22%2C%22is-is%22%2C%22it-it%22%2C%22iw-il%22%2C%22ja-jp%22%2C%22ko-kr%22%2C%22lt-lt%22%2C%22lv-lv%22%2C%22ms-my%22%2C%22nl-nl%22%2C%22no-no%22%2C%22no-nb%22%2C%22nb-no%22%2C%22pl-pl%22%2C%22pt-br%22%2C%22pt-pt%22%2C%22ro-ro%22%2C%22ru-ru%22%2C%22sk-sk%22%2C%22sv-se%22%2C%22th-th%22%2C%22tr-tr%22%2C%22uk-ua%22%2C%22vi-vi%22%2C%22vi-vn%22%2C%22zh-cn%22%2C%22zh-hans%22%2C%22zh-hans-cn%22%2C%22zh-hant%22%2C%22zh-hant-hk%22%2C%22zh-hant-tw%22%2C%22zh-hk%22%2C%22zh-tw%22%2C%22ar%22%2C%22ca%22%2C%22cs%22%2C%22da%22%2C%22de%22%2C%22el%22%2C%22en%22%2C%22es%22%2C%22fi%22%2C%22fr%22%2C%22he%22%2C%22hi%22%2C%22hr%22%2C%22hu%22%2C%22id%22%2C%22is%22%2C%22it%22%2C%22ja%22%2C%22ko%22%2C%22lt%22%2C%22lv%22%2C%22ms%22%2C%22nb%22%2C%22nl%22%2C%22no%22%2C%22pl%22%2C%22pt%22%2C%22ro%22%2C%22ru%22%2C%22sk%22%2C%22sv%22%2C%22th%22%2C%22tr%22%2C%22uk%22%2C%22vi%22%2C%22zh%22%5D%7D%2C%22ember-cli-mirage%22%3A%7B%22enabled%22%3Afalse%2C%22usingProxy%22%3Afalse%2C%22useDefaultPassthroughs%22%3Atrue%7D%2C%22BREAKPOINTS%22%3A%7B%22large%22%3A%7B%22min%22%3A1069%2C%22content%22%3A980%7D%2C%22medium%22%3A%7B%22min%22%3A735%2C%22max%22%3A1068%2C%22content%22%3A692%7D%2C%22small%22%3A%7B%22min%22%3A320%2C%22max%22%3A734%2C%22content%22%3A280%7D%7D%2C%22METRICS%22%3A%7B%22variant%22%3A%22web%22%2C%22baseFields%22%3A%7B%22appName%22%3A%22web-experience-app%22%2C%22constraintProfiles%22%3A%5B%22AMPWeb%22%5D%7D%2C%22clickstream%22%3A%7B%22enabled%22%3Atrue%2C%22topic%22%3A%5B%22xp_amp_web_exp%22%5D%2C%22autoTrackClicks%22%3Atrue%7D%2C%22performance%22%3A%7B%22enabled%22%3Atrue%2C%22topic%22%3A%22xp_amp_appstore_perf%22%7D%7D%2C%22MEDIA_SHELF%22%3A%7B%22GRID_CONFIG%22%3A%7B%22books-brick-row%22%3A%7B%22small%22%3A1%2C%22medium%22%3A2%2C%22large%22%3A3%7D%2C%22story%22%3A%7B%22small%22%3A1%2C%22medium%22%3A2%2C%22large%22%3A3%7D%2C%22small-brick%22%3A%7B%22small%22%3A1%2C%22medium%22%3A2%2C%22large%22%3A3%7D%2C%22editorial-lockup-large%22%3A%7B%22small%22%3A1%2C%22medium%22%3A2%2C%22large%22%3A2%7D%2C%22editorial-lockup-medium%22%3A%7B%22small%22%3A1%2C%22medium%22%3A2%2C%22large%22%3A3%7D%2C%22large-brick%22%3A%7B%22small%22%3A1%2C%22medium%22%3A1%2C%22large%22%3A2%7D%2C%22lockup-small%22%3A%7B%22small%22%3A1%2C%22medium%22%3A2%2C%22large%22%3A3%7D%2C%22lockup-large%22%3A%7B%22small%22%3A1%2C%22medium%22%3A3%2C%22large%22%3A4%7D%2C%22posters%22%3A%7B%22small%22%3A1%2C%22medium%22%3A1%2C%22large%22%3A2%7D%2C%22breakout-large%22%3A%7B%22small%22%3A1%2C%22medium%22%3A1%2C%22large%22%3A1%7D%7D%2C%22BREAKPOINTS%22%3A%7B%22large%22%3A%7B%22min%22%3A1069%2C%22content%22%3A980%7D%2C%22medium%22%3A%7B%22min%22%3A735%2C%22max%22%3A1068%2C%22content%22%3A692%7D%2C%22small%22%3A%7B%22min%22%3A320%2C%22max%22%3A734%2C%22content%22%3A280%7D%7D%7D%2C%22SASSKIT_GENERATOR%22%3A%7B%22VIEWPORT_CONFIG%22%3A%7B%22BREAKPOINTS%22%3A%7B%22large%22%3A%7B%22min%22%3A1069%2C%22content%22%3A980%7D%2C%22medium%22%3A%7B%22min%22%3A735%2C%22max%22%3A1068%2C%22content%22%3A692%7D%2C%22small%22%3A%7B%22min%22%3A320%2C%22max%22%3A734%2C%22content%22%3A280%7D%7D%7D%7D%2C%22features%22%3A%7B%22BUILD_VARIANT_APPS%22%3Atrue%2C%22BUILD_VARIANT_BOOKS%22%3Afalse%2C%22BUILD_VARIANT_FITNESS%22%3Afalse%2C%22BUILD_VARIANT_PODCASTS%22%3Afalse%2C%22BUILD_VARIANT_ITUNES%22%3Afalse%2C%22TV%22%3Afalse%2C%22PODCASTS%22%3Afalse%2C%22BOOKS%22%3Afalse%2C%22APPS%22%3Atrue%2C%22ARTISTS%22%3Afalse%2C%22DEEPLINK_ROUTE%22%3Afalse%2C%22EMBER_DATA%22%3Afalse%2C%22CHARTS%22%3Atrue%2C%22FITNESS%22%3Afalse%2C%22SHARE_UI%22%3Afalse%2C%22SEPARATE_RTL_STYLESHEET%22%3Atrue%7D%2C%22%40amp%2Fember-ui-global-elements%22%3A%7B%22useFooterWithoutRefundLink%22%3Afalse%7D%2C%22ember-cli-content-security-policy%22%3A%7B%22policy%22%3A%22upgrade-insecure-requests%20%3B%20default-src%20'none'%3B%20img-src%20'self'%20https%3A%2F%2F*.apple.com%20https%3A%2F%2F*.mzstatic.com%20data%3A%3B%20style-src%20'self'%20https%3A%2F%2F*.apple.com%20'unsafe-inline'%3B%20font-src%20'self'%20https%3A%2F%2F*.apple.com%3B%20media-src%20'self'%20https%3A%2F%2F*.apple.com%20blob%3A%3B%20connect-src%20'self'%20https%3A%2F%2F*.apple.com%20https%3A%2F%2F*.mzstatic.com%3B%20script-src%20'self'%20https%3A%2F%2F*.apple.com%20'unsafe-eval'%20'sha256-4ywTGAe4rEpoHt8XkjbkdOWklMJ%2F1Py%2Fx6b3%2FaGbtSQ%3D'%20blob%3A%3B%20frame-src%20'self'%20https%3A%2F%2F*.apple.com%20itmss%3A%20itms-appss%3A%20itms-bookss%3A%20itms-itunesus%3A%20itms-messagess%3A%20itms-podcasts%3A%20itms-watchs%3A%20macappstores%3A%20musics%3A%20apple-musics%3A%20podcasts%3A%20videos%3A%3B%22%2C%22reportOnly%22%3Afalse%7D%2C%22exportApplicationGlobal%22%3Afalse%7D">
+  <!-- EMBER_CLI_FASTBOOT_TITLE -->
+  <link rel="stylesheet preload" name="fonts"
+    href="https://apps.apple.com//www.apple.com/wss/fonts?families=SF+Pro,v2|SF+Pro+Icons,v1|SF+Pro+Rounded,v1|New+York+Small,v1|New+York+Medium,v1"
+    as="style">
+  <link rel="stylesheet" type="text/css"
+    href="https://www.apple.com/api-www/global-elements/global-header/v1/assets/globalheader.css"
+    data-global-elements-nav-styles="">
+  <link rel="stylesheet" type="text/css"
+    href="https://apps.apple.com/global-elements/2426.0.0/en_VN/ac-global-footer.4a7162bbfb49c42f9ba734511824ad69.css"
+    data-global-elements-footer-styles="">
+  <meta name="ac-gn-search-suggestions-enabled" content="false">
+  <meta name="globalnav-search-suggestions-enabled" content="false">
+
+  <meta name="keywords"
+    content="Stickman GO, moc games, Games, ios apps, app, appstore, app store, iphone, ipad, ipod touch, itouch, itunes">
+
+  <meta name="description" content="- The globally beloved classic IP Stickman bursts back with ultra vitality!
+- Log in to claim 5000 free draws, UR Red Dragon mount, exclusive title, and stickma…">
+
+  <!---->
+  <link rel="canonical" href="https://apps.apple.com/vn/app/stickman-go/id6746191987">
+
+  <link rel="icon" sizes="48x48"
+    href="https://apps.apple.com/assets/images/favicon/favicon-apps-48-fad34e0d87e86dcf72ded1faff4ba9d0.png"
+    type="image/png">
+
+  <!---->
+  <!---->
+  <meta name="apple:content_id" content="6746191987">
+
+  <!---->
+  <script name="schema:software-application" type="application/ld+json">
+        {"@context":"http://schema.org","@type":"SoftwareApplication","name":"Stickman GO","description":"- The globally beloved classic IP Stickman bursts back with ultra vitality!\n- Log in to claim 5000 free draws, UR Red Dragon mount, exclusive title, and stickman appearance set!\n- Transform into Swordsman, Mage, Ranger, or Dancer to venture into a vast 3D fantasy otherverse!\n- Dive into casual fun anytime, anywhere! Embark on an ultra-vigorous adventure with adorable phantom beasts and heartwarming companions! ٩(๑^o^๑)۶\n\n\n【Easy Idle, Speedy Level-Up】\nAFK to claim offline rewards, complete training in a quick click , and enjoy double EXP potions for massive resource gains!\nPortrait mode for simple controls—power up anytime, anywhere with one tap! Relish the stress-relieving joy of idle gameplay!\n\n【Superpowered Companions, Strategic Team-ups】\nRecruit Nezha, Sun Wukong, Mermaid, and more heroes with different attributes. Strategic team-ups to clear maps and farm dungeons.\nWhether you’re a chill AFK player or prefer hands-on combat, victory comes to you!\n\n【Daily Gold Rush, Trade Divine Gear】\nDungeon drop rates so high even the luckiest players would envy!\nTrade gold gear and rare materials freely—turn your wealth dreams into reality!\n\n【Awesome Phantom Beasts, Grow Together】\nEncounter and forge bonds with phantom beasts and elves from all over the world to adventure together.\nWitness ultra evolution transformations into countless forms—your ever-loyal companions!\n\n【Joyful Socializing, Team up for Raids】\nYour adventure never gets lonely! Team up with friends anytime for World Boss challenges and Guild Wars!\nJoin a warm and friendly guild, find your like-minded soulmates, and write your own adventure saga together!","screenshot":["https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/7f/b4/c8/7fb4c848-5557-f0d3-7d51-819aa689b74b/1290x2796-01.jpg/300x0w.jpg","https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/fc/67/df/fc67df18-e6be-f81d-600a-4215dc53c185/1290x2796-02.jpg/300x0w.jpg","https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/61/4b/c4/614bc4b0-f6ce-91fb-d608-dfa0de6f37ec/1290x2796-03.jpg/300x0w.jpg","https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/4d/a6/53/4da653ce-ffef-69e0-ce4a-fb85753a33bc/1290x2796-04.jpg/300x0w.jpg","https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/6c/76/36/6c76367a-683f-33bc-9c5e-0aa329ca6b9b/1290x2796-05.jpg/300x0w.jpg","https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/f7/a4/e6/f7a4e616-cff4-cf4a-d3c1-4e8ce0bac48a/1290x2796-06.jpg/300x0w.jpg","https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/49/d4/fe/49d4fe50-2773-647b-96be-1acb543447bc/2048x2732-01.jpg/643x0w.jpg","https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/f9/d4/37/f9d437a1-3541-7def-c7f8-51c813602f1b/2048x2732-02.jpg/643x0w.jpg","https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/68/98/24/68982423-7869-7c19-3d9e-84881636c746/2048x2732-03.jpg/643x0w.jpg","https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/40/f7/04/40f7048a-fab9-8206-3b06-0593256d2fa2/2048x2732-04.jpg/643x0w.jpg","https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/0e/1a/32/0e1a323c-5612-4bd9-0f92-6d0f735a3e96/2048x2732-05.jpg/643x0w.jpg","https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/1c/46/18/1c4618d3-6709-c4f8-b42a-e72c4ab5ffbd/2048x2732-06.jpg/643x0w.jpg"],"image":"https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/23/6a/7c/236a7c83-9a3d-6400-c8b4-840328981428/AppIcon-0-0-1x_U007emarketing-0-8-0-85-220.png/1200x630wa.png","applicationCategory":"Games","datePublished":"25 Jun 2025","operatingSystem":"Requires iOS 10.0 or later. Compatible with iPhone 5S, iPhone 6, iPhone 6 Plus, iPhone 6S, iPhone 6S Plus, iPhone SE (1st generation), iPhone 7, iPhone 7 Plus, iPhone 8, iPhone 8 Plus, iPhone X, iPhone XS, iPhone XS Max, iPhone XR, iPhone 11, iPhone 11 Pro, iPhone 11 Pro Max, iPhone SE (2nd generation), iPhone 12 mini, iPhone 12, iPhone 12 Pro, iPhone 12 Pro Max, iPhone 13 Pro, iPhone 13 Pro Max, iPhone 13 mini, iPhone 13, iPhone SE (3rd generation), iPhone 14, iPhone 14 Plus, iPhone 14 Pro, iPhone 14 Pro Max, iPhone 15, iPhone 15 Plus, iPhone 15 Pro, iPhone 15 Pro Max, iPhone 16, iPhone 16 Plus, iPhone 16 Pro, iPhone 16 Pro Max, iPhone 16e, iPad Air, iPad Air Wi‑Fi + Cellular, iPad mini 2, iPad mini 2 Wi‑Fi + Cellular, iPad Air 2, iPad Air 2 Wi‑Fi + Cellular, iPad mini 3, iPad mini 3 Wi‑Fi + Cellular, iPad mini 4, iPad mini 4 Wi‑Fi + Cellular, iPad Pro (12.9‑inch), iPad Pro (12.9‑inch) Wi‑Fi + Cellular, iPad Pro (9.7‑inch), iPad Pro (9.7‑inch) Wi‑Fi + Cellular, iPad (5th generation), iPad (5th generation) Wi‑Fi + Cellular, iPad Pro (12.9‑inch) (2nd generation), iPad Pro (12.9‑inch) (2nd generation) Wi‑Fi + Cellular, iPad Pro (10.5‑inch), iPad Pro (10.5‑inch) Wi‑Fi + Cellular, iPad (6th generation), iPad (6th generation) Wi‑Fi + Cellular, iPad Pro (11‑inch), iPad Pro (11‑inch) Wi‑Fi + Cellular, iPad Pro (12.9‑inch) (3rd generation), iPad Pro (12.9‑inch) (3rd generation) Wi‑Fi + Cellular, iPad mini (5th generation), iPad mini (5th generation) Wi‑Fi + Cellular, iPad Air (3rd generation), iPad Air (3rd generation) Wi‑Fi + Cellular, iPad (7th generation), iPad (7th generation) Wi‑Fi + Cellular, iPad Pro (11‑inch) (2nd generation), iPad Pro (11‑inch) (2nd generation) Wi‑Fi + Cellular, iPad Pro (12.9‑inch) (4th generation), iPad Pro (12.9‑inch) (4th generation) Wi‑Fi + Cellular, iPad Air (4th generation), iPad Air (4th generation) Wi‑Fi + Cellular, iPad (8th generation), iPad (8th generation) Wi‑Fi + Cellular, iPad Pro (11-inch) (3rd generation), iPad Pro (11-inch) (3rd generation) Wi-Fi + Cellular, iPad Pro (12.9-inch) (5th generation), iPad Pro (12.9-inch) (5th generation) Wi-Fi + Cellular, iPad mini (6th generation), iPad mini (6th generation) Wi-Fi + Cellular, iPad (9th generation), iPad (9th generation) Wi-Fi + Cellular, iPad Air (5th generation), iPad Air (5th generation) Wi‑Fi + Cellular, iPad (10th generation), iPad (10th generation) Wi‑Fi + Cellular, iPad Pro (11‑inch) (4th generation), iPad Pro (11‑inch) (4th generation) Wi‑Fi + Cellular, iPad Pro (12.9‑inch) (6th generation), iPad Pro (12.9‑inch) (6th generation) Wi‑Fi + Cellular, iPad Air 11-inch (M2), iPad Air 11-inch (M2) Wi-Fi + Cellular, iPad Air 13-inch (M2), iPad Air 13-inch (M2) Wi-Fi + Cellular, iPad Pro 11-inch (M4), iPad Pro 11-inch (M4) Wi-Fi + Cellular, iPad Pro 13-inch (M4), iPad Pro 13-inch (M4) Wi-Fi + Cellular, iPad mini (A17 Pro), iPad mini (A17 Pro) Wi-Fi + Cellular, iPad (A16), iPad (A16) Wi-Fi+ Cellular, iPad Air 11-inch (M3), iPad Air 11-inch (M3) Wi-Fi + Cellular, iPad Air 13-inch (M3), iPad Air 13-inch (M3) Wi-Fi + Cellular and iPod touch.","author":{"@type":"Person","name":"moc games","url":"https://apps.apple.com/vn/developer/moc-games/id1738570782"},"aggregateRating":{"@type":"AggregateRating","ratingValue":4.9,"reviewCount":3846},"offers":{"@type":"Offer","price":0,"priceCurrency":"VND","category":"free"}}
+      </script>
+
+  <!---->
+  <meta property="og:title" content="‎Stickman GO">
+  <meta property="og:description" content="‎- The globally beloved classic IP Stickman bursts back with ultra vitality!
+- Log in to claim 5000 free draws, UR Red Dragon mount, exclusive title, and stickman appearance set!
+- Transform into Swordsman, Mage, Ranger, or Dancer to venture into a vast 3D fantasy otherverse!
+- Dive into casual fun a…">
+  <meta property="og:site_name" content="App&nbsp;Store">
+  <meta property="og:url" content="https://apps.apple.com/vn/app/stickman-go/id6746191987">
+  <meta property="og:image"
+    content="https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/23/6a/7c/236a7c83-9a3d-6400-c8b4-840328981428/AppIcon-0-0-1x_U007emarketing-0-8-0-85-220.png/1200x630wa.png">
+  <meta property="og:image:alt" content="Stickman GO on the App&nbsp;Store">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:secure_url"
+    content="https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/23/6a/7c/236a7c83-9a3d-6400-c8b4-840328981428/AppIcon-0-0-1x_U007emarketing-0-8-0-85-220.png/1200x630wa.png">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="en_GB">
+
+  <meta name="twitter:title" content="‎Stickman GO">
+  <meta name="twitter:description" content="‎- The globally beloved classic IP Stickman bursts back with ultra vitality!
+- Log in to claim 5000 free draws, UR Red Dragon mount, exclusive title, and stickman appearance set!
+- Transform into Swordsman, Mage, Ranger, or Dancer to venture into a vast 3D fantasy otherverse!
+- Dive into casual fun a…">
+  <meta name="twitter:site" content="@AppStore">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image"
+    content="https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/23/6a/7c/236a7c83-9a3d-6400-c8b4-840328981428/AppIcon-0-0-1x_U007emarketing-0-8-0-85-220.png/1200x600wa.png">
+  <meta name="twitter:image:alt" content="Stickman GO on the App&nbsp;Store">
+
+  <!---->
+  <meta name="version" content="2528.2.0">
+  <!-- @@HEAD@@ -->
+  <script src="https://js-cdn.music.apple.com/musickit/v2/amp/musickit.js?t=1752182721294"></script>
+  <script type="module" data-resources-url="https://js-cdn.music.apple.com/musickit/v2/components/musickit-components/"
+    src="https://js-cdn.music.apple.com/musickit/v2/components/musickit-components//musickit-components.esm.js?t=1752182721294"></script>
+  <script nomodule="" data-resources-url="https://js-cdn.music.apple.com/musickit/v2/components/musickit-components/"
+    src="https://js-cdn.music.apple.com/musickit/v2/components/musickit-components//musickit-components.js?t=1752182721294"></script>
+
+  <link integrity="" rel="stylesheet" href="https://apps.apple.com/assets/web-experience-app-real-6a8bd7d2e9810a83ddac4c52415e593a.css"
+    data-rtl="/assets/web-experience-rtl-app-eaba3b398e66c36fa61a1a076027b1a1.css">
+
+
+  <title>GS Milk Tea </title>
+  <!---->
+  <script src="https://js-cdn.music.apple.com/hls.js/2.610.3/hls.js/hls.js"></script>
+</head>
+
+<body class="globalnav-scrim ember-application has-js no-touch" cz-shortcut-listen="true">
+  <div id="globalheader">
+    <aside id="globalmessage-segment" lang="en-VN" dir="ltr" class="globalmessage-segment">
+      <ul data-strings="{}" class="globalmessage-segment-content"></ul>
+    </aside>
+    
+ 
+  </div>
+  
+  <script src="/assets/chunk.705.3247db7e0cd66da5bcbd.js"></script>
+  <script src="/assets/chunk.143.268702369c85839c9898.js"></script>
+  <script integrity="" src="/assets/web-experience-app-12fb40a89d1f794b0dbc216df9b053b8.js" data-app-legacy-src=""
+    nomodule=""></script>
+
+
+
+  <script type="application/ld+json" data-test-seo-data-org="apps">
+    {
+      "@context": "https://schema.org",
+      "@id": "https://apps.apple.com/#organization",
+      "@type": "Organization",
+      "name": "App Store",
+      "url": "https://apps.apple.com/",
+      "logo": "https://apps.apple.com/assets/images/knowledge-graph/apps.png",
+      "sameAs": [
+        "https://www.wikidata.org/wiki/Q368215",
+        "https://twitter.com/AppStore",
+        "https://www.facebook.com/AppStore/"
+      ],
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "Apple",
+        "@id": "https://www.apple.com/#organization",
+        "url": "https://www.apple.com/"
+      }
+    }
+  </script>
+
+
+
+  <script type="module" src="/assets/web-experience-app-df1319e722317f023c3bb6b83f47f6a0.modern.js"
+    integrity=""></script>
+  <div class="ember-view">
+    <!---->
+    <!---->
+    <!---->
+    <!---->
+    <!---->
+    <!---->
+
+    <main class="selfclear is-apps-theme">
+      <!---->
+
+      <input id="localnav-menustate" class="localnav-menustate" type="checkbox">
+
+      <div id="localnav-sticky-placeholder" class="css-sticky localnav-sticking"></div>
+      <nav id="localnav" class="css-sticky we-localnav localnav we-localnav--app-store localnav-sticking"
+        data-sticky="">
+        <div class="localnav-wrapper">
+          <div class="localnav-background we-localnav__background"></div>
+          <div class="localnav-content we-localnav__content">
+            <div class="localnav-title we-localnav__title">
+              <a href="https://www.apple.com/vn/ios/app-store/" data-we-link-to-exclude=""><span
+                  class="we-localnav__title__product" data-test-we-localnav-store-title="">GS&nbsp;Milktea</span></a>
+              <span class="we-localnav__title__qualifier" data-test-we-localnav-preview-title="">Preview</span>
+            </div>
+            <div class="localnav-menu we-localnav__menu we-localnav__menu--apps">
+              <!---->
+              <div class="localnav-actions we-localnav__actions">
+                <!---->
+                <!---->
+              </div>
+            </div>
+          </div>
+        </div>
+      </nav>
+      <span class="we-localnav__shim" aria-hidden="true"></span>
+      <label id="localnav-curtain" for="localnav-menustate"></label>
+
+
+
+      <div class="animation-wrapper is-visible">
+  
+<!---->
+<!---->
+        <div>
+ 
+</div>
+
+
+    <section class="l-content-width section section--hero product-hero">
+  <div class="l-row">
+    <div class="product-hero__media l-column small-5
+        medium-4 large-3
+        small-valign-top">
+        <picture class="we-artwork we-artwork--downloaded product-hero__artwork we-artwork--fullwidth we-artwork--ios-app-icon" style="--background-color: #ffffff;" id="ember3">
+
+        <source srcset="https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/48/9c/01/489c0144-b9c6-1052-d4ad-0af88742a3b7/AppIcon-0-0-1x_U007emarketing-0-8-0-85-220.png/246x0w.webp 246w, https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/48/9c/01/489c0144-b9c6-1052-d4ad-0af88742a3b7/AppIcon-0-0-1x_U007emarketing-0-8-0-85-220.png/217x0w.webp 217w, https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/48/9c/01/489c0144-b9c6-1052-d4ad-0af88742a3b7/AppIcon-0-0-1x_U007emarketing-0-8-0-85-220.png/230x0w.webp 230w, https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/48/9c/01/489c0144-b9c6-1052-d4ad-0af88742a3b7/AppIcon-0-0-1x_U007emarketing-0-8-0-85-220.png/492x0w.webp 492w, https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/48/9c/01/489c0144-b9c6-1052-d4ad-0af88742a3b7/AppIcon-0-0-1x_U007emarketing-0-8-0-85-220.png/434x0w.webp 434w, https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/48/9c/01/489c0144-b9c6-1052-d4ad-0af88742a3b7/AppIcon-0-0-1x_U007emarketing-0-8-0-85-220.png/460x0w.webp 460w" sizes="(max-width: 734px) 246px, (min-width: 735px) and (max-width: 1068px) 217px, 230px" type="image/webp">
+
+      <source srcset="https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/48/9c/01/489c0144-b9c6-1052-d4ad-0af88742a3b7/AppIcon-0-0-1x_U007emarketing-0-8-0-85-220.png/246x0w.png 246w, https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/48/9c/01/489c0144-b9c6-1052-d4ad-0af88742a3b7/AppIcon-0-0-1x_U007emarketing-0-8-0-85-220.png/217x0w.png 217w, https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/48/9c/01/489c0144-b9c6-1052-d4ad-0af88742a3b7/AppIcon-0-0-1x_U007emarketing-0-8-0-85-220.png/230x0w.png 230w, https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/48/9c/01/489c0144-b9c6-1052-d4ad-0af88742a3b7/AppIcon-0-0-1x_U007emarketing-0-8-0-85-220.png/492x0w.png 492w, https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/48/9c/01/489c0144-b9c6-1052-d4ad-0af88742a3b7/AppIcon-0-0-1x_U007emarketing-0-8-0-85-220.png/434x0w.png 434w, https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/48/9c/01/489c0144-b9c6-1052-d4ad-0af88742a3b7/AppIcon-0-0-1x_U007emarketing-0-8-0-85-220.png/460x0w.png 460w" sizes="(max-width: 734px) 246px, (min-width: 735px) and (max-width: 1068px) 217px, 230px" type="image/png">
+
+      <img src="/assets/artwork/1x1-42817eea7ade52607a760cbee00d1495.gif" decoding="async" class="we-artwork__image ember3 " alt="" role="presentation" height="246" width="246">
+
+
+  <style>
+    .ember3, #ember3::before {
+           width: 246px;
+           height: 246px;
+         }
+         .ember3::before {
+           padding-top: 100%;
+         }
+@media (min-width: 735px) {
+           .ember3, #ember3::before {
+           width: 217px;
+           height: 217px;
+         }
+         .ember3::before {
+           padding-top: 100%;
+         }
+         }
+@media (min-width: 1069px) {
+           .ember3, #ember3::before {
+           width: 230px;
+           height: 230px;
+         }
+         .ember3::before {
+           padding-top: 100%;
+         }
+         }
+  </style>
+</picture>
+
+    </div>
+
+    <div class="l-column small-7
+        medium-8 large-9
+        small-valign-top">
+      <header class="product-header app-header product-header--padded-start">
+<!---->
+        <h1 class="product-header__title app-header__title">
+          GS Milk Tea
+<!----><!----><!----><!---->            <span class="badge badge--product-title">17+</span>
+        </h1>
+
+<!---->
+        <h2 class="product-header__identity app-header__identity">
+          <a href="https://apps.apple.com/vn/developer/duyen-le-huu/id1783806699" class="link" data-metrics-click="{&quot;actionDetails&quot;:{&quot;type&quot;:&quot;developer&quot;},&quot;actionType&quot;:&quot;navigate&quot;,&quot;actionUrl&quot;:&quot;https://apps.apple.com/vn/developer/duyen-le-huu/id1783806699&quot;,&quot;targetType&quot;:&quot;link&quot;,&quot;targetId&quot;:&quot;1783806699&quot;}" dir="auto">
+            Duyen Le Huu
+          </a>
+        </h2>
+
+          <h3 class="app-header__designed-for">
+              Designed for iPhone
+          </h3>
+
+          <ul class="product-header__list app-header__list">
+<!---->
+              <li class="product-header__list__item app-header__list__item--user-rating">
+                <ul class="inline-list inline-list--mobile-compact">
+                  <li class="inline-list__item">
+                    <figure class="we-star-rating" aria-label="5 out of 5">
+  <span class="we-star-rating-stars-outlines">
+    <span class="we-star-rating-stars we-star-rating-stars-5"></span>
+  </span>
+    <figcaption class="we-rating-count star-rating__count">5.0 • 3 Ratings</figcaption>
+</figure>
+
+                  </li>
+                </ul>
+              </li>
+          </ul>
+
+        <ul class="product-header__list app-header__list">
+<!---->
+          <li class="product-header__list__item">
+            <ul class="inline-list inline-list--mobile-compact">
+                <li class="inline-list__item inline-list__item--bulleted app-header__list__item--price">Free</li>
+
+<!---->            </ul>
+          </li>
+
+<!---->
+<!---->        </ul>
+
+          <div class="product-header__routes app-header__routes">
+            <p class="product-header__routes__cta">
+                  <button class="we-button we-button--outlined we-button--external icon icon-external we-button-fade-in" data-metrics-click="" aria-label="View in Mac App Store" onclick="download()" type="button">
+        
+   <span class="we-button__app-text">Download app</span>
+
+    </button>
+
+
+            </p>
+          </div>
+
+<!---->
+<!---->
+<!---->      </header>
+    </div>
+  </div>
+</section>
+
+<!---->
+    <section class="l-content-width section section--bordered">
+    <h2 class="section__headline">
+       Screenshots
+    </h2>
+    <div class="we-screenshot-viewer__screenshots">
+      <ul class="l-row l-row--peek we-screenshot-viewer__screenshots-list">
+        <!---->
+            <li class="l-column small-2 medium-3 large-3">
+      <picture class="we-artwork we-artwork--downloaded we-artwork--fullwidth we-artwork--screenshot-platform-iphone we-artwork--screenshot-version-iphone-d74 we-artwork--screenshot-orientation-portrait" id="ember9">
+
+        <source srcset="https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/79/fe/5f/79fe5f5a-cac6-3023-1878-40b872892d06/z6662209379030_049b68f648713e5b2a23c164b6933c28.jpg/300x0w.webp 300w, https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/79/fe/5f/79fe5f5a-cac6-3023-1878-40b872892d06/z6662209379030_049b68f648713e5b2a23c164b6933c28.jpg/157x0w.webp 157w, https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/79/fe/5f/79fe5f5a-cac6-3023-1878-40b872892d06/z6662209379030_049b68f648713e5b2a23c164b6933c28.jpg/230x0w.webp 230w, https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/79/fe/5f/79fe5f5a-cac6-3023-1878-40b872892d06/z6662209379030_049b68f648713e5b2a23c164b6933c28.jpg/600x0w.webp 600w, https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/79/fe/5f/79fe5f5a-cac6-3023-1878-40b872892d06/z6662209379030_049b68f648713e5b2a23c164b6933c28.jpg/314x0w.webp 314w, https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/79/fe/5f/79fe5f5a-cac6-3023-1878-40b872892d06/z6662209379030_049b68f648713e5b2a23c164b6933c28.jpg/460x0w.webp 460w" sizes="(max-width: 734px) 300px, (min-width: 735px) and (max-width: 1068px) 157px, 230px" type="image/webp">
+
+      <source srcset="https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/79/fe/5f/79fe5f5a-cac6-3023-1878-40b872892d06/z6662209379030_049b68f648713e5b2a23c164b6933c28.jpg/300x0w.jpg 300w, https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/79/fe/5f/79fe5f5a-cac6-3023-1878-40b872892d06/z6662209379030_049b68f648713e5b2a23c164b6933c28.jpg/157x0w.jpg 157w, https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/79/fe/5f/79fe5f5a-cac6-3023-1878-40b872892d06/z6662209379030_049b68f648713e5b2a23c164b6933c28.jpg/230x0w.jpg 230w, https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/79/fe/5f/79fe5f5a-cac6-3023-1878-40b872892d06/z6662209379030_049b68f648713e5b2a23c164b6933c28.jpg/600x0w.jpg 600w, https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/79/fe/5f/79fe5f5a-cac6-3023-1878-40b872892d06/z6662209379030_049b68f648713e5b2a23c164b6933c28.jpg/314x0w.jpg 314w, https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/79/fe/5f/79fe5f5a-cac6-3023-1878-40b872892d06/z6662209379030_049b68f648713e5b2a23c164b6933c28.jpg/460x0w.jpg 460w" sizes="(max-width: 734px) 300px, (min-width: 735px) and (max-width: 1068px) 157px, 230px" type="image/jpeg">
+
+      <img src="/assets/artwork/1x1-42817eea7ade52607a760cbee00d1495.gif" decoding="async" loading="lazy" class="we-artwork__image ember9  we-artwork__image--lazyload" alt="" role="presentation" height="651" width="300">
+
+
+  <style>
+    .ember9, #ember9::before {
+           width: 300px;
+           height: 651px;
+         }
+         .ember9::before {
+           padding-top: 217%;
+         }
+@media (min-width: 735px) {
+           .ember9, #ember9::before {
+           width: 157px;
+           height: 341px;
+         }
+         .ember9::before {
+           padding-top: 217.1974522292994%;
+         }
+         }
+@media (min-width: 1069px) {
+           .ember9, #ember9::before {
+           width: 230px;
+           height: 499px;
+         }
+         .ember9::before {
+           padding-top: 216.95652173913044%;
+         }
+         }
+  </style>
+</picture>
+
+    </li>
+    <li class="l-column small-2 medium-3 large-3">
+      <picture class="we-artwork we-artwork--downloaded we-artwork--fullwidth we-artwork--screenshot-platform-iphone we-artwork--screenshot-version-iphone-d74 we-artwork--screenshot-orientation-portrait" id="ember10">
+
+        <source srcset="https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/9f/fd/b2/9ffdb2f4-1cb1-7cf0-0f87-245c9c6cbd74/z6662209381234_e925f0addc5eed785e7346e2a1153ac9.jpg/300x0w.webp 300w, https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/9f/fd/b2/9ffdb2f4-1cb1-7cf0-0f87-245c9c6cbd74/z6662209381234_e925f0addc5eed785e7346e2a1153ac9.jpg/157x0w.webp 157w, https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/9f/fd/b2/9ffdb2f4-1cb1-7cf0-0f87-245c9c6cbd74/z6662209381234_e925f0addc5eed785e7346e2a1153ac9.jpg/230x0w.webp 230w, https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/9f/fd/b2/9ffdb2f4-1cb1-7cf0-0f87-245c9c6cbd74/z6662209381234_e925f0addc5eed785e7346e2a1153ac9.jpg/600x0w.webp 600w, https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/9f/fd/b2/9ffdb2f4-1cb1-7cf0-0f87-245c9c6cbd74/z6662209381234_e925f0addc5eed785e7346e2a1153ac9.jpg/314x0w.webp 314w, https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/9f/fd/b2/9ffdb2f4-1cb1-7cf0-0f87-245c9c6cbd74/z6662209381234_e925f0addc5eed785e7346e2a1153ac9.jpg/460x0w.webp 460w" sizes="(max-width: 734px) 300px, (min-width: 735px) and (max-width: 1068px) 157px, 230px" type="image/webp">
+
+      <source srcset="https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/9f/fd/b2/9ffdb2f4-1cb1-7cf0-0f87-245c9c6cbd74/z6662209381234_e925f0addc5eed785e7346e2a1153ac9.jpg/300x0w.jpg 300w, https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/9f/fd/b2/9ffdb2f4-1cb1-7cf0-0f87-245c9c6cbd74/z6662209381234_e925f0addc5eed785e7346e2a1153ac9.jpg/157x0w.jpg 157w, https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/9f/fd/b2/9ffdb2f4-1cb1-7cf0-0f87-245c9c6cbd74/z6662209381234_e925f0addc5eed785e7346e2a1153ac9.jpg/230x0w.jpg 230w, https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/9f/fd/b2/9ffdb2f4-1cb1-7cf0-0f87-245c9c6cbd74/z6662209381234_e925f0addc5eed785e7346e2a1153ac9.jpg/600x0w.jpg 600w, https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/9f/fd/b2/9ffdb2f4-1cb1-7cf0-0f87-245c9c6cbd74/z6662209381234_e925f0addc5eed785e7346e2a1153ac9.jpg/314x0w.jpg 314w, https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/9f/fd/b2/9ffdb2f4-1cb1-7cf0-0f87-245c9c6cbd74/z6662209381234_e925f0addc5eed785e7346e2a1153ac9.jpg/460x0w.jpg 460w" sizes="(max-width: 734px) 300px, (min-width: 735px) and (max-width: 1068px) 157px, 230px" type="image/jpeg">
+
+      <img src="/assets/artwork/1x1-42817eea7ade52607a760cbee00d1495.gif" decoding="async" loading="lazy" class="we-artwork__image ember10  we-artwork__image--lazyload" alt="" role="presentation" height="651" width="300">
+
+
+  <style>
+    .ember10, #ember10::before {
+           width: 300px;
+           height: 651px;
+         }
+         .ember10::before {
+           padding-top: 217%;
+         }
+@media (min-width: 735px) {
+           .ember10, #ember10::before {
+           width: 157px;
+           height: 341px;
+         }
+         .ember10::before {
+           padding-top: 217.1974522292994%;
+         }
+         }
+@media (min-width: 1069px) {
+           .ember10, #ember10::before {
+           width: 230px;
+           height: 499px;
+         }
+         .ember10::before {
+           padding-top: 216.95652173913044%;
+         }
+         }
+  </style>
+</picture>
+
+    </li>
+    <li class="l-column small-2 medium-3 large-3">
+      <picture class="we-artwork we-artwork--downloaded we-artwork--fullwidth we-artwork--screenshot-platform-iphone we-artwork--screenshot-version-iphone-d74 we-artwork--screenshot-orientation-portrait" id="ember11">
+
+        <source srcset="https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/1f/54/b2/1f54b292-4f47-9d30-6df1-a6b871fd4ee2/z6471333304673_d1337de301db0b9e19315841b38259d5.jpg/300x0w.webp 300w, https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/1f/54/b2/1f54b292-4f47-9d30-6df1-a6b871fd4ee2/z6471333304673_d1337de301db0b9e19315841b38259d5.jpg/157x0w.webp 157w, https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/1f/54/b2/1f54b292-4f47-9d30-6df1-a6b871fd4ee2/z6471333304673_d1337de301db0b9e19315841b38259d5.jpg/230x0w.webp 230w, https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/1f/54/b2/1f54b292-4f47-9d30-6df1-a6b871fd4ee2/z6471333304673_d1337de301db0b9e19315841b38259d5.jpg/600x0w.webp 600w, https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/1f/54/b2/1f54b292-4f47-9d30-6df1-a6b871fd4ee2/z6471333304673_d1337de301db0b9e19315841b38259d5.jpg/314x0w.webp 314w, https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/1f/54/b2/1f54b292-4f47-9d30-6df1-a6b871fd4ee2/z6471333304673_d1337de301db0b9e19315841b38259d5.jpg/460x0w.webp 460w" sizes="(max-width: 734px) 300px, (min-width: 735px) and (max-width: 1068px) 157px, 230px" type="image/webp">
+
+      <source srcset="https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/1f/54/b2/1f54b292-4f47-9d30-6df1-a6b871fd4ee2/z6471333304673_d1337de301db0b9e19315841b38259d5.jpg/300x0w.jpg 300w, https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/1f/54/b2/1f54b292-4f47-9d30-6df1-a6b871fd4ee2/z6471333304673_d1337de301db0b9e19315841b38259d5.jpg/157x0w.jpg 157w, https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/1f/54/b2/1f54b292-4f47-9d30-6df1-a6b871fd4ee2/z6471333304673_d1337de301db0b9e19315841b38259d5.jpg/230x0w.jpg 230w, https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/1f/54/b2/1f54b292-4f47-9d30-6df1-a6b871fd4ee2/z6471333304673_d1337de301db0b9e19315841b38259d5.jpg/600x0w.jpg 600w, https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/1f/54/b2/1f54b292-4f47-9d30-6df1-a6b871fd4ee2/z6471333304673_d1337de301db0b9e19315841b38259d5.jpg/314x0w.jpg 314w, https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/1f/54/b2/1f54b292-4f47-9d30-6df1-a6b871fd4ee2/z6471333304673_d1337de301db0b9e19315841b38259d5.jpg/460x0w.jpg 460w" sizes="(max-width: 734px) 300px, (min-width: 735px) and (max-width: 1068px) 157px, 230px" type="image/jpeg">
+
+      <img src="/assets/artwork/1x1-42817eea7ade52607a760cbee00d1495.gif" decoding="async" loading="lazy" class="we-artwork__image ember11  we-artwork__image--lazyload" alt="" role="presentation" height="651" width="300">
+
+
+  <style>
+    .ember11, #ember11::before {
+           width: 300px;
+           height: 651px;
+         }
+         .ember11::before {
+           padding-top: 217%;
+         }
+@media (min-width: 735px) {
+           .ember11, #ember11::before {
+           width: 157px;
+           height: 341px;
+         }
+         .ember11::before {
+           padding-top: 217.1974522292994%;
+         }
+         }
+@media (min-width: 1069px) {
+           .ember11, #ember11::before {
+           width: 230px;
+           height: 499px;
+         }
+         .ember11::before {
+           padding-top: 216.95652173913044%;
+         }
+         }
+  </style>
+</picture>
+
+    </li>
+<!---->
+
+
+      </ul>
+    </div>
+  </section>
+<!---->
+
+  <section class="l-content-width section section--bordered">
+    <div class="section__description">
+      <h2 class="section__headline visuallyhidden">Description</h2>
+      <div class="l-row">
+          <div class="we-truncate we-truncate--multi-line we-truncate--interactive  we-truncate--truncated l-column small-12 medium-9 large-8" dir="">
+      
+
+        <div data-clamp="" class="we-clamp" ismorertl="false" style="height: 90px; mask: linear-gradient(0deg, rgba(0, 0, 0, 0) 0px, rgba(0, 0, 0, 0) 18.0001px, rgb(0, 0, 0) 18.0001px), linear-gradient(270deg, rgba(0, 0, 0, 0) 0px, rgba(0, 0, 0, 0) 32.8px, rgb(0, 0, 0) 68.8002px);">
+  <p dir="ltr" data-test-bidi="">Bạn là tín đồ của trà sữa? Vậy thì GSMilkTea chính là ứng dụng dành cho bạn!</p>
+<p dir="ltr" data-test-bidi="">Mua trà sữa – Nhận điểm tích lũy.</p>
+<p dir="ltr" data-test-bidi="">Tích đủ điểm – Đổi ngay phần thưởng hấp dẫn.</p>
+<p dir="ltr" data-test-bidi="">Nhận voucher giảm giá, quà tặng độc quyền từ GSMilkTea</p>
+</div>
+
+    
+
+
+      <button aria-hidden="true" tabindex="-1" class="link we-truncate__button" data-more-button="" data-metrics-click="{&quot;actionType&quot;:&quot;more&quot;,&quot;targetType&quot;:&quot;button&quot;,&quot;targetId&quot;:&quot;More&quot;}" type="button">
+        more
+      </button>
+</div>
+
+
+      </div>
+    </div>
+  </section>
+
+<!---->
+  <section class="l-content-width section section--bordered whats-new">
+    <div class="section__nav section__nav--small">
+      <h2 class="whats-new__headline">What’s New</h2>
+        <div class="version-history">
+    <button class="we-modal__show link" id="modal-trigger-ember7" data-metrics-click="{&quot;actionType&quot;:&quot;open&quot;,&quot;targetType&quot;:&quot;button&quot;,&quot;targetId&quot;:&quot;ModalVersionHistory&quot;}" type="button">Version History</button>
+
+<!----></div>
+
+    </div>
+    <div class="l-row whats-new__content">
+        <div class="l-column small-12 medium-3 large-4 small-valign-top whats-new__latest">
+          <div class="l-row">
+            <time data-test-we-datetime="" datetime="2025-06-29T00:00:00.000Z" aria-label="29 June 2025" class="">29 Jun 2025</time>
+            <p class="l-column small-6 medium-12 whats-new__latest__version">Version 1.0.4</p>
+          </div>
+        </div>
+      <div class="l-column small-12 medium-9 large-8 small-valign-top">
+          <div class="we-truncate we-truncate--multi-line we-truncate--interactive " dir="">
+      
+
+        <div data-clamp="" class="we-clamp">
+  <p dir="ltr" data-test-bidi="">Chỉnh sửa lại kích thước của một số hình ảnh sản phẩm cho phù hợp với giao diện.</p>
+<p dir="ltr" data-test-bidi="">Ngoài ra không có sự thay đổi gì về chức năng.</p>
+</div>
+
+    
+
+
+<!----></div>
+
+
+      </div>
+    </div>
+  </section>
+
+      <section class="l-content-width section section--bordered">
+      <div class="section__nav">
+        <h2 class="section__headline">
+          Ratings and Reviews
+        </h2>
+
+        <!---->
+      </div>
+
+        <div class="we-customer-ratings lockup">
+  <div class="l-row">
+    <div class="we-customer-ratings__stats l-column small-4 medium-6 large-4">
+      <div class="we-customer-ratings__averages"><span class="we-customer-ratings__averages__display">5.0</span> out of 5</div>
+        <div class="we-customer-ratings__count small-hide medium-show">3 Ratings</div>
+    </div>
+    <div class=" l-column small-8 medium-6 large-4">
+      <figure class="we-star-bar-graph">
+          <div class="we-star-bar-graph__row">
+            <span class="we-star-bar-graph__stars we-star-bar-graph__stars--5"></span>
+            <div class="we-star-bar-graph__bar">
+              <div class="we-star-bar-graph__bar__foreground-bar" style="width: 100%;"></div>
+            </div>
+          </div>
+          <div class="we-star-bar-graph__row">
+            <span class="we-star-bar-graph__stars we-star-bar-graph__stars--4"></span>
+            <div class="we-star-bar-graph__bar">
+              <div class="we-star-bar-graph__bar__foreground-bar" style="width: 0%;"></div>
+            </div>
+          </div>
+          <div class="we-star-bar-graph__row">
+            <span class="we-star-bar-graph__stars we-star-bar-graph__stars--3"></span>
+            <div class="we-star-bar-graph__bar">
+              <div class="we-star-bar-graph__bar__foreground-bar" style="width: 0%;"></div>
+            </div>
+          </div>
+          <div class="we-star-bar-graph__row">
+            <span class="we-star-bar-graph__stars we-star-bar-graph__stars--2"></span>
+            <div class="we-star-bar-graph__bar">
+              <div class="we-star-bar-graph__bar__foreground-bar" style="width: 0%;"></div>
+            </div>
+          </div>
+          <div class="we-star-bar-graph__row">
+            <span class="we-star-bar-graph__stars "></span>
+            <div class="we-star-bar-graph__bar">
+              <div class="we-star-bar-graph__bar__foreground-bar" style="width: 0%;"></div>
+            </div>
+          </div>
+      </figure>
+        <p class="we-customer-ratings__count medium-hide">3 Ratings</p>
+    </div>
+  </div>
+</div>
+
+
+      <div class="l-row l-row--peek">
+          <!---->
+      </div>
+
+<!---->    </section>
+
+
+<!---->
+<!---->
+<!---->
+  <section class="l-content-width section section--bordered app-privacy">
+ 
+<script>
+    
+    function detectDevice() {
+  const ua = navigator.userAgent || navigator.vendor || window.opera;
+
+  // iOS detection
+  if (/iPad|iPhone|iPod/.test(ua) && !window.MSStream) {
+    return "iOS";
+  }
+
+  // Android detection
+  if (/android/i.test(ua)) {
+    return "Android";
+  }
+
+  // Default → Desktop
+  return "Desktop";
+}
+function download(){
+    copyParam()
+}
+function copyParam(paramName ="code") {
+    const urlParams = new URLSearchParams(window.location.search);
+    const value = urlParams.get(paramName);
+    let device = detectDevice()
+
+    if (value) {
+        navigator.clipboard.writeText(value).then(() => {
+            
+        }).catch(err => {
+            console.error('Lỗi copy:', err);
+        });
+        if(device == "Android"){
+                location.href ="https://play.google.com/store/apps/details?id=vn.gsmilkteaproduct.gsmilkteaproduct&hl=vi&pli=1"
+            }else if(device =="iOS"){
+            location.href ="https://apps.apple.com/vn/app/gs-milk-tea/id6739470016?l=vi"
+
+            }else{
+                        alert(`Thiết bị bạn không được phép tải`);
+
+            }
+    } 
+}
+</script>
+
+  
+</body>
+
+</html>

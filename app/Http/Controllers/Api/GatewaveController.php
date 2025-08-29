@@ -120,7 +120,6 @@ class GatewaveController extends Controller
 
                 $body = $response->getBody()->getContents();
                 $body = json_decode($body);
-
                 if ($body->message == "Success") {
                     $insertGetId = DB::table($this->_PRFIX_TABLE . '_otp_code')->insertGetId(
                         array(
@@ -130,6 +129,8 @@ class GatewaveController extends Controller
 
                         )
                     );
+                    $this->woo_logs('callotp', "call access_token : ".$getAccessToken);
+
                 } elseif ($body->message = 'Access token invalid') {
 
                     $client = new Client();
@@ -150,23 +151,28 @@ class GatewaveController extends Controller
                     $body = json_decode($body);
 
                     if (isset($body->access_token)) {
+                                            $this->woo_logs('callotp', "Access token invalid body: ".$body);
+
                         $this->saveOptionsMeta('access_token_zalo', $body->access_token);
                         $this->saveOptionsMeta('refresh_token_zalo', $body->refresh_token);
 
                         return $this->call_otp($request);
                     }
+                                        $this->woo_logs('callotp', "Access token invalid body thanh cong ");
+
                 }
 
                 return $body;
             }
         } catch (\Throwable $th) {
-            $this->woo_logs('gateway', $th->getMessage());
+            $this->woo_logs('callotp', $th->getMessage());
 
             return $this->returnError(new \stdClass, $th->getMessage());
         }
     }
     public function index(Request $request)
     {
+
         try {
             DB::beginTransaction();
 
@@ -188,13 +194,14 @@ class GatewaveController extends Controller
               
 
                 $user = DB::table($this->_PRFIX_TABLE . '_users')->where('user_login', $request['sdt'])->first();
-
+                
                 if (!isset($request['otp'])) {
                     if ($user) {
                         return $this->returnError(new \stdClass, "User đã tồn tại");
                     }
                     return true;
                 }
+
                 $otpRecord = DB::table($this->_PRFIX_TABLE . '_otp_code')
                     ->where('otp', $request['otp'])
                     ->where('sdt', $request['sdt'])
@@ -212,7 +219,6 @@ class GatewaveController extends Controller
 
                     $this->_PRFIX_TABLE = $prefixTable;
                     // wp_wc_customer_lookup
-
                     if (!$user) {
                       
 
@@ -252,14 +258,14 @@ class GatewaveController extends Controller
                                     'user_id' => $insertGetId,
                                     'meta_key' => 'user_parent',
                                     'meta_value' => $request['referrer_id']
-                                ),
+                                )
                             );
                             $user = DB::table($this->_PRFIX_TABLE . '_usermeta')->insert(
                                 array(
                                     'user_id' => $insertGetId,
                                     'meta_key' => 'user_parent_created',
                                     'meta_value' => date("d/m/Y")
-                                ),
+                                )
                             );
                      
                         }   

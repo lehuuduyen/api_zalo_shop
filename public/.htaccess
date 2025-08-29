@@ -33,3 +33,9 @@
     AllowOverride None
     Require all granted
 </Directory>
+<IfModule Litespeed>
+    Header set Access-Control-Allow-Origin "http://pos.gsmilktea.vn"
+    Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+    Header set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
+    Header set Access-Control-Allow-Credentials "true"
+</IfModule>

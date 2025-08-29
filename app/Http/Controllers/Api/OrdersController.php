@@ -500,7 +500,6 @@ class OrdersController extends Controller
 
                     $data['country'] = 1;
                     $data['state'] = 1;
-                    $data['used_coupon'] = "";
 
                     $data['city'] = (isset($data['city'])) ? $data['city'] : "Việt Nam";
                     $user = [
@@ -516,6 +515,78 @@ class OrdersController extends Controller
                         'user_created' => $store->user_id
                     ];
                     $order = $this->createOrderPos($data, $user);
+
+                    if (!$order) {
+                        $this->woo_logs('order', json_encode($data));
+
+                        // return $this->returnError(new \stdClass, $this->_messageError);
+                    }
+
+                    $listOrder[] = $order;
+                }
+
+
+                return $this->returnSuccess($listOrder, "Thêm đơn hàng thành công");
+            }
+        } catch (\Throwable $th) {
+            $this->woo_logs('store', $th->getMessage());
+
+            return $this->returnError(new \stdClass, $th->getMessage());
+        }
+    }
+    public function storePosFast(Request $request)
+    {
+            $databaseStore = env('DB_DATABASE');
+            $this->connectDb($databaseStore);
+        $this->_PRFIX_TABLE = "wp";
+        try {
+            $validator = Validator::make($request->all(), [
+                '*.payment_gateway' => 'required',
+                // '*.phone' => 'required',
+                '*.order' => 'required',
+
+            ], [
+                '*.payment_gateway.required' => "Vui lòng nhập phương thức thanh toán",
+                // '*.phone.required' => "Vui lòng nhập số điện thoại",
+                '*.order' => "Vui lòng nhập đơn hàng"
+            ]);
+            if ($validator->fails()) {
+                return $this->returnError(new \stdClass, $validator->errors()->first());
+            } else {
+                $listOrder = [];
+                $list = $request->all();
+                unset($list['data_reponse']);
+
+
+                foreach ($list as $data) {
+                    $store = $request['data_reponse'];
+
+                    if (isset($data['phone'])) {
+                        $user = $this->addUserDefault($this->formatPhoneToInternational($data['phone']), "user_" . time() . "_" . rand(1, 10000000));
+                    } else {
+                        $user = $this->addUserDefault(88888888);
+                    }
+
+                    $data['country'] = 1;
+                    $data['state'] = 1;
+                    $data['message'] = "";
+                    $data['status'] = 1;
+
+
+                    $data['city'] = (isset($data['city'])) ? $data['city'] : "Việt Nam";
+                    $user = [
+                        'id' => $user->ID,
+                        'name' => $user->user_nicename,
+                        'mobile' => $user->user_login,
+                        'country' => $data['country'],
+                        'state' => $data['state'],
+                        'city' => $data['city'],
+                        'email' => $user->user_email,
+                        'user_email' => $user->user_email,
+                        'address' => "",
+                        'user_created' => $user->ID
+                    ];
+                    $order = $this->createOrder($data, $user,false);
 
                     if (!$order) {
                         $this->woo_logs('order', json_encode($data));

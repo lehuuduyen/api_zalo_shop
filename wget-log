@@ -1,0 +1,11 @@
+--2025-08-25 17:13:14--  https://repo.litespeed.sh/
+Resolving repo.litespeed.sh (repo.litespeed.sh)... 34.192.49.9
+Connecting to repo.litespeed.sh (repo.litespeed.sh)|34.192.49.9|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 5962 (5.8K) [application/octet-stream]
+Saving to: ‘STDOUT’
+
+-                          0%[                                   ]       0  --.-KB/s               -                        100%[==================================>]   5.82K  --.-KB/s    in 0.01s   
+
+2025-08-25 17:13:14 (579 KB/s) - written to stdout [5962/5962]
+

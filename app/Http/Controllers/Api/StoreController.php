@@ -7,7 +7,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-
+// use Intervention\Image\Facades\Image;
+use Illuminate\Support\Facades\Storage;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver; 
 class StoreController extends Controller
 {
     /**
@@ -24,9 +27,9 @@ class StoreController extends Controller
 
 
         $info = new \stdClass();
-        $info->email = "";
-        $info->phone = "";
-        $info->website = "";
+        $info->email = "gsmilkteasg@gmail.com";
+        $info->phone = "09262826828";
+        $info->website = "https://gsmilktea.vn";
         $info->open_hour = "08:00 - 22:00";
         $branchs = DB::table($this->_PRFIX_TABLE . '_woo_branchs')->where('status', 1)
             ->get();
@@ -43,9 +46,9 @@ class StoreController extends Controller
             $branchs[$key]->quan_name = ($val->district) ? $this->quan($request, $val->city, $val->district) : "";
             $branchs[$key]->phuong_name = ($val->ward) ? $this->phuong($request, $val->district, $val->ward) : "";
             $branchs[$key]->img = env('API_URL_BACKEND').'/quan.png'; // Properly encode the address
-            $phuong = preg_replace('/\b0(\d)/', '$1', $branchs[$key]->phuong_name) . PHP_EOL;
-            $address = urlencode($branchs[$key]->address . ',' . $phuong . ',' . $branchs[$key]->quan_name . ',' . $branchs[$key]->city_name); // Properly encode the address
-
+            $phuong = preg_replace('/\b0(\d)/', '$1', $branchs[$key]->phuong_name) ;
+            //  $address = urlencode($branchs[$key]->address . ',' . $phuong . ',' . $branchs[$key]->quan_name . ',' . $branchs[$key]->city_name);
+            $address = urlencode($branchs[$key]->address . ',' . $phuong . ',' . $branchs[$key]->city_name); // Properly encode the address
             $position = file_get_contents('https://nominatim.openstreetmap.org/search?q=' . $address . '&format=json&limit=1', false, $context);
             if (!$position) {
                 // return ['error' => 'Failed to retrieve location'];
@@ -301,34 +304,58 @@ class StoreController extends Controller
     }
     public function storeImage(Request $request)
     {
-        // Kiểm tra file có tồn tại không
+        try {
+           // Kiểm tra file
         if (!$request->hasFile('photo')) {
             return response()->json(['error' => 'No file uploaded'], 400);
         }
 
-        // Lấy file từ request
         $file = $request->file('photo');
 
-        // Kiểm tra file có hợp lệ không
         if (!$file->isValid()) {
             return response()->json(['error' => 'Invalid file'], 400);
         }
 
-        // Lưu file vào thư mục storage/app/public/uploads
-        $path = $file->store('uploads', 'public'); // Lưu file
+        // Khởi tạo ImageManager với GD driver
+        $manager = new ImageManager(new Driver());
 
+        // Đọc file ảnh từ request
+        $image = $manager->read($file->getRealPath());
+
+        // Resize max width = 500 (giữ tỷ lệ)
+        $image = $image->scale(width: 500);
+
+        // Tạo tên file duy nhất
+        $fileName = uniqid() . '.jpg';
+        $path = 'uploads/' . $fileName;
+
+        // Lưu ảnh vào storage (jpeg chất lượng 80%)
+        $image->toJpeg(80)->save(storage_path('app/public/' . $path));
+
+        // Lưu DB
         $store = $request['data_reponse'];
         $this->_PRFIX_TABLE = $store->prefixTable;
         $userId = $store->user_id;
 
-        $user = DB::table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
-            array(
+        DB::table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
+            [
                 'user_id' => $userId,
                 'meta_key' => 'image_user'
-            ),
-            array('meta_value' => $path)
+            ],
+            [
+                'meta_value' => $path
+            ]
         );
+
         return response()->json(['path' => $path], 200);
+            
+        } catch (\Throwable $th) {
+            //throw $th;
+                        $this->woo_logs('storeImage', $th->getMessage());
+
+            return $this->returnError([], $th->getMessage());
+        }
+        
     }
 
     public function info(Request $request)
@@ -386,7 +413,7 @@ class StoreController extends Controller
         $is_affliate = $this->getUserMeta($user->ID, 'is_affliate');
         $user->is_affliate = $is_affliate;
         $user->store = $store->store;
-        $user->link_gioi_thieu = "https://".env('APP_URL_POS')."/taiapp.html?code=".$user->mobile;
+        $user->link_gioi_thieu = env('APP_URL_POS')."/taiapp.html?code=".$user->mobile;
 
 
 

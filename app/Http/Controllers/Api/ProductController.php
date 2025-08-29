@@ -563,11 +563,80 @@ class ProductController extends Controller
 
         }
     }
-
+public function checkCouponFast(Request $request)
+    {
+        try {
+            //code...
+            // $store = $request['data_reponse'];
+            $this->_PRFIX_TABLE = "wp";
+            $databaseStore = env('DB_DATABASE');
+            $this->connectDb($databaseStore);
+            $data = $request->all();
+            if (!isset($data['coupon'])) {
+                return $this->returnError([], "Bắt buộc phải nhập coupon");
+            }
+            if (!isset($data['subtotal'])) {
+                return $this->returnError([], "Bắt buộc phải nhập total");
+            }
+            $order = $data['order'];
+            $listProductId = [];
+            foreach ($order as $value) {
+                $listProductId[] = $value['productId'];
+            }
+            $products = DB::table($this->_PRFIX_TABLE . '_posts')->whereIn('id', $listProductId)->get();
+            $user = DB::table($this->_PRFIX_TABLE . '_users')->where('user_login', $data['phone'])->first();
+               if(!$user){
+                   $data['email'] = "";
+               }else{
+                    $data['email'] = $user->user_email;
+    
+               }
+            if(is_array($data['coupon'])){
+                $listCoupon = [];
+                $temp['subtotal']=0;
+                $subtotal =0;
+                foreach($data['coupon'] as $key=> $coupon ){
+                    $temp['coupon']=$coupon;
+                    if($key ==0){
+                        $temp['subtotal']=$data['subtotal'];
+                    }else{
+                        $temp['subtotal']=$subtotal;
+                        
+                    }
+                    $coupon_amount_total = $this->calculateCoupon($temp, $products, true);
+                    $subtotal = $data['subtotal'] - $coupon_amount_total;
+                    $listCoupon[]=[
+                        'coupon'=>$coupon,
+                        'discount'=>$coupon_amount_total
+                    ];
+                }
+                return $this->returnSuccess($listCoupon);
+                
+            }else{
+                $controller = new Controller();
+                $da = $controller->getTotalPriceDetailsPos($order,1,1);
+                $data['subtotal'] = $da['totalPriceTopping'];
+                $data['email'] = $data['email'] ;
+                $coupon_amount_total = $this->calculateCoupon($data, $products, true);
+                if ($coupon_amount_total > 0) {
+                    return $this->returnSuccess($coupon_amount_total);
+                } else {
+                    return $this->returnError($coupon_amount_total, 'Mã khuyễn mãi không đúng');
+                }
+            }
+           
+        } catch (\Throwable $th) {
+            //throw $th;
+            $this->woo_logs('checkCoupon', $th->getMessage());
+            return $this->returnError(0, $th->getMessage());
+        }
+    }
     public function checkCoupon(Request $request)
     {
         try {
             //code...
+            $databaseStore = env('DB_DATABASE');
+            $this->connectDb($databaseStore);
             $store = $request['data_reponse'];
             $this->_PRFIX_TABLE = $store->prefixTable;
             $data = $request->all();
@@ -582,7 +651,14 @@ class ProductController extends Controller
             foreach ($order as $value) {
                 $listProductId[] = $value['productId'];
             }
-            $products = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->whereIn('id', $listProductId)->get();
+            $products = DB::table($this->_PRFIX_TABLE . '_posts')->whereIn('id', $listProductId)->get();
+            //  $user = DB::table($this->_PRFIX_TABLE . '_users')->where('user_login', $data['phone'])->first();
+            //   if(!$user){
+            //       $data['email'] = "";
+            //   }else{
+            //         $data['email'] = $user->user_email;
+    
+            //   }
             
             if(is_array($data['coupon'])){
                 $listCoupon = [];
@@ -639,7 +715,7 @@ class ProductController extends Controller
             if (!isset($data['phone'])) {
                 return $this->returnError([], "Bắt buộc phải nhập số điện thoại");
             }
-            $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_posts')->where('user_login', $data['phone'])->first();
+            $user = DB::connection('mysql_external')->table($this->_PRFIX_TABLE . '_users')->where('user_login', $data['phone'])->first();
            if(!$user){
                $data['email'] = "";
            }else{

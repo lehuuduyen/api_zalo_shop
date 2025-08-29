@@ -662,8 +662,52 @@ class Controller extends BaseController
             $totalOrderBanDau = $totalPriceDetails['total'];
             $finalDetails = $this->getFinalPriceDetailsPos($user, $data, $totalPriceDetails);
 
+ //them wp_wc_order_coupon_lookup && wp_woocommerce_order_items
+            if ($finalDetails['coupon_discounted'] && $finalDetails['coupon_discounted'] > 0) {
+                
+                    $coupon = DB::table($this->_PRFIX_TABLE . '_posts')->where('post_title', $data['used_coupon'])->where('post_status', 'publish')->where('post_type', 'shop_coupon')->first();
+
+                    $coupon_amount = $this->getPostMeta($coupon->ID, 'coupon_amount');
+                    $coupon_type = $this->getPostMeta($coupon->ID, 'discount_type');
+
+                    DB::table($this->_PRFIX_TABLE . '_wc_order_coupon_lookup')->insertGetId(
+                        array(
+                            'order_id' => $postId,
+                            'coupon_id' => $coupon->ID,
+                            'date_created' => $timeNow,
+                            'discount_amount' => $finalDetails['coupon_discounted'],
+                        )
+                    );
+                    $orderItemIdCoupon = DB::table($this->_PRFIX_TABLE . '_woocommerce_order_items')->insertGetId(
+                        array(
+                            'order_id' => $postId,
+                            'order_item_type' => 'coupon',
+                            'order_item_name' => $data['used_coupon'],
+                        )
+                    );
 
 
+                    DB::table($this->_PRFIX_TABLE . '_woocommerce_order_itemmeta')->insert(
+                        array(
+                            array(
+                                'order_item_id' => $orderItemIdCoupon,
+                                'meta_key' => 'coupon_data',
+                                'meta_value' => '',
+                            ),
+                            array(
+                                'order_item_id' => $orderItemIdCoupon,
+                                'meta_key' => 'discount_amount_tax',
+                                'meta_value' => 0,
+                            ),
+                            array(
+                                'order_item_id' => $orderItemIdCoupon,
+                                'meta_key' => 'discount_amount',
+                                'meta_value' => $finalDetails['coupon_discounted'],
+                            )
+                        )
+                    );
+            }
+            
 
             //wp_wc_order_product_lookup
             $history = $this->getHistoryUser($user['id']);
@@ -1278,7 +1322,7 @@ class Controller extends BaseController
             throw new \Exception($th->getMessage());
         }
     }
-    public function createOrder($data, $user)
+    public function createOrder($data, $user,$thanhToanNhanh=true)
     {
 
 
@@ -1297,7 +1341,7 @@ class Controller extends BaseController
                         'post_modified' => $timeNow,
                         'post_modified_gmt' => $timeNow,
                         'post_title' => 'Order &ndash; ' . $this->timeFormat(),
-                        'post_status' => 'wc-processing',
+                        'post_status' => 'wc-pending',
                         'post_type' => 'shop_order',
                         'post_content' => 'Website',
                         'post_excerpt' => '',
@@ -1706,9 +1750,14 @@ class Controller extends BaseController
             $quan = $this->getUserMeta($user['id'], 'quan');
 
             $phuong = $this->getUserMeta($user['id'], 'phuong');
-            $fee = ($quan && $phuong) ? $this->calFee($quan, $phuong) : 0;
+            if($thanhToanNhanh){
+                            $fee = ($quan && $phuong  ) ? $this->calFee($quan, $phuong) : 0;
 
-            if ($fee > 0) {
+            }
+else{
+    $fee = 0;
+}
+            if ($fee > 0 ) {
                 $motahang = '';
 
                 foreach ($data['order'] as $order) {

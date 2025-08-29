@@ -18,11 +18,13 @@ class CheckStore extends Controller
     public function handle(Request $request, Closure $next)
     {
         try {
+
             $token = request()->bearerToken();
             $dataToken = $this->decodeData($token);
-            
+
             $data = json_decode($dataToken);
             $timeNow = time();
+            
             if ($data) {
                 if($data->expired_in >= $timeNow || empty($data->expired_in) )
                 $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
@@ -34,6 +36,7 @@ class CheckStore extends Controller
             $fullDomain = $protocol . \env('APP_URL_BACKEND');
             $data->domain = $fullDomain;
                 $request['data_reponse'] = $data;
+
                 $this->connectDb($data->databaseStore);
                 return $next($request);
             }

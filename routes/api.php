@@ -18,17 +18,17 @@ use Illuminate\Support\Facades\Route;
 //     return $request->user();
 // });
 Route::group(['middleware' => ['CorsApi']], function () {
-    Route::post('register', 'App\Http\Controllers\Api\GatewaveController@index')->middleware('CorsApi');
-    Route::post('reset_pass', 'App\Http\Controllers\Api\GatewaveController@reset_pass')->middleware('CorsApi');
-    Route::post('call_otp', 'App\Http\Controllers\Api\GatewaveController@call_otp')->middleware('CorsApi');
+    Route::post('register', 'App\Http\Controllers\Api\GatewaveController@index');
+    Route::post('reset_pass', 'App\Http\Controllers\Api\GatewaveController@reset_pass');
+    Route::post('call_otp', 'App\Http\Controllers\Api\GatewaveController@call_otp');
 
-    Route::post('login', 'App\Http\Controllers\Api\GatewaveController@login')->middleware('CorsApi');
+    Route::post('login', 'App\Http\Controllers\Api\GatewaveController@login');
 
     Route::post('loginPos', 'App\Http\Controllers\Api\GatewaveController@loginPos');
 
     Route::view('/', 'home');
 
-    Route::get('checkFollow', 'App\Http\Controllers\Api\GatewaveController@checkFollow')->middleware('CorsApi');
+    Route::get('checkFollow', 'App\Http\Controllers\Api\GatewaveController@checkFollow');
     Route::get('city', 'App\Http\Controllers\Api\StoreController@city');
     Route::get('quan', 'App\Http\Controllers\Api\StoreController@quan');
     Route::get('phuong', 'App\Http\Controllers\Api\StoreController@phuong');
@@ -56,7 +56,11 @@ Route::group(['middleware' => ['GetData', 'CorsApi']], function () {
     Route::get('order_pos', 'App\Http\Controllers\Api\OrdersController@indexPos')->middleware('CheckStore');
 
     Route::post('order_pos', 'App\Http\Controllers\Api\OrdersController@storePos')->middleware('CheckStore');
+
 });
+    Route::post('order_fast', 'App\Http\Controllers\Api\OrdersController@storePosFast');
+
+    Route::post('check_coupon_fast', 'App\Http\Controllers\Api\ProductController@checkCouponFast');
 
 Route::group(['middleware' => ['GetData', 'CorsApi']], function () {
 

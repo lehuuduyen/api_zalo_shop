@@ -159,14 +159,21 @@ class ProductController extends Controller
         }
 
 
-
+        $listAttribute = $this->getAttribute($request);
+        
         $time = time();
         $listProducts = [];
         $listChildProducts = [];
         foreach ($products as $key => $product) {
             // $childProduct = DB::table($this->_PRFIX_TABLE . '_posts')->where('post_parent', $product->ID)->where('post_type', 'product_variation')->where('post_status', 'publish')->get();
-           
-            
+            $getAttributes = json_decode($this->getPostMeta($product->ID, 'list_attribute')) ;
+            if(!$getAttributes){
+                $tempAttribute = $listAttribute;
+            }else{
+                $tempAttribute = $this->getAttribute($request,$getAttributes);
+            }
+            $products[$key]->list_attribute = $tempAttribute;
+
             $products[$key]->product_inventory = $this->getProductInventory($product->ID);
             $products[$key]->category = $this->getCategoryByProduct($product->ID, $store);
             $products[$key]->image_id = $this->getImage($product->ID, $store);
@@ -302,7 +309,7 @@ class ProductController extends Controller
 
         return $this->returnSuccess($categories);
     }
-    public function getAttribute(Request $request)
+    public function getAttribute(Request $request,$getAttributes =[])
     {
         
         $store = new stdClass();
@@ -327,7 +334,8 @@ class ProductController extends Controller
             $listTitleTopping = $listAttribute['multiple_checkboxes_options_value'][0];
             $listPriceTopping = $listAttribute['multiple_checkboxes_options_price'][0];
             $listSaleOffTopping = $listAttribute['multiple_checkboxes_options_sale_price'][0];
-           
+            $listImage  = $listAttribute['multiple_radiobuttons_options_description'][0];
+
             
            
             foreach($listTitleSize as $key =>$value){
@@ -336,6 +344,12 @@ class ProductController extends Controller
                 $temp['title']=$value;
                 $temp['price']=(int) $listPriceSize[$key];
                 $temp['priceSale']=($listSaleOffeSize[$key] != "")?(int) $listSaleOffeSize[$key] :"";
+                            $temp['path'] = $listImage[$key];
+
+                if(in_array($value,$getAttributes)){
+                    continue;
+                }
+
                 $listBigSize[]=$temp;
               
             }
@@ -346,6 +360,9 @@ class ProductController extends Controller
                 $temp['title']=$value;
                 $temp['price']=(int) $listPriceTopping[$key];
                 $temp['priceSale']=($listSaleOffTopping[$key] != "")?(int) $listSaleOffTopping[$key] :"";
+                if(in_array($value,$getAttributes)){
+                    continue;
+                }
                 $listTopping[]=$temp;
               
             }
@@ -361,6 +378,9 @@ class ProductController extends Controller
                 $temp['title']=$value;
                 $temp['price']=(int) $listPriceSuggar[$key];
                 $temp['priceSale']=($listSaleOffeSuggar[$key] != "")?(int) $listSaleOffeSuggar[$key] :"";
+                if(in_array($value,$getAttributes)){
+                    continue;
+                }
                 $listSuggar[]=$temp;
               
             }
@@ -371,7 +391,7 @@ class ProductController extends Controller
         $result['checkbox']['topping'] = $listTopping;
 
 
-        return $this->returnSuccess($result);
+        return $result;
     }
     public function rewardPolicy(Request $request)
     {

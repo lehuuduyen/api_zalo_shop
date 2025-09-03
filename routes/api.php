@@ -46,7 +46,7 @@ Route::get('products', 'App\Http\Controllers\Api\ProductController@index');
 Route::get('getCategoryProduct', 'App\Http\Controllers\Api\ProductController@getCategoryProduct');
 
 Route::get('product/categories', 'App\Http\Controllers\Api\ProductController@getCategories');
-Route::get('product/attribute', 'App\Http\Controllers\Api\ProductController@getAttribute');
+// Route::get('product/attribute', 'App\Http\Controllers\Api\ProductController@getAttribute');
 Route::get('blogs', 'App\Http\Controllers\Api\BlogController@index');
 
 Route::group(['middleware' => ['GetData', 'CorsApi']], function () {

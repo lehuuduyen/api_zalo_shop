@@ -106,11 +106,29 @@ class OrdersController extends Controller
         $param = $request->all();
         $this->_PRFIX_TABLE = $store->prefixTable;
         if (isset($param['status']) && !empty($param['status'])) {
-            $orders = DB::table($this->_PRFIX_TABLE . '_wc_order_stats')->join($this->_PRFIX_TABLE . '_posts', $this->_PRFIX_TABLE . '_posts.ID', $this->_PRFIX_TABLE . '_wc_order_stats.order_id')->where($this->_PRFIX_TABLE . '_wc_order_stats.customer_id', $store->user_id)->where($this->_PRFIX_TABLE . '_posts.post_status', '!=', 'trash')->where($this->_PRFIX_TABLE . '_posts.post_status', '=',  $param['status'])->orderBy($this->_PRFIX_TABLE . '_wc_order_stats.date_created', 'DESC')->get();
+            if($param['status'] == "wc-pending"){
+                $orders = DB::table($this->_PRFIX_TABLE . '_wc_order_stats')
+    ->join($this->_PRFIX_TABLE . '_posts', $this->_PRFIX_TABLE . '_posts.ID', '=', $this->_PRFIX_TABLE . '_wc_order_stats.order_id')
+    ->where($this->_PRFIX_TABLE . '_wc_order_stats.customer_id', $store->user_id)
+    ->where($this->_PRFIX_TABLE . '_posts.post_status', '!=', 'trash')
+    ->whereIn($this->_PRFIX_TABLE . '_posts.post_status', [
+        'wc-pending',
+        'wc-processing',
+        'waiting-for-shipment'
+    ])
+    ->orderBy($this->_PRFIX_TABLE . '_wc_order_stats.date_created', 'DESC')
+    ->get();
+            }
+            else{
+                $orders = DB::table($this->_PRFIX_TABLE . '_wc_order_stats')->join($this->_PRFIX_TABLE . '_posts', $this->_PRFIX_TABLE . '_posts.ID', $this->_PRFIX_TABLE . '_wc_order_stats.order_id')->where($this->_PRFIX_TABLE . '_wc_order_stats.customer_id', $store->user_id)->where($this->_PRFIX_TABLE . '_posts.post_status', '!=', 'trash')->where($this->_PRFIX_TABLE . '_posts.post_status', '=',  $param['status'])->orderBy($this->_PRFIX_TABLE . '_wc_order_stats.date_created', 'DESC')->get();
+                
+            }
+            
         } else {
+            
             $orders = DB::table($this->_PRFIX_TABLE . '_wc_order_stats')->join($this->_PRFIX_TABLE . '_posts', $this->_PRFIX_TABLE . '_posts.ID', $this->_PRFIX_TABLE . '_wc_order_stats.order_id')->where($this->_PRFIX_TABLE . '_wc_order_stats.customer_id', $store->user_id)->where($this->_PRFIX_TABLE . '_posts.post_status', '!=', 'trash')->orderBy($this->_PRFIX_TABLE . '_wc_order_stats.date_created', 'DESC')->get();
+            
         }
-
         foreach ($orders as $key => $order) {
 
             $user = $this->info($order->customer_id);

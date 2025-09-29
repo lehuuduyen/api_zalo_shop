@@ -747,15 +747,23 @@ class Controller extends BaseController
                     $temp1 = [];
                     $temp2 = [];
                     $temp3 = [];
-
+                    if($totalPriceDetails['variants'][$key]['note'] !=""){
+                            $temp3[] = [
+                                            'mode' => 'builder',
+                                            'name' => "Ghi chú",
+                                            'value' => $totalPriceDetails['variants'][$key]['note'],
+                                            'post_name' => 'tmcp_textfield_2',
+                                            'price' => 0,
+                                            'section' => rand(1000000, 999999),
+                                            'section_label' => "Ghi chú",
+                                            'fixedcurrenttotal' => 0,
+                                            'currencies' => [],
+                                            'price_per_currency' => ['VND' => ''],
+                                            'quantity' => 1,
+                                        ];
+                        }  
                     foreach ($totalPriceDetails['variants'][$key]['radioGroups'] as $keyGroup => $valueGroup) {
-                        $sttKeyGroup = 2;
-                        if ($keyGroup == "size") {
-                            $sttKeyGroup = 0;
-                        }
-                        if ($keyGroup == "topping") {
-                            $sttKeyGroup = 1;
-                        }
+                       
                         $bien = "tmcp_radio_$i";
                         $temp2[] = [
                             "key" => $valueGroup . "_" . $i,
@@ -763,12 +771,12 @@ class Controller extends BaseController
                         ];
                         
                         $temp1[$bien] = $valueGroup . "_$i";
-                        if (isset($attribute['multiple_radiobuttons_options_value'][$sttKeyGroup])) {
-                            $listTitleSize = $attribute['multiple_radiobuttons_options_value'][$sttKeyGroup];
-                            $keySearchAtrribute = array_search($valueGroup, $listTitleSize);
-                            if ($keySearchAtrribute != "") {
-                                $priceAttribute = $attribute['multiple_radiobuttons_options_price'][$sttKeyGroup][$keySearchAtrribute];
-
+                        $priceAttribute =0;
+                       
+                        foreach($attribute['multiple_radiobuttons_options_value'] as $keyAttribute => $listValueAttribute){
+                            $keySearchAtrribute = array_search($valueGroup, $listValueAttribute);
+                            if($keySearchAtrribute){
+                                $priceAttribute = $attribute['multiple_radiobuttons_options_price'][$keyAttribute][$keySearchAtrribute];
                                 $price = $price + $priceAttribute;
                             }
                         }
@@ -803,6 +811,7 @@ class Controller extends BaseController
                             $listTitleSize = $attribute['multiple_checkboxes_options_value'][0];
 
                             $keySearchAtrribute = array_search($valueGroup, $listTitleSize);
+                            $priceAttribute =0;
                             if ($keySearchAtrribute != "") {
                                 $priceAttribute = $attribute['multiple_checkboxes_options_price'][0][$keySearchAtrribute];
                                 $temp3[] = [
@@ -1332,7 +1341,15 @@ class Controller extends BaseController
 
         try {
             // them wp_posts
-
+            $note = [];
+            foreach ($data['order'] as $orderDetail) {
+                $note[] = $orderDetail['title'] . ": " . $orderDetail['note'];
+            }
+            if (count($note) > 0) {
+                $note = json_encode($note, JSON_UNESCAPED_UNICODE);
+            } else {
+                $note = "";
+            }
             if (isset($data['status']) && $data['status'] == 1) {
                 $postId = DB::table($this->_PRFIX_TABLE . '_posts')->insertGetId(
                     array(
@@ -1344,7 +1361,7 @@ class Controller extends BaseController
                         'post_status' => 'wc-pending',
                         'post_type' => 'shop_order',
                         'post_content' => 'Website',
-                        'post_excerpt' => '',
+                        'post_excerpt' => $note,
                         'to_ping' => '',
                         'pinged' => '',
                         'post_content_filtered' => '',
@@ -1363,7 +1380,7 @@ class Controller extends BaseController
                         'post_status' => 'wc-processing',
                         'post_type' => 'shop_order',
                         'post_content' => 'Website',
-                        'post_excerpt' => $data['message'],
+                        'post_excerpt' => $note,
                         'to_ping' => '',
                         'pinged' => '',
                         'post_content_filtered' => '',
@@ -1453,7 +1470,7 @@ class Controller extends BaseController
                                     'meta_key' => 'discount_amount',
                                     'meta_value' => $coupon_discounted,
                                 )
-                            ),
+                            )
                         );
                     }
                 } else {
@@ -1496,7 +1513,7 @@ class Controller extends BaseController
                                 'meta_key' => 'discount_amount',
                                 'meta_value' => $finalDetails['coupon_discounted'],
                             )
-                        ),
+                        )
                     );
                 }
             }
@@ -1552,22 +1569,32 @@ class Controller extends BaseController
                 $tempSaveOrderItemMetaTmdata = [];
                 $tempSaveOrderItemMetaTmcartepo_data = [];
                 $_tm_epo_product_original_price = [$price];
-
+                
+                
                 if ($attribute  && isset($totalPriceDetails['variants'][$key])) {
                     $attribute = unserialize($attribute->meta_value)['tmfbuilder'];
                     $i = 0;
                     $temp1 = [];
                     $temp2 = [];
                     $temp3 = [];
-
+                      if($totalPriceDetails['variants'][$key]['note'] !=""){
+                            $temp3[] = [
+                                            'mode' => 'builder',
+                                            'name' => "Ghi chú",
+                                            'value' => $totalPriceDetails['variants'][$key]['note'],
+                                            'post_name' => 'tmcp_textfield_2',
+                                            'price' => 0,
+                                            'section' => rand(1000000, 999999),
+                                            'section_label' => "Ghi chú",
+                                            'fixedcurrenttotal' => 0,
+                                            'currencies' => [],
+                                            'price_per_currency' => ['VND' => ''],
+                                            'quantity' => 1,
+                                        ];
+                        }    
                     foreach ($totalPriceDetails['variants'][$key]['radioGroups'] as $keyGroup => $valueGroup) {
-                        $sttKeyGroup = 2;
-                        if ($keyGroup == "size") {
-                            $sttKeyGroup = 0;
-                        }
-                        if ($keyGroup == "topping") {
-                            $sttKeyGroup = 1;
-                        }
+                       
+                        
                         $bien = "tmcp_radio_$i";
                         $temp2[] = [
                             "key" => $valueGroup . "_" . $i,
@@ -1575,21 +1602,24 @@ class Controller extends BaseController
                         ];
                         
                         $temp1[$bien] = $valueGroup . "_$i";
+                        $priceAttribute =0;
 
-                        if (isset($attribute['multiple_radiobuttons_options_value'][$sttKeyGroup])) {
-                            $listTitleSize = $attribute['multiple_radiobuttons_options_value'][$sttKeyGroup];
-                            $keySearchAtrribute = array_search($valueGroup, $listTitleSize);
-                            if ($keySearchAtrribute != "") {
-                                $priceAttribute = $attribute['multiple_radiobuttons_options_price'][$sttKeyGroup][$keySearchAtrribute];
+                        foreach($attribute['multiple_radiobuttons_options_value'] as $keyAttribute => $listValueAttribute){
+                            $keySearchAtrribute = array_search($valueGroup, $listValueAttribute);
+
+                            if($keySearchAtrribute){
+                            
+                                $priceAttribute = $attribute['multiple_radiobuttons_options_price'][$keyAttribute][$keySearchAtrribute];
                                 $price = $price + $priceAttribute;
                             }
                         }
+
                         $temp3[] = [
                             'mode' => 'builder',
                             'name' => ucwords($keyGroup),
                             'value' => $valueGroup,
                             'post_name' => $bien,
-                            'price' => $priceAttribute || 0,
+                            'price' => $priceAttribute ,
                             'section' => rand(1000000, 999999),
                             'section_label' => ucwords($keyGroup),
                             'fixedcurrenttotal' => 0,
@@ -1597,6 +1627,7 @@ class Controller extends BaseController
                             'price_per_currency' => ['VND' => ''],
                             'quantity' => 1,
                         ];
+
                         $i++;
                     }
                     $j = 0;
@@ -2474,23 +2505,17 @@ else{
                 $temp3 = [];
 
                 foreach ($item['radioGroups'] as $keyGroup => $valueGroup) {
-                    $sttKeyGroup = 2;
-                    if ($keyGroup == "size") {
-                        $sttKeyGroup = 0;
-                    }
-                    if ($keyGroup == "topping") {
-                        $sttKeyGroup = 1;
-                    }
+                    
 
 
-                    if (isset($attribute['multiple_radiobuttons_options_value'][$sttKeyGroup])) {
-                        $listTitleSize = $attribute['multiple_radiobuttons_options_value'][$sttKeyGroup];
-                        $keySearchAtrribute = array_search($valueGroup, $listTitleSize);
-                        if ($keySearchAtrribute != "") {
-                            $priceAttribute = $attribute['multiple_radiobuttons_options_price'][$sttKeyGroup][$keySearchAtrribute];
-                            $priceTopping = $priceTopping + $priceAttribute;
+                    
+                        foreach($attribute['multiple_radiobuttons_options_value'] as $keyAttribute => $listValueAttribute){
+                            $keySearchAtrribute = array_search($valueGroup, $listValueAttribute);
+                            if($keySearchAtrribute){
+                                $priceAttribute = $attribute['multiple_radiobuttons_options_price'][$keyAttribute][$keySearchAtrribute];
+                                $priceTopping = $priceTopping + $priceAttribute;
+                            }
                         }
-                    }
 
                     $i++;
                 }

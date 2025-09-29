@@ -216,6 +216,17 @@ class StoreController extends Controller
                     )
                 );
             }
+            if (isset($data['isNewMember'])) {
+                $user = DB::table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
+                    array(
+                        'user_id' => $userId,
+                        'meta_key' => 'isNewMember'
+                    ),
+                    array(
+                        'meta_value' => false,
+                    )
+                );
+            }
             if (isset($data['user_key_notification'])) {
 
                 $check = DB::table($this->_PRFIX_TABLE . '_woo_user_key_notification')
@@ -371,6 +382,8 @@ class StoreController extends Controller
         $city = $this->getUserMeta($user->ID, 'city');
         $quan = $this->getUserMeta($user->ID, 'quan');
         $phuong = $this->getUserMeta($user->ID, 'phuong');
+        $isNewMember = $this->getUserMeta($user->ID, 'isNewMember');
+
         $birthday = $this->getUserMeta($user->ID, 'birthday');
         $image = $this->getUserMeta($user->ID, 'image_user');
         if ($image) {
@@ -384,6 +397,10 @@ class StoreController extends Controller
 
         $user->count_notification_not_read = $countNoti;
         $user->address = $address;
+        $user->isNewMember = $isNewMember || false;
+        $user->hopqua = "https://api.gsmilktea.vn/storage/uploads/hopqua.gif";
+        $user->phaohoa = "https://api.gsmilktea.vn/storage/uploads/phaohoa.gif";
+
         $user->avt = $image;
         $user->user_parent = $this->getUserMeta($user->ID, 'user_parent');
         $user->user_parent_created = $this->getUserMeta($user->ID, 'user_parent_created');

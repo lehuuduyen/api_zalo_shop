@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use Hautelook\Phpass\PasswordHash;
 use GuzzleHttp\Client;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 
 class GatewaveController extends Controller
 {
@@ -132,7 +133,6 @@ class GatewaveController extends Controller
                     $this->woo_logs('callotp', "call access_token : ".$getAccessToken);
 
                 } elseif ($body->message = 'Access token invalid') {
-
                     $client = new Client();
                     $data = [
                         "app_id" => '3294166732429448932',
@@ -151,14 +151,12 @@ class GatewaveController extends Controller
                     $body = json_decode($body);
 
                     if (isset($body->access_token)) {
-                                            $this->woo_logs('callotp', "Access token invalid body: ".$body);
 
                         $this->saveOptionsMeta('access_token_zalo', $body->access_token);
                         $this->saveOptionsMeta('refresh_token_zalo', $body->refresh_token);
 
-                        return $this->call_otp($request);
+                        $this->call_otp($request);
                     }
-                                        $this->woo_logs('callotp', "Access token invalid body thanh cong ");
 
                 }
 
@@ -248,6 +246,14 @@ class GatewaveController extends Controller
                             ),
                             array('meta_value' => 'a:1:{s:10:"subscriber";b:1;}')
                         );
+                         $insertMetaUser = DB::table($this->_PRFIX_TABLE . '_usermeta')->updateOrInsert(
+                            array(
+                                'user_id' => $insertGetId,
+                                'meta_key' => 'isNewMember'
+                            ),
+                            array('meta_value' => true)
+                        );
+                       
                                                   
                         if (isset($request['referrer_id']) && !empty($request['referrer_id'])   &&  $request['referrer_id'] != '77777777' && $request['sdt'] != $request['referrer_id'] ) {
                       
@@ -291,7 +297,77 @@ class GatewaveController extends Controller
                     $hash = $this->getToken($request['store'], $request['sdt'], $databaseStore, $request['name'], $insertGetId, $email, $prefixTable);
                     $this->woo_logs('gateway', $hash, 3);
                     $this->woo_logs('user',"user: ".$request['sdt']."-parent: ".$request['referrer_id'], 3);
+                    
+                    //create voucher 
+                    $timeNow = date('Y/m/d H:i:s');
 
+                    $postId = DB::table($this->_PRFIX_TABLE . '_posts')->insertGetId(
+                    array(
+                        'post_date' => $timeNow,
+                        'post_date_gmt' => $timeNow,
+                        'post_modified' => $timeNow,
+                        'post_modified_gmt' => $timeNow,
+                        'post_title' => uniqid(),
+                        'post_status' => 'publish',
+                        'post_type' => 'shop_coupon',
+                        'post_content' => '',
+                        'post_excerpt' => '[Người mới]  ' ,
+                        'post_name' =>  Str::slug('[Người mới]  ' ),
+                        'to_ping' => '',
+                        'pinged' => '',
+                        'post_content_filtered' => '',
+
+                        'comment_count' => '0',
+                    )
+                );
+                $postMeta = DB::table($this->_PRFIX_TABLE . '_postmeta')->insert(
+                    array(
+
+                        array(
+                            'post_id' => $postId,
+                            'meta_key' => 'coupon_amount',
+                            'meta_value' => 50,
+                        ),
+                        array(
+                            'post_id' => $postId,
+                            'meta_key' => 'discount_type',
+                            'meta_value' => 'percent',
+                        ),
+                        array(
+                            'post_id' => $postId,
+                            'meta_key' => 'individual_use',
+                            'meta_value' => 'no',
+                        ),
+                        array(
+                            'post_id' => $postId,
+                            'meta_key' => 'usage_limit',
+                            'meta_value' => 1,
+                        ),
+                        array(
+                            'post_id' => $postId,
+                            'meta_key' => 'usage_limit_per_user',
+                            'meta_value' => 1,
+                        ),
+
+                        array(
+                            'post_id' => $postId,
+                            'meta_key' => 'usage_count',
+                            'meta_value' => 0,
+                        ),
+                        array(
+                            'post_id' => $postId,
+                            'meta_key' => 'date_expires',
+                            'meta_value' => strtotime("+1 month"),
+                        ),
+                        array(
+                            'post_id' => $postId,
+                            'meta_key' => 'customer_email',
+                            'meta_value' => serialize([$email]),
+                        )
+
+
+                    )
+                );
                     DB::commit();
 
                     return $this->returnSuccess([

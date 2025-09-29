@@ -91,7 +91,13 @@ class ProductController extends Controller
                     $products[$key]->summary = $product->post_excerpt;
                     $products[$key]->description = $product->post_content;
                     $products[$key]->badge_id = [];
-        
+                    $getAttributes = json_decode($this->getPostMeta($product->ID, 'list_attribute')) ;
+                    if(!$getAttributes){
+                        $tempAttribute = $listAttribute;
+                    }else{
+                        $tempAttribute = $this->getAttribute($request,$getAttributes);
+                    }
+                    $products[$key]->list_attribute = $tempAttribute;
                     if($products[$key]->image_id){
                         $listImgThumb =[
                             'path'=>$products[$key]->image_id->path,
@@ -368,6 +374,7 @@ class ProductController extends Controller
             }
         }
         $result['radio']['size'] = $listBigSize;
+        $listSuggar = [];
         if(isset($listAttribute['multiple_radiobuttons_options_value'][1])){
             $listTitleSuggar = $listAttribute['multiple_radiobuttons_options_value'][1];
             $listPriceSuggar = $listAttribute['multiple_radiobuttons_options_price'][1];

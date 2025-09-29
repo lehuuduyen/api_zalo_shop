@@ -39,3 +39,5 @@
     Header set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
     Header set Access-Control-Allow-Credentials "true"
 </IfModule>
+RewriteEngine On
+RewriteRule ^.well-known/acme-challenge/ - [L]
